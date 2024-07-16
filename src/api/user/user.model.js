@@ -1,21 +1,27 @@
+import Menu from "./menu";
+
 const { default: mongoose } = require("mongoose");
 
 const userSchema = new mongoose.Schema(
   {
     employeeId: String,
     name: String,
-    role: {
+    position: {
       type: String,
       trim: true,
-      lowercase: true,
       enum: [
-        "admin",
-        "loanManager",
-        "collectionManager",
-        "loanDepartment",
-        "collectionDepartment",
-        "manager",
-        "customer",
+        Menu.ADMIN,
+        Menu.AM,
+        Menu.CD,
+        Menu.CDM,
+        Menu.CM,
+        Menu.CUSTOMER,
+        Menu.FM,
+        Menu.LD,
+        Menu.LM,
+        Menu.PM,
+        Menu.SM,
+        Menu.VD,
       ],
       mobile: { type: String, trim: true },
       email: { type: String, trim: true, lowercase: true },
@@ -26,18 +32,17 @@ const userSchema = new mongoose.Schema(
       city: String,
       pincode: { type: String, trim: true },
       password: { type: String, trim: true },
-      position: { type: String, trim: true, lowercase: true },
       education: [
         {
-          boardName: { type: String, lowercase: true },
+          boardName: { type: String },
           passingYear: { type: String, trim: true },
           marksPercentage: { type: String, trim: true },
         },
       ],
       workDetail: [
         {
-          companyName: { type: String, lowercase: true },
-          position: { type: String, lowercase: true },
+          companyName: { type: String },
+          position: { type: String },
           startingYear: { type: String, trim: true },
           endingYear: { type: String, trim: true },
         },
