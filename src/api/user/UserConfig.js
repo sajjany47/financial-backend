@@ -1,4 +1,4 @@
-const Menu = {
+export const Position = {
   ADMIN: "admin",
   SM: "state-manager",
   CM: "city-manager",
@@ -13,4 +13,14 @@ const Menu = {
   CUSTOMER: "customer",
 };
 
-export default Menu;
+export const Status = {
+  WAITING: "waiting",
+  PENDING: "pending",
+  VERIFIED: "verified",
+  REJECTED: "rejected",
+};
+
+export const fresherOrExperience = {
+  FRESHER: "fresher",
+  EXPERIENCE: "experience",
+};

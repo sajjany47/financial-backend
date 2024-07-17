@@ -1,4 +1,4 @@
-import Menu from "./menu";
+import { Position, Status } from "./UserConfig";
 
 const { default: mongoose } = require("mongoose");
 
@@ -10,18 +10,18 @@ const userSchema = new mongoose.Schema(
       type: String,
       trim: true,
       enum: [
-        Menu.ADMIN,
-        Menu.AM,
-        Menu.CD,
-        Menu.CDM,
-        Menu.CM,
-        Menu.CUSTOMER,
-        Menu.FM,
-        Menu.LD,
-        Menu.LM,
-        Menu.PM,
-        Menu.SM,
-        Menu.VD,
+        Position.ADMIN,
+        Position.AM,
+        Position.CD,
+        Position.CDM,
+        Position.CM,
+        Position.CUSTOMER,
+        Position.FM,
+        Position.LD,
+        Position.LM,
+        Position.PM,
+        Position.SM,
+        Position.VD,
       ],
       mobile: { type: String, trim: true },
       email: { type: String, trim: true, lowercase: true },
@@ -39,6 +39,10 @@ const userSchema = new mongoose.Schema(
           marksPercentage: { type: String, trim: true },
         },
       ],
+      fresherOrExperience: {
+        type: String,
+        enum: [fresherOrExperience.EXPERIENCE, fresherOrExperience.FRESHER],
+      },
       workDetail: [
         {
           companyName: { type: String },
@@ -59,8 +63,14 @@ const userSchema = new mongoose.Schema(
         type: String,
         trim: true,
         lowercase: true,
-        enum: ["waiting", "pending", "verified", "rejected"],
+        enum: [
+          Status.WAITING,
+          Status.PENDING,
+          Status.VERIFIED,
+          Status.REJECTED,
+        ],
       },
+      profileRatio: String,
       approvedBy: String,
       isActive: Boolean,
       createdBy: String,
