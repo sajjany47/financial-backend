@@ -1,11 +1,12 @@
 import { Position, Status } from "./UserConfig";
 
-const { default: mongoose } = require("mongoose");
+import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
   {
     employeeId: String,
     name: String,
+    username: String,
     position: {
       type: String,
       trim: true,
@@ -59,16 +60,11 @@ const userSchema = new mongoose.Schema(
       accountNumber: { type: String, trim: true },
       ifsc: { type: String, trim: true },
       branchName: { type: String, lowercase: true },
-      status: {
+      isProfileVerified: {
         type: String,
         trim: true,
         lowercase: true,
-        enum: [
-          Status.WAITING,
-          Status.PENDING,
-          Status.VERIFIED,
-          Status.REJECTED,
-        ],
+        enum: [Status.PENDING, Status.VERIFIED, Status.REJECTED],
       },
       profileRatio: String,
       approvedBy: String,

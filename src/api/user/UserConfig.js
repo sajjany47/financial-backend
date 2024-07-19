@@ -14,7 +14,6 @@ export const Position = {
 };
 
 export const Status = {
-  WAITING: "waiting",
   PENDING: "pending",
   VERIFIED: "verified",
   REJECTED: "rejected",

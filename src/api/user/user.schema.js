@@ -2,6 +2,7 @@ import * as Yup from "yup";
 import { fresherOrExperience } from "./UserConfig";
 
 export const customerSignUpSchema30 = Yup.object().shape({
+  username: Yup.string().required("Username is required"),
   name: Yup.string().required("Name is required"),
   mobile: Yup.string().required("Mobile number is required"),
   email: Yup.string()
@@ -19,6 +20,7 @@ export const customerSignUpSchema30 = Yup.object().shape({
 });
 
 export const adminSignUpSchema30 = Yup.object().shape({
+  username: Yup.string().required("Username is required"),
   name: Yup.string().required("Name is required"),
   mobile: Yup.string().required("Mobile number is required"),
   email: Yup.string()
@@ -190,8 +192,5 @@ export const userSchema = Yup.object().shape({
     .required("Account number is required")
     .matches("/^d{9,18}$/", "Enter valid Account number"),
   branchName: Yup.string().required("Branch name is required"),
-  status: Yup.string()
-    .oneOf([Status.WAITING, Status.PENDING, Status.VERIFIED, Status.REJECTED])
-    .required("Status is required"),
   isActive: Yup.boolean().required("Active field is required"),
 });
