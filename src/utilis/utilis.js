@@ -1,5 +1,6 @@
 import { customAlphabet } from "nanoid";
 
+export const url = "https://demo.com";
 export const generateEmployeeId = () => {
   const alphabet = "abcdefghijklmnopqrstuvwxyz0123456789";
 

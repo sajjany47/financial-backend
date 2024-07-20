@@ -4,6 +4,10 @@ import user from "./user.model";
 import { Status } from "./UserConfig";
 import { generateEmployeeId, generatePassword } from "../../utilis/utilis";
 import bcrypt from "bcrypt";
+import { Resend } from "resend";
+import { welcome } from "../../template/wlecome";
+
+const resend = new Resend("re_123456789");
 
 const adminSignUpSchemaFirst = async (req, res) => {
   try {
@@ -25,7 +29,21 @@ const adminSignUpSchemaFirst = async (req, res) => {
         });
 
         const saveUser = await userData.save();
-
+        if (saveUser) {
+          const { data, error } = await resend.emails.send({
+            from: "Acme <onboarding@resend.dev>",
+            to: [validatedUser.email],
+            subject: "Registration Successfully",
+            html: welcome({
+              sender: req.name,
+              username: validatedUser.username,
+              password: password,
+            }),
+          });
+          if (error) {
+            return res.status(400).json({ error });
+          }
+        }
         return res
           .status(StatusCodes.OK)
           .json({ message: "User created successfully" });
