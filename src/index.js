@@ -2,7 +2,7 @@ import { createServer } from "http";
 import mongoose from "mongoose";
 import express from "express";
 import fileUpload from "express-fileupload";
-import userRoutes from "./routes/user.routes";
+import UserRoutes from "./routes/user.routes";
 
 function main() {
   const port = process.env.port;
@@ -13,7 +13,7 @@ function main() {
   app.use(express.json());
   app.use(express.urlencoded({ limit: "30 mb", extended: true }));
   // app.use(routes);
-  app.use("/user", userRoutes);
+  app.use("/user", UserRoutes);
   mongoose
     .connect(mongodb_url)
     .then(() => {

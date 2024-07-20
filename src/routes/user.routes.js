@@ -1,8 +1,8 @@
 import express from "express";
 import { adminSignUpSchemaFirst } from "../api/user/user.controller";
 
-const userRoutes = express.Router();
+const UserRoutes = express.Router();
 
-userRoutes.route("/admin-signup", adminSignUpSchemaFirst);
+UserRoutes.route("/admin-signup").post(adminSignUpSchemaFirst);
 
-export default userRoutes;
+export default UserRoutes;
