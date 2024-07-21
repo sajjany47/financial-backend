@@ -10,7 +10,7 @@ import {
 import bcrypt from "bcrypt";
 import { welcome } from "../../template/wlecome.js";
 
-const adminSignUpSchemaFirst = async (req, res) => {
+export const adminSignUpSchemaFirst = async (req, res) => {
   try {
     console.log(req);
     const validatedUser = await adminSignUpSchema30.validate(req.body);
@@ -57,5 +57,3 @@ const adminSignUpSchemaFirst = async (req, res) => {
     res.status(StatusCodes.BAD_GATEWAY).json(error.message);
   }
 };
-
-export { adminSignUpSchemaFirst };
