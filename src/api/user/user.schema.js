@@ -6,7 +6,7 @@ export const customerSignUpSchema30 = Yup.object().shape({
   name: Yup.string().required("Name is required"),
   mobile: Yup.string().required("Mobile number is required"),
   email: Yup.string()
-    .matches("/^[^s@]+@[^s@]+.[^s@]+$/", "Please enter valid email")
+    .matches("/S+@S+.S+/", "Please enter valid email")
     .required("Email is required"),
   password: Yup.string().required("Password is required"),
   dob: Yup.date()
@@ -24,7 +24,7 @@ export const adminSignUpSchema30 = Yup.object().shape({
   name: Yup.string().required("Name is required"),
   mobile: Yup.string().required("Mobile number is required"),
   email: Yup.string()
-    .matches("/^[^s@]+@[^s@]+.[^s@]+$/", "Please enter valid email")
+    // .matches("/S+@S+.S+/", "Please enter valid email")
     .required("Email is required"),
   dob: Yup.date()
     .required("Date of birth is required")
@@ -131,7 +131,7 @@ export const userSchema = Yup.object().shape({
     .required("Position is required"),
   mobile: Yup.string().required("Mobile number is required"),
   email: Yup.string()
-    .matches("/^[^s@]+@[^s@]+.[^s@]+$/", "Please enter valid email")
+    .matches("/S+@S+.S+/", "Please enter valid email")
     .required("Email is required"),
   dob: Yup.date().required("Date of birth is required"),
   address: Yup.string().required("Address is required"),

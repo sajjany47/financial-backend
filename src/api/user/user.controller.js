@@ -16,12 +16,14 @@ export const adminSignUpSchemaFirst = async (req, res) => {
     if (validatedUser) {
       const isValid = await user.findOne({ username: validatedUser.username });
 
-      if (isValid) {
-        const password = generatePassword();
+      if (!isValid) {
+        const password = await generatePassword();
+        const employeeId = await generateEmployeeId();
+
         const userData = new user({
           ...validatedUser,
           password: await bcrypt.hash(password, 10),
-          employeeId: generateEmployeeId(),
+          employeeId: employeeId,
           isProfileVerified: Status.PENDING,
           profileRatio: "30%",
           approvedBy: req.id,

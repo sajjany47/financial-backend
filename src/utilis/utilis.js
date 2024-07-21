@@ -30,7 +30,7 @@ export const generateEmployeeId = () => {
 
   const employeeId = customAlphabet(alphabet, 6);
 
-  return employeeId.toUpperCase();
+  return employeeId;
 };
 
 export const generatePassword = () => {
