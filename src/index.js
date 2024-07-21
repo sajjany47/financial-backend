@@ -2,7 +2,7 @@ import { createServer } from "http";
 import mongoose from "mongoose";
 import express from "express";
 import fileUpload from "express-fileupload";
-import UserRoutes from "./routes/user.routes";
+import UserRoutes from "./routes/user.routes.js";
 
 function main() {
   const port = process.env.port;

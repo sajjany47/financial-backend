@@ -1,5 +1,5 @@
 import * as Yup from "yup";
-import { fresherOrExperience } from "./UserConfig";
+import { fresherOrExperience, Position, Status } from "./UserConfig.js";
 
 export const customerSignUpSchema30 = Yup.object().shape({
   username: Yup.string().required("Username is required"),

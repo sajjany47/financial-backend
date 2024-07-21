@@ -3,8 +3,6 @@ import nodemailer from "nodemailer";
 
 export const url = "https://demo.com";
 
-import nodemailer from "nodemailer";
-
 export const MailSend = async (data) => {
   const transporter = nodemailer.createTransport({
     host: "smtp.ethereal.email",

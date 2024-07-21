@@ -1,4 +1,4 @@
-import { Position, Status } from "./UserConfig";
+import { Position, Status, fresherOrExperience } from "./UserConfig.js";
 
 import mongoose from "mongoose";
 

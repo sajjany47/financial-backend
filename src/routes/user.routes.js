@@ -1,5 +1,5 @@
 import express from "express";
-import { adminSignUpSchemaFirst } from "../api/user/user.controller";
+import { adminSignUpSchemaFirst } from "../api/user/user.controller.js";
 
 const UserRoutes = express.Router();
 

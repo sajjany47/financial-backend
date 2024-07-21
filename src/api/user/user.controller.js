@@ -1,17 +1,18 @@
 import { StatusCodes } from "http-status-codes";
-import { adminSignUpSchema30 } from "./user.schema";
-import user from "./user.model";
-import { Status } from "./UserConfig";
+import { adminSignUpSchema30 } from "./user.schema.js";
+import user from "./user.model.js";
+import { Status } from "./UserConfig.js";
 import {
   generateEmployeeId,
   generatePassword,
   MailSend,
-} from "../../utilis/utilis";
+} from "../../utilis/utilis.js";
 import bcrypt from "bcrypt";
-import { welcome } from "../../template/wlecome";
+import { welcome } from "../../template/wlecome.js";
 
 const adminSignUpSchemaFirst = async (req, res) => {
   try {
+    console.log(req);
     const validatedUser = await adminSignUpSchema30.validate(req.body);
     if (validatedUser) {
       const isValid = await user.findOne({ username: validatedUser.username });
