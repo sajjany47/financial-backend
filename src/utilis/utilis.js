@@ -1,4 +1,4 @@
-import { customAlphabet } from "nanoid";
+import { nanoid } from "nanoid";
 import nodemailer from "nodemailer";
 
 export const url = "https://demo.com";
@@ -25,18 +25,22 @@ export const MailSend = async (data) => {
   return send;
 };
 
-export const generateEmployeeId = () => {
-  const alphabet = "abcdefghijklmnopqrstuvwxyz0123456789";
-
-  const employeeId = customAlphabet(alphabet, 6);
-
-  return employeeId;
-};
-
 export const generatePassword = () => {
-  const alphabet = "abcdefghijklmnopqrstuvwxyz0123456789#@!-_";
-
-  const password = customAlphabet(alphabet, 8);
-
-  return password;
+  const nanoidCharacters =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
+  return nanoid(10, nanoidCharacters);
 };
+
+export const generateEmployeeId = () => {
+  const nanoidCharacters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+  return nanoid(8, nanoidCharacters);
+};
+
+// export const generatePassword = () => {
+//   const alphabet = "abcdefghijklmnopqrstuvwxyz0123456789#@!-_";
+
+//   const password = customAlphabet(alphabet, 8);
+
+//   return password;
+// };

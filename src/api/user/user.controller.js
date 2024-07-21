@@ -9,6 +9,7 @@ import {
 } from "../../utilis/utilis.js";
 import bcrypt from "bcrypt";
 import { welcome } from "../../template/wlecome.js";
+import nodemailer from "nodemailer";
 
 export const adminSignUpSchemaFirst = async (req, res) => {
   try {
@@ -18,30 +19,66 @@ export const adminSignUpSchemaFirst = async (req, res) => {
 
       if (!isValid) {
         const password = generatePassword();
+
         const employeeId = generateEmployeeId();
 
         const userData = new user({
           ...validatedUser,
+          name: validatedUser.name,
+          username: validatedUser.username,
+          mobile: validatedUser.mobile,
+          email: validatedUser.email,
+          dob: validatedUser.dob,
+          position: validatedUser.position,
+          address: validatedUser.address,
+          state: validatedUser.state,
+          country: validatedUser.country,
+          city: validatedUser.city,
+          pincode: validatedUser.pincode,
           password: bcrypt.hash(password, 10),
           employeeId: employeeId,
           isProfileVerified: Status.PENDING,
           profileRatio: "30%",
-          approvedBy: req.id,
+          // approvedBy: req.id,
           isActive: true,
-          createdBy: req.id,
+          // createdBy: req.id,
         });
 
         const saveUser = await userData.save();
         if (saveUser) {
-          MailSend({
-            to: [validatedUser.email],
+          const transporter = nodemailer.createTransport({
+            service: "gmail",
+            host: "smtp.gmail.com",
+            port: process.env.PORT,
+            secure: false,
+            auth: {
+              user: process.env.USER,
+              pass: process.env.USER_PASSWORD,
+            },
+          });
+
+          const send = await transporter.sendMail({
+            from: process.env.SEND_MAIL,
+            // to: "bar@example.com, baz@example.com", list should be like this
+            to: validatedUser.email,
             subject: "Registration Successfully",
             html: welcome({
-              sender: req.name,
+              sender: "Sajjan",
+              name: validatedUser.name,
               username: validatedUser.username,
               password: password,
             }),
           });
+
+          // const mailSend = await MailSend({
+          //   to: [validatedUser.email],
+          //   subject: "Registration Successfully",
+          //   html: welcome({
+          //     sender: req.name,
+          //     username: validatedUser.username,
+          //     password: password,
+          //   }),
+          // });
         }
         return res
           .status(StatusCodes.OK)
