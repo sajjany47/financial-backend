@@ -12,7 +12,6 @@ import { welcome } from "../../template/wlecome.js";
 
 export const adminSignUpSchemaFirst = async (req, res) => {
   try {
-    console.log(req);
     const validatedUser = await adminSignUpSchema30.validate(req.body);
     if (validatedUser) {
       const isValid = await user.findOne({ username: validatedUser.username });

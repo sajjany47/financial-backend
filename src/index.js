@@ -8,8 +8,8 @@ function main() {
   const port = process.env.port;
   const mongodb_url = process.env.mongodb_url;
   const app = express();
+  app.use(fileUpload());
   const server = createServer(app);
-  app.use(fileUpload);
   app.use(express.json());
   app.use(express.urlencoded({ limit: "30 mb", extended: true }));
   // app.use(routes);
