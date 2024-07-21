@@ -23,7 +23,6 @@ export const adminSignUpSchemaFirst = async (req, res) => {
         const employeeId = generateEmployeeId();
 
         const userData = new user({
-          ...validatedUser,
           name: validatedUser.name,
           username: validatedUser.username,
           mobile: validatedUser.mobile,
