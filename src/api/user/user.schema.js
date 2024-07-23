@@ -49,10 +49,13 @@ export const adminSignUpSchema30 = Yup.object().shape({
   state: Yup.string().required("State is required"),
   country: Yup.string().required("Country is required"),
   city: Yup.string().required("City is required"),
-  pincode: Yup.string().required("Pincode is required"),
+  pincode: Yup.string()
+    .matches(/^\d{6}$/, "Enter valid pincode")
+    .required("Pincode is required"),
 });
 
 export const educationOrCompanyDetailSchema30 = Yup.object().shape({
+  id: Yup.string().required("Id is required"),
   education: Yup.array(
     Yup.object({
       boardName: Yup.string().required("Board name is required"),
@@ -86,6 +89,7 @@ export const educationOrCompanyDetailSchema30 = Yup.object().shape({
   ),
 });
 export const documentsSchema20 = Yup.object().shape({
+  id: Yup.string().required("Id is required"),
   aadharNumber: Yup.string()
     .required("Aadhar number is required")
     .matches("/^d{12}$/", "Enter valid Aadhar number"),
@@ -100,17 +104,16 @@ export const documentsSchema20 = Yup.object().shape({
     .matches("/^[A-Z]{1}[0-9]{7}$/", "Enter valid Passport number"),
 });
 export const accountDetailSchema20 = Yup.object().shape({
+  id: Yup.string().required("Id is required"),
   bankName: Yup.string().required("Bank name is required"),
   accountNumber: Yup.string()
     .required("Account number is required")
     .matches("/^d{9,18}$/", "Enter valid Account number"),
   branchName: Yup.string().required("Branch name is required"),
-  status: Yup.string()
-    .oneOf([Status.WAITING, Status.PENDING, Status.VERIFIED, Status.REJECTED])
-    .required("Status is required"),
 });
 
 export const userSchema = Yup.object().shape({
+  id: Yup.string().required("Id is required"),
   employeeId: Yup.string().required("EmployeeId is required"),
   name: Yup.string().required("Name is required"),
   position: Yup.string()

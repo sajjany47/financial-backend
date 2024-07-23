@@ -5,6 +5,7 @@ export const url = "https://demo.com";
 
 export const MailSend = async (data) => {
   const transporter = nodemailer.createTransport({
+    service: "gmail",
     host: "smtp.ethereal.email",
     port: process.env.PORT,
     secure: false,
