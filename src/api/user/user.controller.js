@@ -20,6 +20,7 @@ import jwt from "jsonwebtoken";
 export const adminSignUpSchemaFirst = async (req, res) => {
   try {
     const validatedUser = await adminSignUpSchema30.validate(req.body);
+
     if (validatedUser) {
       const isValid = await user.findOne({ username: validatedUser.username });
 
@@ -41,7 +42,7 @@ export const adminSignUpSchemaFirst = async (req, res) => {
           city: validatedUser.city,
           pincode: validatedUser.pincode,
           jobBranchName: validatedUser.jobBranchName,
-          password: bcrypt.hash(password, 10),
+          password: await bcrypt.hash(password, 10),
           employeeId: employeeId,
           isProfileVerified: Status.PENDING,
           profileRatio: "30%",
@@ -53,35 +54,12 @@ export const adminSignUpSchemaFirst = async (req, res) => {
 
         const saveUser = await userData.save();
         if (saveUser) {
-          // const transporter = nodemailer.createTransport({
-          //   service: "gmail",
-          //   host: "smtp.gmail.com",
-          //   port: process.env.PORT,
-          //   secure: false,
-          //   auth: {
-          //     user: process.env.USER,
-          //     pass: process.env.USER_PASSWORD,
-          //   },
-          // });
-
-          // const send = await transporter.sendMail({
-          //   from: process.env.SEND_MAIL,
-          //   // to: "bar@example.com, baz@example.com", list should be like this
-          //   to: validatedUser.email,
-          //   subject: "Registration Successfully",
-          //   html: welcome({
-          //     sender: "Sajjan",
-          //     name: validatedUser.name,
-          //     username: validatedUser.username,
-          //     password: password,
-          //   }),
-          // });
-
           await MailSend({
             to: [validatedUser.email],
             subject: "Registration Successfully",
             html: welcome({
               sender: req.name,
+              name: validatedUser.name,
               username: validatedUser.username,
               password: password,
             }),

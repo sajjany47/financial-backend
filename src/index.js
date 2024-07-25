@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import express from "express";
 import fileUpload from "express-fileupload";
 import UserRoutes from "./routes/user.routes.js";
+import cors from "cors";
 
 function main() {
   const port = process.env.port;
@@ -12,6 +13,13 @@ function main() {
   const server = createServer(app);
   app.use(express.json());
   app.use(express.urlencoded({ limit: "30 mb", extended: true }));
+  app.use(
+    cors({
+      origin: "http://localhost:5173",
+      methods: ["GET", "POST"],
+      credentials: true,
+    })
+  );
   // app.use(routes);
   app.use("/user", UserRoutes);
   mongoose

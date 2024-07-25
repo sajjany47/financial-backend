@@ -28,14 +28,14 @@ export const MailSend = async (data) => {
 
 export const generatePassword = () => {
   const nanoidCharacters =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   return nanoid(10, nanoidCharacters);
 };
 
 export const generateEmployeeId = () => {
   const nanoidCharacters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
-  return nanoid(8, nanoidCharacters);
+  return nanoid(8, nanoidCharacters).toUpperCase();
 };
 
 // export const generatePassword = () => {
