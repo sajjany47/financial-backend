@@ -15,6 +15,7 @@ import bcrypt from "bcrypt";
 import { welcome } from "../../template/wlecome.js";
 import nodemailer from "nodemailer";
 import mongoose from "mongoose";
+import jwt from "jsonwebtoken";
 
 export const adminSignUpSchemaFirst = async (req, res) => {
   try {
@@ -39,6 +40,7 @@ export const adminSignUpSchemaFirst = async (req, res) => {
           country: validatedUser.country,
           city: validatedUser.city,
           pincode: validatedUser.pincode,
+          jobBranchName: validatedUser.jobBranchName,
           password: bcrypt.hash(password, 10),
           employeeId: employeeId,
           isProfileVerified: Status.PENDING,
@@ -51,39 +53,39 @@ export const adminSignUpSchemaFirst = async (req, res) => {
 
         const saveUser = await userData.save();
         if (saveUser) {
-          const transporter = nodemailer.createTransport({
-            service: "gmail",
-            host: "smtp.gmail.com",
-            port: process.env.PORT,
-            secure: false,
-            auth: {
-              user: process.env.USER,
-              pass: process.env.USER_PASSWORD,
-            },
-          });
+          // const transporter = nodemailer.createTransport({
+          //   service: "gmail",
+          //   host: "smtp.gmail.com",
+          //   port: process.env.PORT,
+          //   secure: false,
+          //   auth: {
+          //     user: process.env.USER,
+          //     pass: process.env.USER_PASSWORD,
+          //   },
+          // });
 
-          const send = await transporter.sendMail({
-            from: process.env.SEND_MAIL,
-            // to: "bar@example.com, baz@example.com", list should be like this
-            to: validatedUser.email,
-            subject: "Registration Successfully",
-            html: welcome({
-              sender: "Sajjan",
-              name: validatedUser.name,
-              username: validatedUser.username,
-              password: password,
-            }),
-          });
-
-          // const mailSend = await MailSend({
-          //   to: [validatedUser.email],
+          // const send = await transporter.sendMail({
+          //   from: process.env.SEND_MAIL,
+          //   // to: "bar@example.com, baz@example.com", list should be like this
+          //   to: validatedUser.email,
           //   subject: "Registration Successfully",
           //   html: welcome({
-          //     sender: req.name,
+          //     sender: "Sajjan",
+          //     name: validatedUser.name,
           //     username: validatedUser.username,
           //     password: password,
           //   }),
           // });
+
+          await MailSend({
+            to: [validatedUser.email],
+            subject: "Registration Successfully",
+            html: welcome({
+              sender: req.name,
+              username: validatedUser.username,
+              password: password,
+            }),
+          });
         }
         return res
           .status(StatusCodes.OK)
@@ -204,5 +206,50 @@ export const updateAccountDetails = async (req, res) => {
     }
   } catch (error) {
     res.status(StatusCodes.BAD_GATEWAY).json(error.message);
+  }
+};
+
+export const login = async (req, res) => {
+  try {
+    const reqData = req.body;
+    const validUser = await user.findOne({ username: reqData.username });
+    if (validUser) {
+      if (validUser.isActive) {
+        const verifyPassword = await bcrypt.compare(
+          reqData.password,
+          validUser.password
+        );
+        if (verifyPassword) {
+          const data = {
+            _id: validUser._id,
+            username: validUser.username,
+            position: validUser.position,
+            jobBranchName: validUser.jobBranchName,
+            country: validUser.country,
+            state: validUser.state,
+          };
+          const token = jwt.sign(data, process.env.SECRET_KEY, {
+            expiresIn: "6h",
+          });
+          return res
+            .status(StatusCodes.OK)
+            .json({ message: "Data fetched successfully", data: data });
+        } else {
+          return res
+            .status(StatusCodes.UNAUTHORIZED)
+            .json({ message: "invalid password" });
+        }
+      } else {
+        return res
+          .status(StatusCodes.LOCKED)
+          .json({ message: "Contact with admin" });
+      }
+    } else {
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ message: "User not found!" });
+    }
+  } catch (error) {
+    return res.status(StatusCodes.BAD_GATEWAY).json(error.message);
   }
 };

@@ -1,24 +1,6 @@
 import * as Yup from "yup";
 import { fresherOrExperience, Position, Status } from "./UserConfig.js";
 
-export const customerSignUpSchema30 = Yup.object().shape({
-  username: Yup.string().required("Username is required"),
-  name: Yup.string().required("Name is required"),
-  mobile: Yup.string().required("Mobile number is required"),
-  email: Yup.string()
-    .matches("/S+@S+.S+/", "Please enter valid email")
-    .required("Email is required"),
-  password: Yup.string().required("Password is required"),
-  dob: Yup.date()
-    .required("Date of birth is required")
-    .max(new Date(Date.now() - 567648000000), "You must be at least 18 years"),
-  address: Yup.string().required("Address is required"),
-  state: Yup.string().required("State is required"),
-  country: Yup.string().required("Country is required"),
-  city: Yup.string().required("City is required"),
-  pincode: Yup.string().required("Pincode is required"),
-});
-
 export const adminSignUpSchema30 = Yup.object().shape({
   username: Yup.string().required("Username is required"),
   name: Yup.string().required("Name is required"),
@@ -45,6 +27,13 @@ export const adminSignUpSchema30 = Yup.object().shape({
       Position.VD,
     ])
     .required("Position is required"),
+  jobBranchName: Yup.string()
+    .when("position", {
+      is: (val) => val !== Position.CUSTOMER,
+      then: () => Yup.string().required("Branch is required"),
+      otherwise: () => Yup.string().notRequired(),
+    })
+    .required("Branch is required"),
   address: Yup.string().required("Address is required"),
   state: Yup.string().required("State is required"),
   country: Yup.string().required("Country is required"),
@@ -132,6 +121,13 @@ export const userSchema = Yup.object().shape({
       Position.VD,
     ])
     .required("Position is required"),
+  jobBranchName: Yup.string()
+    .when("position", {
+      is: (val) => val !== Position.CUSTOMER,
+      then: () => Yup.string().required("Branch is required"),
+      otherwise: () => Yup.string().notRequired(),
+    })
+    .required("Branch is required"),
   mobile: Yup.string().required("Mobile number is required"),
   email: Yup.string()
     .matches("/S+@S+.S+/", "Please enter valid email")

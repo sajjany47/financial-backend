@@ -1,8 +1,7 @@
 export const Position = {
   ADMIN: "admin",
+  BM: "branch-manager",
   SM: "state-manager",
-  CM: "city-manager",
-  AM: "area-manager",
   LM: "loan-manager",
   PM: "product-manager",
   CDM: "collection-department-head",
