@@ -209,9 +209,10 @@ export const login = async (req, res) => {
           const token = jwt.sign(data, process.env.SECRET_KEY, {
             expiresIn: "6h",
           });
-          return res
-            .status(StatusCodes.OK)
-            .json({ message: "Data fetched successfully", data: data });
+          return res.status(StatusCodes.OK).json({
+            message: "Data fetched successfully",
+            data: { data: data, accessToken: token, refreshToken: token },
+          });
         } else {
           return res
             .status(StatusCodes.UNAUTHORIZED)
