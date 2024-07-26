@@ -50,6 +50,7 @@ export const adminSignUpSchemaFirst = async (req, res) => {
           isActive: true,
           createdBy: req.id,
           isProfileVerified: Status.PENDING,
+          isPasswordReser: false,
         });
 
         const saveUser = await userData.save();
@@ -190,6 +191,7 @@ export const updateAccountDetails = async (req, res) => {
 export const login = async (req, res) => {
   try {
     const reqData = req.body;
+
     const validUser = await user.findOne({ username: reqData.username });
     if (validUser) {
       if (validUser.isActive) {
