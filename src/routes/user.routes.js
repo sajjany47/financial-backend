@@ -2,6 +2,7 @@ import express from "express";
 import {
   adminSignUpSchemaFirst,
   login,
+  resetPassword,
   updateAccountDetails,
   updateDocumentDetails,
   updateEducationDetails,
@@ -14,5 +15,6 @@ UserRoutes.route("/admin-signup").post(adminSignUpSchemaFirst);
 UserRoutes.route("/update-education").post(updateEducationDetails);
 UserRoutes.route("/update-document").post(updateDocumentDetails);
 UserRoutes.route("/update-account").post(updateAccountDetails);
+UserRoutes.route("/update-password").post(resetPassword);
 
 export default UserRoutes;

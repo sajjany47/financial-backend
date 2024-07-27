@@ -235,3 +235,22 @@ export const login = async (req, res) => {
     return res.status(StatusCodes.BAD_GATEWAY).json(error.message);
   }
 };
+
+export const resetPassword = async (req, res) => {
+  try {
+    const reqData = req.body;
+    const updatedPassword = await user.updateOne(
+      { _id: new mongoose.Schema.ObjectId(reqData.id) },
+      {
+        $set: {
+          password: await bcrypt.hash(reqData.password, 10),
+          isPasswordReset: true,
+        },
+      }
+    );
+
+    return res
+      .status(StatusCodes.OK)
+      .json({ message: "Password updated successfully" });
+  } catch (error) {}
+};
