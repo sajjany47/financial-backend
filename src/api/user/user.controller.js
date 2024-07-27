@@ -239,8 +239,9 @@ export const login = async (req, res) => {
 export const resetPassword = async (req, res) => {
   try {
     const reqData = req.body;
+
     const updatedPassword = await user.updateOne(
-      { _id: new mongoose.Schema.ObjectId(reqData.id) },
+      { _id: new mongoose.Types.ObjectId(reqData.id) },
       {
         $set: {
           password: await bcrypt.hash(reqData.password, 10),
@@ -248,9 +249,16 @@ export const resetPassword = async (req, res) => {
         },
       }
     );
-
-    return res
-      .status(StatusCodes.OK)
-      .json({ message: "Password updated successfully" });
-  } catch (error) {}
+    if (updatedPassword) {
+      return res
+        .status(StatusCodes.OK)
+        .json({ message: "Password updated successfully" });
+    } else {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: "Invalid user or Password" });
+    }
+  } catch (error) {
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
+  }
 };
