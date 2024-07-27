@@ -50,7 +50,7 @@ export const adminSignUpSchemaFirst = async (req, res) => {
           isActive: true,
           createdBy: req.id,
           isProfileVerified: Status.PENDING,
-          isPasswordReser: false,
+          isPasswordReset: false,
         });
 
         const saveUser = await userData.save();
@@ -207,6 +207,7 @@ export const login = async (req, res) => {
             jobBranchName: validUser.jobBranchName,
             country: validUser.country,
             state: validUser.state,
+            isPasswordReset: validUser.isPasswordReset,
           };
           const token = jwt.sign(data, process.env.SECRET_KEY, {
             expiresIn: "6h",

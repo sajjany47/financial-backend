@@ -35,7 +35,7 @@ const userSchema = new mongoose.Schema(
     city: String,
     pincode: { type: String, trim: true },
     password: String,
-    isPasswordReser: Boolean,
+    isPasswordReset: Boolean,
     education: [
       {
         boardName: { type: String },
