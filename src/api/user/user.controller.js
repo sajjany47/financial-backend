@@ -209,13 +209,23 @@ export const login = async (req, res) => {
             state: validUser.state,
             isPasswordReset: validUser.isPasswordReset,
           };
-          const token = jwt.sign(data, process.env.SECRET_KEY, {
+          const accessToken = jwt.sign(data, process.env.SECRET_KEY, {
+            expiresIn: "1h",
+          });
+          const refreshToken = jwt.sign(data, process.env.SECRET_KEY, {
             expiresIn: "6h",
           });
-          return res.status(StatusCodes.OK).json({
-            message: "Data fetched successfully",
-            data: { data: data, accessToken: token, refreshToken: token },
-          });
+          return res
+            .header("Authorization", accessToken)
+            .status(StatusCodes.OK)
+            .json({
+              message: "Data fetched successfully",
+              data: {
+                data: data,
+                accessToken: accessToken,
+                refreshToken: refreshToken,
+              },
+            });
         } else {
           return res
             .status(StatusCodes.UNAUTHORIZED)
