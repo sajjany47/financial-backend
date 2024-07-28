@@ -215,6 +215,13 @@ export const login = async (req, res) => {
           const refreshToken = jwt.sign(data, process.env.SECRET_KEY, {
             expiresIn: "6h",
           });
+          req.session.userId = validUser._id;
+
+          await user.updateOne(
+            { _id: new mongoose.Types.ObjectId(validUser._id) },
+            { $set: { sessionId: req.session.id } }
+          );
+
           return res
             .header("Authorization", accessToken)
             .status(StatusCodes.OK)
@@ -271,4 +278,10 @@ export const resetPassword = async (req, res) => {
   } catch (error) {
     res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }
+};
+
+export const logout = async (req, res) => {
+  req.session.destroy(() => {
+    res.status(StatusCodes.OK).json({ message: "Logged out successfully" });
+  });
 };
