@@ -12,7 +12,7 @@ import { refreshToken } from "../middleware/refreshToken.middleware.js";
 
 const UserRoutes = express.Router();
 
-UserRoutes.route("/refresh-token").post(refreshToken);
+UserRoutes.route("/refresh-token").post(tokenValidation, refreshToken);
 UserRoutes.route("/login").post(login);
 UserRoutes.route("/admin-signup").post(tokenValidation, adminSignUpSchemaFirst);
 UserRoutes.route("/update-education").post(
