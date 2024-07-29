@@ -13,7 +13,6 @@ import {
 } from "../../utilis/utilis.js";
 import bcrypt from "bcrypt";
 import { welcome } from "../../template/wlecome.js";
-import nodemailer from "nodemailer";
 import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
 
@@ -75,10 +74,15 @@ export const adminSignUpSchemaFirst = async (req, res) => {
           .json({ message: "Username already exists" });
       }
     } else {
-      return res.status(StatusCodes.BAD_REQUEST);
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: "Failed to create user" });
     }
   } catch (error) {
-    res.status(StatusCodes.BAD_GATEWAY).json(error.message);
+    res.status(StatusCodes.BAD_GATEWAY).json({
+      message: "Something went wrong to create user",
+      details: error.message,
+    });
   }
 };
 
@@ -114,7 +118,10 @@ export const updateEducationDetails = async (req, res) => {
       }
     }
   } catch (error) {
-    res.status(StatusCodes.BAD_GATEWAY).json(error.message);
+    res.status(StatusCodes.BAD_GATEWAY).json({
+      mesaage: "Failed to update user details",
+      details: error.message,
+    });
   }
 };
 
@@ -149,7 +156,10 @@ export const updateDocumentDetails = async (req, res) => {
       }
     }
   } catch (error) {
-    res.status(StatusCodes.BAD_GATEWAY).json(error.message);
+    res.status(StatusCodes.BAD_GATEWAY).json({
+      mesaage: "Failed to update user details",
+      details: error.message,
+    });
   }
 };
 
@@ -184,7 +194,10 @@ export const updateAccountDetails = async (req, res) => {
       }
     }
   } catch (error) {
-    res.status(StatusCodes.BAD_GATEWAY).json(error.message);
+    res.status(StatusCodes.BAD_GATEWAY).json({
+      mesaage: "Failed to update user details",
+      details: error.message,
+    });
   }
 };
 
@@ -249,7 +262,10 @@ export const login = async (req, res) => {
         .json({ message: "User not found!" });
     }
   } catch (error) {
-    return res.status(StatusCodes.BAD_GATEWAY).json(error.message);
+    return res.status(StatusCodes.BAD_GATEWAY).json({
+      mesaage: "Failed to user login",
+      details: error.message,
+    });
   }
 };
 
@@ -276,7 +292,10 @@ export const resetPassword = async (req, res) => {
         .json({ message: "Invalid user or Password" });
     }
   } catch (error) {
-    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
+    res.status(StatusCodes.BAD_REQUEST).json({
+      mesaage: "Failed to update user password",
+      details: error.message,
+    });
   }
 };
 
