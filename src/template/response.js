@@ -11,3 +11,13 @@ export const datatable = (data, total) => {
   };
   return data;
 };
+
+export const ErrorResponse = (data) => {
+  const data = {
+    message: data.message,
+    //Details optional
+    details: data.details,
+  };
+
+  return data;
+};
