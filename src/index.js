@@ -35,13 +35,10 @@ function main() {
 
   // Middleware to check for multiple sessions
   app.use(async (req, res, next) => {
-    console.log(req.session);
     if (req.session.userId) {
-      console.log(req.session.userId);
       const userId = await user.findOne({ _id: req.session.userId });
-      console.log(userId);
+
       if (userId && userId.sessionId && userId.sessionId !== req.session.id) {
-        console.log("first");
         req.session.destroy(() => {
           res.status(401).json({
             message: "Logged out due to new login from another device.",
