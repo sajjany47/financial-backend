@@ -304,3 +304,73 @@ export const logout = async (req, res) => {
     res.status(StatusCodes.OK).json({ message: "Logged out successfully" });
   });
 };
+
+// const express = require("express");
+// const session = require("express-session");
+// const MongoDBStore = require("connect-mongodb-session")(session);
+// const mongoose = require("mongoose");
+
+// const app = express();
+
+// const store = new MongoDBStore({
+//   uri: "mongodb://localhost:27017/sessions",
+//   collection: "mySessions",
+// });
+
+// store.on("error", function (error) {
+//   console.log(error);
+// });
+
+// app.use(
+//   session({
+//     secret: "your secret",
+//     resave: false,
+//     saveUninitialized: false,
+//     store: store,
+//     cookie: { maxAge: 1000 * 60 * 60 * 24 }, // 1 day
+//   })
+// );
+
+// mongoose.connect("mongodb://localhost:27017/mydatabase", {
+//   useNewUrlParser: true,
+//   useUnifiedTopology: true,
+// });
+
+// const UserSession = mongoose.model(
+//   "UserSession",
+//   new mongoose.Schema({
+//     userId: String,
+//     sessionId: String,
+//     createdAt: { type: Date, expires: "1d", default: Date.now },
+//   })
+// );
+
+// app.use(express.json());
+
+// app.post("/login", async (req, res) => {
+//   const { userId } = req.body;
+
+//   // Remove previous sessions
+//   await UserSession.deleteMany({ userId });
+
+//   // Create a new session
+//   const session = new UserSession({ userId, sessionId: req.sessionID });
+//   await session.save();
+
+//   req.session.userId = userId;
+
+//   res.send("Logged in");
+// });
+
+// app.get("/logout", (req, res) => {
+//   req.session.destroy((err) => {
+//     if (err) {
+//       return res.status(500).send("Failed to logout");
+//     }
+//     res.send("Logged out");
+//   });
+// });
+
+// app.listen(3000, () => {
+//   console.log("Server started on http://localhost:3000");
+// });
