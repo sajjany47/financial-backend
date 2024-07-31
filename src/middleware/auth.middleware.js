@@ -12,7 +12,6 @@ export const tokenValidation = async (req, res, next) => {
   try {
     const token = authToken && authToken.split(" ")[1];
     const verifyToken = jwt.verify(token, process.env.SECRET_KEY);
-    console.log(verifyToken);
     const verifySession = await user.findOne({
       sessionId: verifyToken.sessionId,
     });
