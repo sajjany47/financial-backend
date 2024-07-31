@@ -28,6 +28,7 @@ export const refreshToken = async (req, res) => {
       .json({
         message: "Token generated successfully",
         data: {
+          data: verifyToken,
           accessToken: accessToken,
           refreshToken: refreshToken,
         },

@@ -13,6 +13,7 @@ export const tokenValidation = async (req, res, next) => {
   }
   try {
     const token = authToken && authToken.split(" ")[1];
+
     const verifyToken = jwt.verify(token, process.env.SECRET_KEY);
     const verifySession = await user.findOne({
       _id: new mongoose.Types.ObjectId(verifyToken._id),
