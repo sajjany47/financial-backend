@@ -1,9 +1,11 @@
 import { StatusCodes } from "http-status-codes";
 import jwt from "jsonwebtoken";
 import user from "../api/user/user.model.js";
+import mongoose from "mongoose";
 
 export const tokenValidation = async (req, res, next) => {
   const authToken = req.header("authorization");
+
   if (!authToken) {
     return res
       .status(StatusCodes.UNAUTHORIZED)
@@ -13,7 +15,7 @@ export const tokenValidation = async (req, res, next) => {
     const token = authToken && authToken.split(" ")[1];
     const verifyToken = jwt.verify(token, process.env.SECRET_KEY);
     const verifySession = await user.findOne({
-      sessionId: verifyToken.sessionId,
+      _id: new mongoose.Types.ObjectId(verifyToken._id),
     });
 
     if (verifySession.sessionId !== verifyToken.sessionId) {

@@ -10,7 +10,7 @@ export const refreshToken = async (req, res) => {
     const verifyToken = jwt.verify(refresh, process.env.SECRET_KEY);
 
     const verifySession = await user.findOne({
-      sessionId: verifyToken.sessionId,
+      _id: new mongoose.Types.ObjectId(verifyToken._id),
     });
 
     if (verifySession.sessionId !== verifyToken.sessionId) {
