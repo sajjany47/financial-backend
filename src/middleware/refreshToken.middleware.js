@@ -4,13 +4,6 @@ import user from "../api/user/user.model.js";
 import { generateAccessToken, generateRefreshToken } from "../utilis/utilis.js";
 
 export const refreshToken = async (req, res) => {
-  // const refreshToken = req.body.refreshToken;
-
-  // if (!refreshToken) {
-  //   return res
-  //     .status(StatusCodes.UNAUTHORIZED)
-  //     .json({ message: "Access Denied. No refresh token provided." });
-  // }
   try {
     const refresh = req.body.refreshToken;
 
@@ -20,7 +13,7 @@ export const refreshToken = async (req, res) => {
       sessionId: verifyToken.sessionId,
     });
 
-    if (verifySession === undefined) {
+    if (verifyToken.sessionId !== verifySession.sessionId) {
       return res
         .status(StatusCodes.UNAUTHORIZED)
         .json({ message: "Access Denied" });

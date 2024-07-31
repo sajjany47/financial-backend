@@ -15,7 +15,7 @@ export const tokenValidation = async (req, res, next) => {
     const verifySession = await user.findOne({
       sessionId: verifyToken.sessionId,
     });
-    if (verifySession.sessionId !== verifyToken.sessionId) {
+    if (verifyToken.sessionId !== verifySession.sessionId) {
       return res
         .status(StatusCodes.UNAUTHORIZED)
         .json({ message: "Access Denied" });
