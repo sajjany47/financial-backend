@@ -4,9 +4,6 @@ import express from "express";
 import fileUpload from "express-fileupload";
 import UserRoutes from "./routes/user.routes.js";
 import cors from "cors";
-import session from "express-session";
-import MongoStore from "connect-mongo";
-// import user from "./api/user/user.model.js";
 
 function main() {
   const port = process.env.port;

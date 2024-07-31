@@ -13,7 +13,7 @@ export const refreshToken = async (req, res) => {
       sessionId: verifyToken.sessionId,
     });
 
-    if (verifyToken.sessionId !== verifySession.sessionId) {
+    if (verifySession.sessionId !== verifyToken.sessionId) {
       return res
         .status(StatusCodes.UNAUTHORIZED)
         .json({ message: "Access Denied" });

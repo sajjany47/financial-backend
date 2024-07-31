@@ -2,6 +2,7 @@ import express from "express";
 import {
   adminSignUpSchemaFirst,
   login,
+  logout,
   resetPassword,
   updateAccountDetails,
   updateDocumentDetails,
@@ -25,5 +26,6 @@ UserRoutes.route("/update-document").post(
 );
 UserRoutes.route("/update-account").post(tokenValidation, updateAccountDetails);
 UserRoutes.route("/update-password").post(tokenValidation, resetPassword);
+UserRoutes.route("/logout").get(tokenValidation, logout);
 
 export default UserRoutes;
