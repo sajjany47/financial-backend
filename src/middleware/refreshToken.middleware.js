@@ -4,31 +4,31 @@ import user from "../api/user/user.model.js";
 import { generateAccessToken, generateRefreshToken } from "../utilis/utilis.js";
 
 export const refreshToken = async (req, res) => {
-  const refreshToken = req.body.refreshToken;
-  if (!refreshToken) {
-    return res
-      .status(StatusCodes.UNAUTHORIZED)
-      .json({ message: "Access Denied. No refresh token provided." });
-  }
+  // const refreshToken = req.body.refreshToken;
+
+  // if (!refreshToken) {
+  //   return res
+  //     .status(StatusCodes.UNAUTHORIZED)
+  //     .json({ message: "Access Denied. No refresh token provided." });
+  // }
   try {
-    const verifyToken = jwt.verify(refreshToken, process.env.SECRET_KEY);
+    const refresh = req.body.refreshToken;
+
+    const verifyToken = jwt.verify(refresh, process.env.SECRET_KEY);
 
     const verifySession = await user.findOne({
       sessionId: verifyToken.sessionId,
     });
+
     if (verifySession === undefined) {
       return res
         .status(StatusCodes.UNAUTHORIZED)
         .json({ message: "Access Denied" });
     }
-    const accessToken = generateAccessToken(data);
-    const refreshToken = generateRefreshToken(data);
-    // const accessToken = jwt.sign(verifyToken, process.env.SECRET_KEY, {
-    //   expiresIn: "1h",
-    // });
-    // const refreshToken = jwt.sign(verifyToken, process.env.SECRET_KEY, {
-    //   expiresIn: "6h",
-    // });
+
+    const accessToken = generateAccessToken(verifyToken);
+    const refreshToken = generateRefreshToken(verifyToken);
+
     return res
       .header("Authorization", `Bearer ${accessToken}`)
       .status(StatusCodes.OK)

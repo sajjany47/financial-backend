@@ -5,7 +5,17 @@ import jwt from "jsonwebtoken";
 export const url = "https://demo.com";
 
 export const generateAccessToken = (data) => {
-  const accessToken = jwt.sign(data, process.env.SECRET_KEY, {
+  const a = {
+    _id: data._id,
+    username: data.username,
+    position: data.position,
+    jobBranchName: data.jobBranchName,
+    country: data.country,
+    state: data.state,
+    isPasswordReset: data.isPasswordReset,
+    sessionId: data.sessionId,
+  };
+  const accessToken = jwt.sign(a, process.env.SECRET_KEY, {
     expiresIn: "1h",
   });
 
@@ -13,7 +23,17 @@ export const generateAccessToken = (data) => {
 };
 
 export const generateRefreshToken = (data) => {
-  const refreshToken = jwt.sign(data, process.env.SECRET_KEY, {
+  const a = {
+    _id: data._id,
+    username: data.username,
+    position: data.position,
+    jobBranchName: data.jobBranchName,
+    country: data.country,
+    state: data.state,
+    isPasswordReset: data.isPasswordReset,
+    sessionId: data.sessionId,
+  };
+  const refreshToken = jwt.sign(a, process.env.SECRET_KEY, {
     expiresIn: "6h",
   });
 
