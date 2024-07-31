@@ -5,9 +5,8 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start:dev": "env-cmd -f .env.development nodemon --exec node src/index.js",
-    "start:stagging": "env-cmd -f .env.stagging nodemon --exec node src/index.js",
-    "start:production": "env-cmd -f .env.production nodemon --exec node src/index.js"
+    "dev": "env-cmd -f .env.development nodemon --exec node src/index.js",
+    "production": "env-cmd -f .env.production nodemon --exec node src/index.js"
   },
   "keywords": [],
   "author": "",

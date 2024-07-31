@@ -7,14 +7,17 @@ import {
 import user from "./user.model.js";
 import { Status } from "./UserConfig.js";
 import {
+  generateAccessToken,
   generateEmployeeId,
   generatePassword,
+  generateRefreshToken,
   MailSend,
 } from "../../utilis/utilis.js";
 import bcrypt from "bcrypt";
 import { welcome } from "../../template/wlecome.js";
 import mongoose from "mongoose";
-import jwt from "jsonwebtoken";
+// import jwt from "jsonwebtoken";
+import { nanoid } from "nanoid";
 
 export const adminSignUpSchemaFirst = async (req, res) => {
   try {
@@ -213,6 +216,7 @@ export const login = async (req, res) => {
           validUser.password
         );
         if (verifyPassword) {
+          const sessionID = nanoid();
           const data = {
             _id: validUser._id,
             username: validUser.username,
@@ -221,18 +225,15 @@ export const login = async (req, res) => {
             country: validUser.country,
             state: validUser.state,
             isPasswordReset: validUser.isPasswordReset,
+            sessionId: sessionID,
           };
-          const accessToken = jwt.sign(data, process.env.SECRET_KEY, {
-            expiresIn: "1h",
-          });
-          const refreshToken = jwt.sign(data, process.env.SECRET_KEY, {
-            expiresIn: "6h",
-          });
-          req.session.userId = validUser._id;
+          const accessToken = generateAccessToken(data);
+          const refreshToken = generateRefreshToken(data);
+          // req.session.userId = validUser._id;
 
           await user.updateOne(
             { _id: new mongoose.Types.ObjectId(validUser._id) },
-            { $set: { sessionId: req.session.id } }
+            { $set: { sessionId: sessionID } }
           );
 
           return res

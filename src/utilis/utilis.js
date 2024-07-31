@@ -1,7 +1,24 @@
 import { nanoid } from "nanoid";
 import nodemailer from "nodemailer";
+import jwt from "jsonwebtoken";
 
 export const url = "https://demo.com";
+
+export const generateAccessToken = (data) => {
+  const accessToken = jwt.sign(data, process.env.SECRET_KEY, {
+    expiresIn: "1h",
+  });
+
+  return accessToken;
+};
+
+export const generateRefreshToken = (data) => {
+  const refreshToken = jwt.sign(data, process.env.SECRET_KEY, {
+    expiresIn: "6h",
+  });
+
+  return refreshToken;
+};
 
 export const MailSend = async (data) => {
   const transporter = nodemailer.createTransport({
