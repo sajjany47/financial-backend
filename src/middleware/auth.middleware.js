@@ -15,6 +15,7 @@ export const tokenValidation = async (req, res, next) => {
     const token = authToken && authToken.split(" ")[1];
 
     const verifyToken = jwt.verify(token, process.env.SECRET_KEY);
+
     const verifySession = await user.findOne({
       _id: new mongoose.Types.ObjectId(verifyToken._id),
     });
@@ -22,7 +23,9 @@ export const tokenValidation = async (req, res, next) => {
     if (verifySession.sessionId !== verifyToken.sessionId) {
       return res
         .status(StatusCodes.UNAUTHORIZED)
-        .json({ message: "Access Denied" });
+        .json({
+          message: "Access Denied due to new login from another device.",
+        });
     }
     Object.assign(req, { user: verifyToken });
     next();
