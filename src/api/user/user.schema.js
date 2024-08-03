@@ -99,6 +99,7 @@ export const accountDetailSchema20 = Yup.object().shape({
     .required("Account number is required")
     .matches("/^d{9,18}$/", "Enter valid Account number"),
   branchName: Yup.string().required("Branch name is required"),
+  ifsc: Yup.string().required("IFSC code is required"),
 });
 
 export const userSchema = Yup.object().shape({

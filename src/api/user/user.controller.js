@@ -178,7 +178,7 @@ export const updateAccountDetails = async (req, res) => {
           bankName: validatedUser.bankName,
           accountNumber: validatedUser.accountNumber,
           branchName: validatedUser.branchName,
-          passportNumber: validatedUser.passportNumber,
+          ifsc: validatedUser.ifsc,
           profileRatio: "100%",
           updatedBy: req.id,
         };
