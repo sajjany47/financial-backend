@@ -89,6 +89,62 @@ export const adminSignUpSchemaFirst = async (req, res) => {
   }
 };
 
+export const updateBasicDetails = async (req, res) => {
+  try {
+    const validatedUser = await adminSignUpSchema30.validate(req.body);
+
+    if (validatedUser) {
+      const isValid = await user.findOne({
+        _id: new new mongoose.Types.ObjectId(validatedUser.id)(),
+      });
+
+      if (isValid) {
+        const userData = {
+          name: validatedUser.name,
+          username: validatedUser.username,
+          mobile: validatedUser.mobile,
+          email: validatedUser.email,
+          dob: validatedUser.dob,
+          position: validatedUser.position,
+          address: validatedUser.address,
+          state: validatedUser.state,
+          country: validatedUser.country,
+          city: validatedUser.city,
+          pincode: validatedUser.pincode,
+          jobBranchName: validatedUser.jobBranchName,
+          password: await bcrypt.hash(password, 10),
+          employeeId: employeeId,
+          isProfileVerified: Status.PENDING,
+          profileRatio: "30%",
+          updatedBy: req.id,
+        };
+
+        const updateUser = await user.updateOne(
+          { _id: new new mongoose.Types.ObjectId(validatedUser.id)() },
+          { $set: userData }
+        );
+
+        return res
+          .status(StatusCodes.OK)
+          .json({ message: "User created successfully" });
+      } else {
+        return res
+          .status(StatusCodes.CONFLICT)
+          .json({ message: "Username already exists" });
+      }
+    } else {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: "Failed to create user" });
+    }
+  } catch (error) {
+    res.status(StatusCodes.BAD_GATEWAY).json({
+      message: "Something went wrong to create user",
+      details: error.message,
+    });
+  }
+};
+
 export const updateEducationDetails = async (req, res) => {
   try {
     const validatedUser = await educationOrCompanyDetailSchema30.validate(

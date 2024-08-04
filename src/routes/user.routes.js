@@ -5,6 +5,7 @@ import {
   logout,
   resetPassword,
   updateAccountDetails,
+  updateBasicDetails,
   updateDocumentDetails,
   updateEducationDetails,
 } from "../api/user/user.controller.js";
@@ -25,6 +26,7 @@ UserRoutes.route("/update-document").post(
   updateDocumentDetails
 );
 UserRoutes.route("/update-account").post(tokenValidation, updateAccountDetails);
+UserRoutes.route("/update-basic").post(tokenValidation, updateBasicDetails);
 UserRoutes.route("/update-password").post(tokenValidation, resetPassword);
 UserRoutes.route("/logout").get(tokenValidation, logout);
 
