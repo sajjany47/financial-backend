@@ -4,6 +4,7 @@ import { fresherOrExperience, Position, Status } from "./UserConfig.js";
 export const adminSignUpSchema30 = Yup.object().shape({
   username: Yup.string().required("Username is required"),
   name: Yup.string().required("Name is required"),
+  userImage: Yup.string().required("User Profile Picture is required"),
   mobile: Yup.string().required("Mobile number is required"),
   email: Yup.string()
     // .matches("/S+@S+.S+/", "Please enter valid email")
@@ -11,22 +12,27 @@ export const adminSignUpSchema30 = Yup.object().shape({
   dob: Yup.date()
     .required("Date of birth is required")
     .max(new Date(Date.now() - 567648000000), "You must be at least 18 years"),
-  position: Yup.string()
-    .oneOf([
-      Position.ADMIN,
-      Position.AM,
-      Position.CD,
-      Position.CDM,
-      Position.CM,
-      Position.CUSTOMER,
-      Position.FM,
-      Position.LD,
-      Position.LM,
-      Position.PM,
-      Position.SM,
-      Position.VD,
-    ])
-    .required("Position is required"),
+  position: Yup.string().when("role", {
+    is: (val) => val !== Position.CUSTOMER,
+    then: () =>
+      Yup.string()
+        .oneOf([
+          Position.ADMIN,
+          Position.AM,
+          Position.CD,
+          Position.CDM,
+          Position.CM,
+          Position.CUSTOMER,
+          Position.FM,
+          Position.LD,
+          Position.LM,
+          Position.PM,
+          Position.SM,
+          Position.VD,
+        ])
+        .required("Position is required"),
+    otherwise: () => Yup.string().notRequired(),
+  }),
   jobBranchName: Yup.string()
     .when("position", {
       is: (val) => val !== Position.CUSTOMER,
@@ -44,62 +50,85 @@ export const adminSignUpSchema30 = Yup.object().shape({
 });
 
 export const educationOrCompanyDetailSchema30 = Yup.object().shape({
-  id: Yup.string().required("Id is required"),
-  education: Yup.array(
-    Yup.object({
-      boardName: Yup.string().required("Board name is required"),
-      passingYear: Yup.string()
-        .required("Passing year is required")
-        .matches("/^d{4}$/", "Enter valid year"),
-      marksPercentage: Yup.string()
-        .required("Passing year is required")
-        .matches(
-          "/^(100(.0{1,2})?|(d{1,2})(.d{1,2})?)$/",
-          "Enter valid percentage"
-        ),
-    })
-  )
-    .required("Education details is required")
-    .min(1, "Education details is required "),
+  education: Yup.array()
+    .of(
+      Yup.object().shape({
+        boardName: Yup.string().required("Board name is required"),
+        passingYear: Yup.string()
+          .required("Passing year is required")
+          .matches(/^\d{4}$/, "Enter a valid year"),
+        marksPercentage: Yup.string()
+          .required("Marks percentage is required")
+          .matches(
+            /^(100(\.0{1,2})?|(\d{1,2})(\.\d{1,2})?)$/,
+            "Enter a valid percentage"
+          ),
+        resultImage: Yup.string().required("Marksheet is required"),
+      })
+    )
+    .required("Education details are required")
+    .min(1, "At least one education detail is required"),
+
   fresherOrExperience: Yup.string()
     .oneOf([fresherOrExperience.EXPERIENCE, fresherOrExperience.FRESHER])
-    .required("Select one of this"),
-  workDetail: Yup.array(
-    Yup.object({
-      companyName: Yup.string().required("Company name is required"),
-      position: Yup.string().required("Position is required"),
-      startingYear: Yup.string()
-        .required("Starting year is required")
-        .matches("/^d{4}$/", "Enter valid year"),
-      endingYear: Yup.string()
-        .required("Ending year is required")
-        .matches("/^d{4}$/", "Enter valid year"),
-    })
-  ),
+    .required("Select one of these"),
+
+  workDetail: Yup.array().when("fresherOrExperience", {
+    is: (val) => val === fresherOrExperience.EXPERIENCE,
+    then: Yup.array()
+      .of(
+        Yup.object().shape({
+          companyName: Yup.string().required("Company name is required"),
+          position: Yup.string().required("Position is required"),
+          startingYear: Yup.string().required("Starting year is required"),
+          endingYear: Yup.string().required("Ending year is required"),
+          experienceLetter: Yup.string().required(
+            "Experience Letter is required"
+          ),
+          relievingLetter: Yup.string().required(
+            "Relieving Letter is required"
+          ),
+          appointmentLetter: Yup.string().required(
+            "Appointment Letter is required"
+          ),
+          salarySlip: Yup.string().required("Salary Slip is required"),
+        })
+      )
+      .required("Work details are required")
+      .min(1, "At least one work detail is required"),
+    otherwise: () => Yup.array().notRequired(),
+  }),
 });
 export const documentsSchema20 = Yup.object().shape({
-  id: Yup.string().required("Id is required"),
-  aadharNumber: Yup.string()
-    .required("Aadhar number is required")
-    .matches("/^d{12}$/", "Enter valid Aadhar number"),
-  voterNumber: Yup.string()
-    .required("Voter number is required")
-    .matches("/^[A-Z]{3}d{7}$/", "Enter valid voter number"),
-  panNumber: Yup.string()
-    .required("Pan number is required")
-    .matches("/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/", "Enter valid pan number"),
-  passportNumber: Yup.string()
-    .required("Passport number is required")
-    .matches("/^[A-Z]{1}[0-9]{7}$/", "Enter valid Passport number"),
+  aadharNumber: Yup.string().required("Aadhar number is required"),
+  // .matches("^d{12}$", "Enter valid Aadhar number"),
+  voterNumber: Yup.string().required("Voter number is required"),
+  // .matches("/^[A-Z]{3}d{7}$/", "Enter valid voter number"),
+  panNumber: Yup.string().required("Pan number is required"),
+  // .matches("/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/", "Enter valid pan number"),
+  passportNumber: Yup.string(),
+  // .required("Passport number is required")
+  // .matches("/^[A-Z]{1}[0-9]{7}$/", "Enter valid Passport number"),
+  aadharImage: Yup.string().required("Aadhar Image is required"),
+  voterImage: Yup.string().required("Voter Image is required"),
+  panImage: Yup.string().required("Pan Image is required"),
+  passportImage: Yup.string().when("passportNumber", {
+    is: (val) => val !== "" && val !== undefined, // Check if passportNumber is not empty
+    then: () => Yup.string().required("Passport Image is required"),
+    otherwise: () => Yup.string().notRequired(),
+  }),
 });
 export const accountDetailSchema20 = Yup.object().shape({
-  id: Yup.string().required("Id is required"),
   bankName: Yup.string().required("Bank name is required"),
-  accountNumber: Yup.string()
-    .required("Account number is required")
-    .matches("/^d{9,18}$/", "Enter valid Account number"),
+  accountNumber: Yup.string().required("Account number is required"),
+  // .matches("/^d{9,18}$/", "Enter valid Account number"),
   branchName: Yup.string().required("Branch name is required"),
   ifsc: Yup.string().required("IFSC code is required"),
+  passbookImage: Yup.string().required("Passbook Front Page image is required"),
+  uanImage: Yup.string().when("uan", {
+    is: (val) => val !== "" && val !== undefined,
+    then: () => Yup.string().required("UAN image is required"),
+  }),
 });
 
 export const userSchema = Yup.object().shape({
