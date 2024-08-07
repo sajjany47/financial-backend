@@ -75,10 +75,15 @@ export const generateEmployeeId = () => {
   return nanoid(8, nanoidCharacters).toUpperCase();
 };
 
-// export const generatePassword = () => {
-//   const alphabet = "abcdefghijklmnopqrstuvwxyz0123456789#@!-_";
-
-//   const password = customAlphabet(alphabet, 8);
-
-//   return password;
-// };
+export const getCircularReplacer = () => {
+  const seen = new WeakSet();
+  return (key, value) => {
+    if (typeof value === "object" && value !== null) {
+      if (seen.has(value)) {
+        return;
+      }
+      seen.add(value);
+    }
+    return value;
+  };
+};

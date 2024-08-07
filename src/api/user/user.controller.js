@@ -11,6 +11,7 @@ import {
   generateEmployeeId,
   generatePassword,
   generateRefreshToken,
+  getCircularReplacer,
   MailSend,
 } from "../../utilis/utilis.js";
 import bcrypt from "bcrypt";
@@ -18,6 +19,7 @@ import { welcome } from "../../template/wlecome.js";
 import mongoose from "mongoose";
 // import jwt from "jsonwebtoken";
 import { nanoid } from "nanoid";
+import axios from "axios";
 
 export const adminSignUpSchemaFirst = async (req, res) => {
   try {
@@ -374,5 +376,99 @@ export const logout = async (req, res) => {
     return res
       .status(StatusCodes.BAD_REQUEST)
       .json({ message: "Failed to Logout user", details: error.message });
+  }
+};
+
+export const country = async (req, res) => {
+  try {
+    const countryList = await axios.get(
+      `https://api.countrystatecity.in/v1/countries`,
+      {
+        headers: {
+          "X-CSCAPI-KEY":
+            "OU5ycmZrek91NnpXVjdUTVJoUVZ1N3ZWWWJGM3lnQVB0N0djYngzMA==",
+        },
+      }
+    );
+
+    const jsonString = JSON.stringify(countryList, getCircularReplacer());
+
+    res.status(StatusCodes.OK).json({
+      message: "Data fetched successfully successfully",
+      data: JSON.parse(jsonString).data,
+    });
+  } catch (error) {
+    return res
+      .status(StatusCodes.BAD_REQUEST)
+      .json({ message: "Failed to fetch data", details: error.message });
+  }
+};
+
+export const state = async (req, res) => {
+  try {
+    const countryList = await axios.get(
+      `https://api.countrystatecity.in/v1/countries/${req.body.country}/states`,
+      {
+        headers: {
+          "X-CSCAPI-KEY":
+            "OU5ycmZrek91NnpXVjdUTVJoUVZ1N3ZWWWJGM3lnQVB0N0djYngzMA==",
+        },
+      }
+    );
+
+    const jsonString = JSON.stringify(countryList, getCircularReplacer());
+
+    res.status(StatusCodes.OK).json({
+      message: "Data fetched successfully successfully",
+      data: JSON.parse(jsonString).data,
+    });
+  } catch (error) {
+    return res
+      .status(StatusCodes.BAD_REQUEST)
+      .json({ message: "Failed to fetch data", details: error.message });
+  }
+};
+
+export const city = async (req, res) => {
+  try {
+    const countryList = await axios.get(
+      `https://api.countrystatecity.in/v1/countries/${req.body.country}/states/${req.body.state}/cities`,
+      {
+        headers: {
+          "X-CSCAPI-KEY":
+            "OU5ycmZrek91NnpXVjdUTVJoUVZ1N3ZWWWJGM3lnQVB0N0djYngzMA==",
+        },
+      }
+    );
+
+    const jsonString = JSON.stringify(countryList, getCircularReplacer());
+
+    res.status(StatusCodes.OK).json({
+      message: "Data fetched successfully successfully",
+      data: JSON.parse(jsonString).data,
+    });
+  } catch (error) {
+    return res
+      .status(StatusCodes.BAD_REQUEST)
+      .json({ message: "Failed to fetch data", details: error.message });
+  }
+};
+
+export const findIFSC = async (req, res) => {
+  try {
+    const countryList = await axios.get(
+      `https://ifsc.razorpay.com/${req.body.ifsc}`
+    );
+
+    const jsonString = JSON.stringify(countryList, getCircularReplacer());
+
+    res.status(StatusCodes.OK).json({
+      message: "Data fetched successfully successfully",
+      data: JSON.parse(jsonString).data,
+    });
+  } catch (error) {
+    return res
+      .status(StatusCodes.BAD_REQUEST)
+      .json({ message: "Failed to fetch data", details: error.message });
   }
 };
