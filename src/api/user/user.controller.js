@@ -20,10 +20,55 @@ import mongoose from "mongoose";
 // import jwt from "jsonwebtoken";
 import { nanoid } from "nanoid";
 import axios from "axios";
+import { v2 as cloudinary } from "cloudinary";
 
 export const adminSignUpSchemaFirst = async (req, res) => {
   try {
-    const validatedUser = await adminSignUpSchema30.validate(req.body);
+    // const validatedUser = await adminSignUpSchema30.validate(req.body);
+    const validatedUser = req.body;
+    const file = req.files.userImage;
+    //configuration
+    cloudinary.config({
+      cloud_name: "dzezstvvt",
+      api_key: "574439343664656",
+      api_secret: "gZ_wMx84XjXuYdfzOAt1M03njRA",
+    });
+
+    cloudinary.uploader
+      .upload(file.tempFilePath, {
+        folder: "user",
+        resource_type: "image",
+      })
+      .then(console.log);
+
+    // Upload an image
+    // const uploadResult = await cloudinary.uploader
+    //   .upload(req.files.userImage, {
+    //     public_id: "profile",
+    //   })
+    //   .catch((error) => {
+    //     console.log(error);
+    //   });
+
+    // console.log(uploadResult);
+
+    // Optimize delivery by resizing and applying auto-format and auto-quality
+    const optimizeUrl = cloudinary.url(file.tempFilePath, {
+      fetch_format: "auto",
+      quality: "auto",
+    });
+
+    console.log(optimizeUrl);
+
+    // Transform the image: auto-crop to square aspect_ratio
+    // const autoCropUrl = cloudinary.url("shoes", {
+    //   crop: "auto",
+    //   gravity: "auto",
+    //   width: 500,
+    //   height: 500,
+    // });
+
+    // console.log(autoCropUrl);
 
     if (validatedUser) {
       const isValid = await user.findOne({ username: validatedUser.username });
