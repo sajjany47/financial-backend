@@ -37,6 +37,7 @@ const userSchema = new mongoose.Schema(
     password: String,
     sessionId: String,
     isPasswordReset: Boolean,
+    userImage: String,
     education: [
       {
         boardName: { type: String },

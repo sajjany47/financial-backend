@@ -1,6 +1,7 @@
 import { nanoid } from "nanoid";
 import nodemailer from "nodemailer";
 import jwt from "jsonwebtoken";
+import { v2 as cloudinary } from "cloudinary";
 
 export const url = "https://demo.com";
 
@@ -86,4 +87,19 @@ export const getCircularReplacer = () => {
     }
     return value;
   };
+};
+
+export const ImageUpload = async (folderName, image) => {
+  cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLODINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_SECRET_KEY,
+  });
+
+  const a = await cloudinary.uploader.upload(image.tempFilePath, {
+    folder: folderName,
+    resource_type: "image",
+  });
+
+  return a.url;
 };

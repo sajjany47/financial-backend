@@ -12,6 +12,7 @@ import {
   generatePassword,
   generateRefreshToken,
   getCircularReplacer,
+  ImageUpload,
   MailSend,
 } from "../../utilis/utilis.js";
 import bcrypt from "bcrypt";
@@ -26,49 +27,6 @@ export const adminSignUpSchemaFirst = async (req, res) => {
   try {
     // const validatedUser = await adminSignUpSchema30.validate(req.body);
     const validatedUser = req.body;
-    const file = req.files.userImage;
-    //configuration
-    cloudinary.config({
-      cloud_name: "dzezstvvt",
-      api_key: "574439343664656",
-      api_secret: "gZ_wMx84XjXuYdfzOAt1M03njRA",
-    });
-
-    cloudinary.uploader
-      .upload(file.tempFilePath, {
-        folder: "user",
-        resource_type: "image",
-      })
-      .then(console.log);
-
-    // Upload an image
-    // const uploadResult = await cloudinary.uploader
-    //   .upload(req.files.userImage, {
-    //     public_id: "profile",
-    //   })
-    //   .catch((error) => {
-    //     console.log(error);
-    //   });
-
-    // console.log(uploadResult);
-
-    // Optimize delivery by resizing and applying auto-format and auto-quality
-    const optimizeUrl = cloudinary.url(file.tempFilePath, {
-      fetch_format: "auto",
-      quality: "auto",
-    });
-
-    console.log(optimizeUrl);
-
-    // Transform the image: auto-crop to square aspect_ratio
-    // const autoCropUrl = cloudinary.url("shoes", {
-    //   crop: "auto",
-    //   gravity: "auto",
-    //   width: 500,
-    //   height: 500,
-    // });
-
-    // console.log(autoCropUrl);
 
     if (validatedUser) {
       const isValid = await user.findOne({ username: validatedUser.username });
@@ -78,7 +36,7 @@ export const adminSignUpSchemaFirst = async (req, res) => {
 
         const employeeId = generateEmployeeId();
 
-        const userData = new user({
+        let userData = {
           name: validatedUser.name,
           username: validatedUser.username,
           mobile: validatedUser.mobile,
@@ -90,7 +48,9 @@ export const adminSignUpSchemaFirst = async (req, res) => {
           country: validatedUser.country,
           city: validatedUser.city,
           pincode: validatedUser.pincode,
-          jobBranchName: validatedUser.jobBranchName,
+          // jobBranchName: validatedUser.jobBranchName,
+          jobBranchName: "kolkata",
+
           password: await bcrypt.hash(password, 10),
           employeeId: employeeId,
           isProfileVerified: Status.PENDING,
@@ -100,9 +60,17 @@ export const adminSignUpSchemaFirst = async (req, res) => {
           createdBy: req.id,
           isProfileVerified: Status.PENDING,
           isPasswordReset: false,
-        });
+        };
+        if (req.files) {
+          const file = req.files.userImage;
+          const imageUrl = await ImageUpload("user", file);
+          userData.userImage = imageUrl;
+        }
 
-        const saveUser = await userData.save();
+        const createUser = new user(userData);
+
+        const saveUser = await createUser.save();
+        console.log(saveUser);
         if (saveUser) {
           await MailSend({
             to: [validatedUser.email],
@@ -117,7 +85,7 @@ export const adminSignUpSchemaFirst = async (req, res) => {
         }
         return res
           .status(StatusCodes.OK)
-          .json({ message: "User created successfully" });
+          .json({ message: "User created successfully", data: saveUser });
       } else {
         return res
           .status(StatusCodes.CONFLICT)
