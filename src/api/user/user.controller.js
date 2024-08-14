@@ -70,13 +70,12 @@ export const adminSignUpSchemaFirst = async (req, res) => {
         const createUser = new user(userData);
 
         const saveUser = await createUser.save();
-        console.log(saveUser);
         if (saveUser) {
           await MailSend({
             to: [validatedUser.email],
             subject: "Registration Successfully",
             html: welcome({
-              sender: req.name,
+              sender: req.user.name,
               name: validatedUser.name,
               username: validatedUser.username,
               password: password,
@@ -291,6 +290,7 @@ export const login = async (req, res) => {
           const data = {
             _id: validUser._id,
             username: validUser.username,
+            name: validUser.name,
             position: validUser.position,
             jobBranchName: validUser.jobBranchName,
             country: validUser.country,

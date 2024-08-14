@@ -1,0 +1,14 @@
+import * as Yup from "yup";
+
+export const createBranchSchema = Yup.object().shape({
+  _id: Yup.string(),
+  name: Yup.string().required("Name is required"),
+  country: Yup.string().required("Country is required"),
+  state: Yup.string().required("State is required"),
+  city: Yup.string().required("City is required"),
+  email: Yup.string().required("Email is required"),
+  phone: Yup.string().required("Phone is required"),
+  address: Yup.string().required("Address is required"),
+  pincode: Yup.string().required("Pincode is required"),
+  code: Yup.string().required("Code is required"),
+});

@@ -9,6 +9,7 @@ export const generateAccessToken = (data) => {
   const a = {
     _id: data._id,
     username: data.username,
+    name: data.name,
     position: data.position,
     jobBranchName: data.jobBranchName,
     country: data.country,
@@ -28,6 +29,7 @@ export const generateRefreshToken = (data) => {
     _id: data._id,
     username: data.username,
     position: data.position,
+    name: data.name,
     jobBranchName: data.jobBranchName,
     country: data.country,
     state: data.state,
