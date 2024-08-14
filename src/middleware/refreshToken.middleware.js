@@ -8,7 +8,7 @@ export const refreshToken = async (req, res) => {
     const refresh = req.body.refreshToken;
 
     const verifyToken = jwt.verify(refresh, process.env.SECRET_KEY);
-
+    Object.assign(req, { user: verifyToken });
     const verifySession = await user.findOne({
       _id: new mongoose.Types.ObjectId(verifyToken._id),
     });
