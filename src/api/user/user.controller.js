@@ -25,8 +25,7 @@ import { v2 as cloudinary } from "cloudinary";
 
 export const adminSignUpSchemaFirst = async (req, res) => {
   try {
-    // const validatedUser = await adminSignUpSchema30.validate(req.body);
-    const validatedUser = req.body;
+    const validatedUser = await adminSignUpSchema30.validate(req.body);
 
     if (validatedUser) {
       const isValid = await user.findOne({ username: validatedUser.username });
@@ -48,9 +47,7 @@ export const adminSignUpSchemaFirst = async (req, res) => {
           country: validatedUser.country,
           city: validatedUser.city,
           pincode: validatedUser.pincode,
-          // jobBranchName: validatedUser.jobBranchName,
-          jobBranchName: "kolkata",
-
+          jobBranchName: validatedUser.jobBranchName,
           password: await bcrypt.hash(password, 10),
           employeeId: employeeId,
           isProfileVerified: Status.PENDING,
@@ -90,15 +87,10 @@ export const adminSignUpSchemaFirst = async (req, res) => {
           .status(StatusCodes.CONFLICT)
           .json({ message: "Username already exists" });
       }
-    } else {
-      return res
-        .status(StatusCodes.BAD_REQUEST)
-        .json({ message: "Failed to create user" });
     }
   } catch (error) {
     res.status(StatusCodes.BAD_GATEWAY).json({
-      message: "Something went wrong to create user",
-      details: error.message,
+      message: error,
     });
   }
 };
@@ -146,15 +138,10 @@ export const updateBasicDetails = async (req, res) => {
           .status(StatusCodes.CONFLICT)
           .json({ message: "Username already exists" });
       }
-    } else {
-      return res
-        .status(StatusCodes.BAD_REQUEST)
-        .json({ message: "Failed to create user" });
     }
   } catch (error) {
     res.status(StatusCodes.BAD_GATEWAY).json({
-      message: "Something went wrong to create user",
-      details: error.message,
+      message: error,
     });
   }
 };
@@ -192,8 +179,7 @@ export const updateEducationDetails = async (req, res) => {
     }
   } catch (error) {
     res.status(StatusCodes.BAD_GATEWAY).json({
-      mesaage: "Failed to update user details",
-      details: error.message,
+      mesaage: error,
     });
   }
 };
@@ -230,8 +216,7 @@ export const updateDocumentDetails = async (req, res) => {
     }
   } catch (error) {
     res.status(StatusCodes.BAD_GATEWAY).json({
-      mesaage: "Failed to update user details",
-      details: error.message,
+      mesaage: error,
     });
   }
 };
@@ -268,8 +253,7 @@ export const updateAccountDetails = async (req, res) => {
     }
   } catch (error) {
     res.status(StatusCodes.BAD_GATEWAY).json({
-      mesaage: "Failed to update user details",
-      details: error.message,
+      mesaage: error,
     });
   }
 };
@@ -335,8 +319,8 @@ export const login = async (req, res) => {
     }
   } catch (error) {
     return res.status(StatusCodes.BAD_GATEWAY).json({
-      mesaage: "Failed to user login",
-      details: error.message,
+      mesaage: error,
+      // details: error.message,
     });
   }
 };
@@ -365,8 +349,7 @@ export const resetPassword = async (req, res) => {
     }
   } catch (error) {
     res.status(StatusCodes.BAD_REQUEST).json({
-      mesaage: "Failed to update user password",
-      details: error.message,
+      mesaage: error,
     });
   }
 };
@@ -386,9 +369,7 @@ export const logout = async (req, res) => {
 
     return res.status(StatusCodes.OK).json({ message: "Logout successfully" });
   } catch (error) {
-    return res
-      .status(StatusCodes.BAD_REQUEST)
-      .json({ message: "Failed to Logout user", details: error.message });
+    return res.status(StatusCodes.BAD_REQUEST).json({ message: error });
   }
 };
 
@@ -411,9 +392,7 @@ export const country = async (req, res) => {
       data: JSON.parse(jsonString).data,
     });
   } catch (error) {
-    return res
-      .status(StatusCodes.BAD_REQUEST)
-      .json({ message: "Failed to fetch data", details: error.message });
+    return res.status(StatusCodes.BAD_REQUEST).json({ message: error });
   }
 };
 
@@ -436,9 +415,7 @@ export const state = async (req, res) => {
       data: JSON.parse(jsonString).data,
     });
   } catch (error) {
-    return res
-      .status(StatusCodes.BAD_REQUEST)
-      .json({ message: "Failed to fetch data", details: error.message });
+    return res.status(StatusCodes.BAD_REQUEST).json({ message: error });
   }
 };
 
@@ -461,9 +438,7 @@ export const city = async (req, res) => {
       data: JSON.parse(jsonString).data,
     });
   } catch (error) {
-    return res
-      .status(StatusCodes.BAD_REQUEST)
-      .json({ message: "Failed to fetch data", details: error.message });
+    return res.status(StatusCodes.BAD_REQUEST).json({ message: error });
   }
 };
 
@@ -480,8 +455,6 @@ export const findIFSC = async (req, res) => {
       data: JSON.parse(jsonString).data,
     });
   } catch (error) {
-    return res
-      .status(StatusCodes.BAD_REQUEST)
-      .json({ message: "Failed to fetch data", details: error.message });
+    return res.status(StatusCodes.BAD_REQUEST).json({ message: error });
   }
 };

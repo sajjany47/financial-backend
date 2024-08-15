@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
-import { createBranchSchema } from "./branch.schema";
-import branch from "./branch.model";
+import { createBranchSchema } from "./branch.schema.js";
+import branch from "./branch.model.js";
 import mongoose from "mongoose";
 
 export const createBranch = async (req, res) => {

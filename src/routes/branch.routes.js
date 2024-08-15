@@ -4,7 +4,8 @@ import {
   createBranch,
   dataTable,
   updateBranch,
-} from "../api/branch/branch.controller";
+} from "../api/branch/branch.controller.js";
+import { tokenValidation } from "../middleware/auth.middleware.js";
 
 const BranchRoutes = express.Router();
 
