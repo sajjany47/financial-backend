@@ -2,6 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import { createBranchSchema } from "./branch.schema.js";
 import branch from "./branch.model.js";
 import mongoose from "mongoose";
+import { query } from "express";
 
 export const createBranch = async (req, res) => {
   try {
@@ -76,11 +77,15 @@ export const updateBranch = async (req, res) => {
 
 export const branchList = async (req, res) => {
   try {
-    const list = await branch.find({ isActive: true });
+    const reqData = req.query;
+
+    const data = await branch.aggregate([
+      { $match: Object.keys(reqData).length > 0 ? reqData : {} },
+    ]);
 
     res
       .status(StatusCodes.OK)
-      .json({ message: "Data fetched successfully", data: list });
+      .json({ message: "Data fetched successfully", data: data });
   } catch (error) {
     res.status(StatusCodes.BAD_REQUEST).json({ message: error });
   }
