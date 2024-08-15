@@ -9,7 +9,6 @@ export const Position = {
   LD: "loan-department",
   VD: "verication-department",
   FM: "financial-manager",
-  CUSTOMER: "customer",
 };
 
 export const Status = {

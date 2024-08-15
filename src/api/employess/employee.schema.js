@@ -1,5 +1,5 @@
 import * as Yup from "yup";
-import { fresherOrExperience, Position, Status } from "./UserConfig.js";
+import { fresherOrExperience, Position, Status } from "./EmployeeConfig.js";
 
 export const adminSignUpSchema30 = Yup.object().shape({
   username: Yup.string().required("Username is required"),
@@ -12,34 +12,23 @@ export const adminSignUpSchema30 = Yup.object().shape({
   dob: Yup.date()
     .required("Date of birth is required")
     .max(new Date(Date.now() - 567648000000), "You must be at least 18 years"),
-  position: Yup.string().when("role", {
-    is: (val) => val !== Position.CUSTOMER,
-    then: () =>
-      Yup.string()
-        .oneOf([
-          Position.ADMIN,
-          Position.AM,
-          Position.CD,
-          Position.CDM,
-          Position.CM,
-          Position.CUSTOMER,
-          Position.FM,
-          Position.LD,
-          Position.LM,
-          Position.PM,
-          Position.SM,
-          Position.VD,
-        ])
-        .required("Position is required"),
-    otherwise: () => Yup.string().notRequired(),
-  }),
-  jobBranchName: Yup.string()
-    .when("position", {
-      is: (val) => val !== Position.CUSTOMER,
-      then: () => Yup.string().required("Branch is required"),
-      otherwise: () => Yup.string().notRequired(),
-    })
-    .required("Branch is required"),
+  position: Yup.string()
+    .oneOf([
+      Position.ADMIN,
+      Position.AM,
+      Position.CD,
+      Position.CDM,
+      Position.CM,
+      Position.FM,
+      Position.LD,
+      Position.LM,
+      Position.PM,
+      Position.SM,
+      Position.VD,
+    ])
+    .required("Position is required"),
+
+  jobBranchName: Yup.string().required("Branch is required"),
   address: Yup.string().required("Address is required"),
   state: Yup.string().required("State is required"),
   country: Yup.string().required("Country is required"),

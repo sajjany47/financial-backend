@@ -1,7 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 import jwt from "jsonwebtoken";
-import user from "../api/user/user.model.js";
 import { generateAccessToken, generateRefreshToken } from "../utilis/utilis.js";
+import employee from "../api/employess/employee.model.js";
 
 export const refreshToken = async (req, res) => {
   try {
@@ -9,7 +9,7 @@ export const refreshToken = async (req, res) => {
 
     const verifyToken = jwt.verify(refresh, process.env.SECRET_KEY);
     Object.assign(req, { user: verifyToken });
-    const verifySession = await user.findOne({
+    const verifySession = await employee.findOne({
       _id: new mongoose.Types.ObjectId(verifyToken._id),
     });
 

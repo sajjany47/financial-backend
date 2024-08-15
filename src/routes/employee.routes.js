@@ -1,0 +1,44 @@
+import express from "express";
+import {
+  adminSignUpSchemaFirst,
+  city,
+  country,
+  findIFSC,
+  login,
+  logout,
+  resetPassword,
+  state,
+  updateAccountDetails,
+  updateBasicDetails,
+  updateDocumentDetails,
+  updateEducationDetails,
+} from "../api/employess/employee.controller.js";
+import { tokenValidation } from "../middleware/auth.middleware.js";
+import { refreshToken } from "../middleware/refreshToken.middleware.js";
+
+const EmployeeRoutes = express.Router();
+
+EmployeeRoutes.route("/refresh-token").post(tokenValidation, refreshToken);
+EmployeeRoutes.route("/login").post(login);
+EmployeeRoutes.route("/admin-signup").post(adminSignUpSchemaFirst);
+EmployeeRoutes.route("/update-education").post(
+  tokenValidation,
+  updateEducationDetails
+);
+EmployeeRoutes.route("/update-document").post(
+  tokenValidation,
+  updateDocumentDetails
+);
+EmployeeRoutes.route("/update-account").post(
+  tokenValidation,
+  updateAccountDetails
+);
+EmployeeRoutes.route("/update-basic").post(tokenValidation, updateBasicDetails);
+EmployeeRoutes.route("/update-password").post(tokenValidation, resetPassword);
+EmployeeRoutes.route("/logout").get(tokenValidation, logout);
+EmployeeRoutes.route("/country").get(tokenValidation, country);
+EmployeeRoutes.route("/state").post(tokenValidation, state);
+EmployeeRoutes.route("/city").post(tokenValidation, city);
+EmployeeRoutes.route("/ifsc").post(tokenValidation, findIFSC);
+
+export default EmployeeRoutes;

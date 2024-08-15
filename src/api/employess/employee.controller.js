@@ -3,9 +3,8 @@ import {
   adminSignUpSchema30,
   documentsSchema20,
   educationOrCompanyDetailSchema30,
-} from "./user.schema.js";
-import user from "./user.model.js";
-import { Status } from "./UserConfig.js";
+} from "./employee.schema.js";
+import { Status } from "./EmployeeConfig.js";
 import {
   generateAccessToken,
   generateEmployeeId,
@@ -18,21 +17,21 @@ import {
 import bcrypt from "bcrypt";
 import { welcome } from "../../template/wlecome.js";
 import mongoose from "mongoose";
-// import jwt from "jsonwebtoken";
 import { nanoid } from "nanoid";
 import axios from "axios";
-import { v2 as cloudinary } from "cloudinary";
+import employee from "./employee.model.js";
 
 export const adminSignUpSchemaFirst = async (req, res) => {
   try {
     const validatedUser = await adminSignUpSchema30.validate(req.body);
 
     if (validatedUser) {
-      const isValid = await user.findOne({ username: validatedUser.username });
+      const isValid = await employee.findOne({
+        username: validatedUser.username,
+      });
 
       if (!isValid) {
         const password = generatePassword();
-
         const employeeId = generateEmployeeId();
 
         let userData = {
@@ -52,19 +51,20 @@ export const adminSignUpSchemaFirst = async (req, res) => {
           employeeId: employeeId,
           isProfileVerified: Status.PENDING,
           profileRatio: "30%",
-          approvedBy: req.id,
+          approvedBy: req.user._id,
           isActive: true,
-          createdBy: req.id,
+          createdBy: req.user._id,
           isProfileVerified: Status.PENDING,
           isPasswordReset: false,
         };
+
         if (req.files) {
           const file = req.files.userImage;
           const imageUrl = await ImageUpload("user", file);
           userData.userImage = imageUrl;
         }
 
-        const createUser = new user(userData);
+        const createUser = new employee(userData);
 
         const saveUser = await createUser.save();
         if (saveUser) {
@@ -100,7 +100,7 @@ export const updateBasicDetails = async (req, res) => {
     const validatedUser = await adminSignUpSchema30.validate(req.body);
 
     if (validatedUser) {
-      const isValid = await user.findOne({
+      const isValid = await employee.findOne({
         _id: new new mongoose.Types.ObjectId(validatedUser.id)(),
       });
 
@@ -122,10 +122,10 @@ export const updateBasicDetails = async (req, res) => {
           employeeId: employeeId,
           isProfileVerified: Status.PENDING,
           profileRatio: "30%",
-          updatedBy: req.id,
+          updatedBy: req.user._id,
         };
 
-        const updateUser = await user.updateOne(
+        const updateUser = await employee.updateOne(
           { _id: new new mongoose.Types.ObjectId(validatedUser.id)() },
           { $set: userData }
         );
@@ -152,7 +152,7 @@ export const updateEducationDetails = async (req, res) => {
       req.body
     );
     if (validatedUser) {
-      const checkUser = await user.findOne({
+      const checkUser = await employee.findOne({
         _id: new mongoose.Types.ObjectId(validatedUser.id),
       });
       if (checkUser) {
@@ -161,10 +161,10 @@ export const updateEducationDetails = async (req, res) => {
           fresherOrExperience: validatedUser.fresherOrExperience,
           workDetail: validatedUser.workDetail,
           profileRatio: "60%",
-          updatedBy: req.id,
+          updatedBy: req.user._id,
         };
 
-        const updateUser = await user.updateOne(
+        const updateUser = await employee.updateOne(
           {
             _id: new mongoose.Types.ObjectId(validatedUser.id),
           },
@@ -188,7 +188,7 @@ export const updateDocumentDetails = async (req, res) => {
   try {
     const validatedUser = await documentsSchema20.validate(req.body);
     if (validatedUser) {
-      const checkUser = await user.findOne({
+      const checkUser = await employee.findOne({
         _id: new mongoose.Types.ObjectId(validatedUser.id),
       });
       if (checkUser) {
@@ -198,10 +198,10 @@ export const updateDocumentDetails = async (req, res) => {
           panNumber: validatedUser.panNumber,
           passportNumber: validatedUser.passportNumber,
           profileRatio: "80%",
-          updatedBy: req.id,
+          updatedBy: req.user._id,
         };
 
-        const updateUser = await user.updateOne(
+        const updateUser = await employee.updateOne(
           {
             _id: new mongoose.Types.ObjectId(validatedUser.id),
           },
@@ -225,7 +225,7 @@ export const updateAccountDetails = async (req, res) => {
   try {
     const validatedUser = await documentsSchema20.validate(req.body);
     if (validatedUser) {
-      const checkUser = await user.findOne({
+      const checkUser = await employee.findOne({
         _id: new mongoose.Types.ObjectId(validatedUser.id),
       });
       if (checkUser) {
@@ -235,10 +235,10 @@ export const updateAccountDetails = async (req, res) => {
           branchName: validatedUser.branchName,
           ifsc: validatedUser.ifsc,
           profileRatio: "100%",
-          updatedBy: req.id,
+          updatedBy: req.user._id,
         };
 
-        const updateUser = await user.updateOne(
+        const updateUser = await employee.updateOne(
           {
             _id: new mongoose.Types.ObjectId(validatedUser.id),
           },
@@ -262,7 +262,7 @@ export const login = async (req, res) => {
   try {
     const reqData = req.body;
 
-    const validUser = await user.findOne({ username: reqData.username });
+    const validUser = await employee.findOne({ username: reqData.username });
     if (validUser) {
       if (validUser.isActive) {
         const verifyPassword = await bcrypt.compare(
@@ -286,7 +286,7 @@ export const login = async (req, res) => {
           const refreshToken = generateRefreshToken(data);
           // req.session.userId = validUser._id;
 
-          await user.updateOne(
+          await employee.updateOne(
             { _id: new mongoose.Types.ObjectId(validUser._id) },
             { $set: { sessionId: sessionID } }
           );
@@ -329,7 +329,7 @@ export const resetPassword = async (req, res) => {
   try {
     const reqData = req.body;
 
-    const updatedPassword = await user.updateOne(
+    const updatedPassword = await employee.updateOne(
       { _id: new mongoose.Types.ObjectId(reqData.id) },
       {
         $set: {
@@ -356,7 +356,7 @@ export const resetPassword = async (req, res) => {
 
 export const logout = async (req, res) => {
   try {
-    const removeSessionId = await user.findOneAndUpdate(
+    const removeSessionId = await employee.findOneAndUpdate(
       {
         _id: new mongoose.Types.ObjectId(req.user._id),
       },

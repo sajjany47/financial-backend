@@ -1,8 +1,8 @@
-import { Position, Status, fresherOrExperience } from "./UserConfig.js";
+import { Position, Status, fresherOrExperience } from "./EmployeeConfig.js";
 
 import mongoose from "mongoose";
 
-const userSchema = new mongoose.Schema(
+const employeeSchema = new mongoose.Schema(
   {
     employeeId: String,
     name: String,
@@ -22,7 +22,6 @@ const userSchema = new mongoose.Schema(
         Position.LD,
         Position.VD,
         Position.FM,
-        Position.CUSTOMER,
       ],
     },
     jobBranchName: String,
@@ -63,6 +62,8 @@ const userSchema = new mongoose.Schema(
     passportNumber: { type: String, trim: true },
     bankName: { type: String, lowercase: true },
     accountNumber: { type: String, trim: true },
+    uan: String,
+    uanImage: String,
     ifsc: { type: String, trim: true },
     branchName: { type: String, lowercase: true },
     isProfileVerified: {
@@ -82,6 +83,6 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-const user = mongoose.model("user", userSchema);
+const employee = mongoose.model("employee", employeeSchema);
 
-export default user;
+export default employee;
