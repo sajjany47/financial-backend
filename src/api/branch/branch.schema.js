@@ -1,7 +1,6 @@
 import * as Yup from "yup";
 
 export const createBranchSchema = Yup.object().shape({
-  _id: Yup.string().required("Id required"),
   name: Yup.string().required("Name is required"),
   country: Yup.string().required("Country is required"),
   state: Yup.string().required("State is required"),

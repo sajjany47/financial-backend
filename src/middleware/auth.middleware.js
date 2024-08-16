@@ -26,6 +26,7 @@ export const tokenValidation = async (req, res, next) => {
       });
     }
     Object.assign(req, { user: verifyToken });
+    console.log(verifyToken);
     next();
   } catch (error) {
     res

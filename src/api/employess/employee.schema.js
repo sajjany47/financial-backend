@@ -17,6 +17,7 @@ export const adminSignUpSchema30 = Yup.object().shape({
       Position.ADMIN,
       Position.AM,
       Position.CD,
+      Position.BM,
       Position.CDM,
       Position.CM,
       Position.FM,

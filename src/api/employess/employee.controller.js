@@ -29,7 +29,8 @@ export const adminSignUpSchemaFirst = async (req, res) => {
       const isValid = await employee.findOne({
         username: validatedUser.username,
       });
-
+      console.log(req._id);
+      console.log("object");
       if (!isValid) {
         const password = generatePassword();
         const employeeId = generateEmployeeId();
@@ -52,12 +53,12 @@ export const adminSignUpSchemaFirst = async (req, res) => {
           isProfileVerified: Status.PENDING,
           profileRatio: "30%",
           approvedBy: req.user._id,
-          isActive: true,
-          createdBy: req.user._id,
-          isProfileVerified: Status.PENDING,
-          isPasswordReset: false,
+          // isActive: true,
+          // createdBy: req.user._id,
+          // isProfileVerified: Status.PENDING,
+          // isPasswordReset: false,
         };
-
+        console.log(userData);
         if (req.files) {
           const file = req.files.userImage;
           const imageUrl = await ImageUpload("user", file);
@@ -119,7 +120,7 @@ export const updateBasicDetails = async (req, res) => {
           pincode: validatedUser.pincode,
           jobBranchName: validatedUser.jobBranchName,
           password: await bcrypt.hash(password, 10),
-          employeeId: employeeId,
+          employeeId: validatedUser.employeeId,
           isProfileVerified: Status.PENDING,
           profileRatio: "30%",
           updatedBy: req.user._id,
