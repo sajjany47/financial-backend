@@ -29,8 +29,7 @@ export const adminSignUpSchemaFirst = async (req, res) => {
       const isValid = await employee.findOne({
         username: validatedUser.username,
       });
-      console.log(req._id);
-      console.log("object");
+
       if (!isValid) {
         const password = generatePassword();
         const employeeId = generateEmployeeId();
@@ -53,12 +52,12 @@ export const adminSignUpSchemaFirst = async (req, res) => {
           isProfileVerified: Status.PENDING,
           profileRatio: "30%",
           approvedBy: req.user._id,
-          // isActive: true,
-          // createdBy: req.user._id,
-          // isProfileVerified: Status.PENDING,
-          // isPasswordReset: false,
+          isActive: true,
+          createdBy: req.user._id,
+          isProfileVerified: Status.PENDING,
+          isPasswordReset: false,
         };
-        console.log(userData);
+
         if (req.files) {
           const file = req.files.userImage;
           const imageUrl = await ImageUpload("user", file);
@@ -171,9 +170,10 @@ export const updateEducationDetails = async (req, res) => {
           },
           { $set: reqData }
         );
+        console.log(updateUser);
         return res
           .status(StatusCodes.OK)
-          .json({ message: "User updated successfully" });
+          .json({ message: "User updated successfully", data: updateUser });
       } else {
         res.status(StatusCodes.NOT_FOUND).json({ message: "User not found!" });
       }

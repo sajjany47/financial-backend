@@ -20,7 +20,10 @@ const EmployeeRoutes = express.Router();
 
 EmployeeRoutes.route("/refresh-token").post(tokenValidation, refreshToken);
 EmployeeRoutes.route("/login").post(login);
-EmployeeRoutes.route("/admin-signup").post(adminSignUpSchemaFirst);
+EmployeeRoutes.route("/admin-signup").post(
+  tokenValidation,
+  adminSignUpSchemaFirst
+);
 EmployeeRoutes.route("/update-education").post(
   tokenValidation,
   updateEducationDetails
