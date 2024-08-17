@@ -11,6 +11,7 @@ import {
   updateAccountDetails,
   updateBasicDetails,
   updateDocumentDetails,
+  updateEducationAndCompanyDetails,
   updateEducationDetails,
 } from "../api/employess/employee.controller.js";
 import { tokenValidation } from "../middleware/auth.middleware.js";
@@ -23,6 +24,10 @@ EmployeeRoutes.route("/login").post(login);
 EmployeeRoutes.route("/admin-signup").post(
   tokenValidation,
   adminSignUpSchemaFirst
+);
+EmployeeRoutes.route("/education-update").post(
+  tokenValidation,
+  updateEducationAndCompanyDetails
 );
 EmployeeRoutes.route("/update-education").post(
   tokenValidation,

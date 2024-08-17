@@ -47,6 +47,7 @@ export const adminSignUpSchemaFirst = async (req, res) => {
           city: validatedUser.city,
           pincode: validatedUser.pincode,
           jobBranchName: validatedUser.jobBranchName,
+          fresherOrExperience: validatedUser.fresherOrExperience,
           password: await bcrypt.hash(password, 10),
           employeeId: employeeId,
           isProfileVerified: Status.PENDING,
@@ -95,13 +96,81 @@ export const adminSignUpSchemaFirst = async (req, res) => {
   }
 };
 
+export const updateEducationAndCompanyDetails = async (req, res) => {
+  try {
+    const validData = req.body;
+    const reqData =
+      req.body.dataType === "education"
+        ? {
+            boardName: validData.boardName,
+            passingYear: validData.passingYear,
+            marksPercentage: validData.marksPercentage,
+            resultImage: validData.resultImage,
+          }
+        : {
+            companyName: validData.companyName,
+            position: validData.position,
+            startingYear: validData.startingYear,
+            endingYear: validData.endingYear,
+            experienceLetter: validData.experienceLetter,
+            relievingLetter: validData.relievingLetter,
+            appointmentLetter: validData.appointmentLetter,
+            salarySlip: validData.salarySlip,
+          };
+    if (req.files.resultImage) {
+      const file = req.files.resultImage;
+      const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
+      reqData.resultImage = imageUrl;
+    }
+    if (req.files.experienceLetter) {
+      const file = req.files.experienceLetter;
+      const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
+      reqData.experienceLetter = imageUrl;
+    }
+    if (req.files.relievingLetter) {
+      const file = req.files.relievingLetter;
+      const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
+      reqData.relievingLetter = imageUrl;
+    }
+    if (req.files.appointmentLetter) {
+      const file = req.files.appointmentLetter;
+      const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
+      reqData.appointmentLetter = imageUrl;
+    }
+    if (req.files.salarySlip) {
+      const file = req.files.salarySlip;
+      const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
+      reqData.salarySlip = imageUrl;
+    }
+    const query =
+      req.body.dataType === "education"
+        ? { education: reqData }
+        : { workDetail: reqData };
+    const updatedData = await employee.updateOne(
+      {
+        _id: new mongoose.Types.ObjectId(validData.id),
+      },
+      { $push: query }
+    );
+
+    return res.status(StatusCodes.OK).json({
+      message: "Data inserted successfully successfully",
+      data: updatedData,
+    });
+  } catch (error) {
+    res.status(StatusCodes.BAD_GATEWAY).json({
+      message: error,
+    });
+  }
+};
+
 export const updateBasicDetails = async (req, res) => {
   try {
     const validatedUser = await adminSignUpSchema30.validate(req.body);
 
     if (validatedUser) {
       const isValid = await employee.findOne({
-        _id: new new mongoose.Types.ObjectId(validatedUser.id)(),
+        _id: new mongoose.Types.ObjectId(validatedUser.id)(),
       });
 
       if (isValid) {
@@ -148,6 +217,7 @@ export const updateBasicDetails = async (req, res) => {
 
 export const updateEducationDetails = async (req, res) => {
   try {
+    console.log(req.body);
     const validatedUser = await educationOrCompanyDetailSchema30.validate(
       req.body
     );
@@ -164,13 +234,13 @@ export const updateEducationDetails = async (req, res) => {
           updatedBy: req.user._id,
         };
 
-        const updateUser = await employee.updateOne(
-          {
-            _id: new mongoose.Types.ObjectId(validatedUser.id),
-          },
-          { $set: reqData }
-        );
-        console.log(updateUser);
+        // const updateUser = await employee.updateOne(
+        //   {
+        //     _id: new mongoose.Types.ObjectId(validatedUser.id),
+        //   },
+        //   { $set: reqData }
+        // );
+        // console.log(updateUser);
         return res
           .status(StatusCodes.OK)
           .json({ message: "User updated successfully", data: updateUser });

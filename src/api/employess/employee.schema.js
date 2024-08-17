@@ -6,6 +6,9 @@ export const adminSignUpSchema30 = Yup.object().shape({
   name: Yup.string().required("Name is required"),
   userImage: Yup.string().required("User Profile Picture is required"),
   mobile: Yup.string().required("Mobile number is required"),
+  fresherOrExperience: Yup.string()
+    .oneOf([fresherOrExperience.EXPERIENCE, fresherOrExperience.FRESHER])
+    .required("Select one of these"),
   email: Yup.string()
     // .matches("/S+@S+.S+/", "Please enter valid email")
     .required("Email is required"),
@@ -58,10 +61,6 @@ export const educationOrCompanyDetailSchema30 = Yup.object().shape({
     )
     .required("Education details are required")
     .min(1, "At least one education detail is required"),
-
-  fresherOrExperience: Yup.string()
-    .oneOf([fresherOrExperience.EXPERIENCE, fresherOrExperience.FRESHER])
-    .required("Select one of these"),
 
   workDetail: Yup.array().when("fresherOrExperience", {
     is: (val) => val === fresherOrExperience.EXPERIENCE,

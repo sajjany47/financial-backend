@@ -42,6 +42,7 @@ const employeeSchema = new mongoose.Schema(
         boardName: { type: String },
         passingYear: { type: String, trim: true },
         marksPercentage: { type: String, trim: true },
+        resultImage: String,
       },
     ],
     fresherOrExperience: {
@@ -54,6 +55,10 @@ const employeeSchema = new mongoose.Schema(
         position: { type: String },
         startingYear: { type: String, trim: true },
         endingYear: { type: String, trim: true },
+        experienceLetter: String,
+        relievingLetter: String,
+        appointmentLetter: String,
+        salarySlip: String,
       },
     ],
     aadharNumber: { type: String, trim: true },
