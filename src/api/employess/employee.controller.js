@@ -164,6 +164,22 @@ export const updateEducationAndCompanyDetails = async (req, res) => {
   }
 };
 
+export const getDetails = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const findData = await employee.findOne(
+      { _id: new mongoose.Types.ObjectId(id) },
+      { password: 1 }
+    );
+
+    return res
+      .status(StatusCodes.OK)
+      .json({ message: "Data fetched successfully", data: findData });
+  } catch (error) {
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error });
+  }
+};
+
 export const updateBasicDetails = async (req, res) => {
   try {
     const validatedUser = await adminSignUpSchema30.validate(req.body);

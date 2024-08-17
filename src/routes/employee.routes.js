@@ -4,6 +4,7 @@ import {
   city,
   country,
   findIFSC,
+  getDetails,
   login,
   logout,
   resetPassword,
@@ -29,6 +30,7 @@ EmployeeRoutes.route("/education-update").post(
   tokenValidation,
   updateEducationAndCompanyDetails
 );
+EmployeeRoutes.route("/:id").post(tokenValidation, getDetails);
 EmployeeRoutes.route("/update-education").post(
   tokenValidation,
   updateEducationDetails
