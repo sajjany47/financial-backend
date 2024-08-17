@@ -51,7 +51,7 @@ export const adminSignUpSchemaFirst = async (req, res) => {
           password: await bcrypt.hash(password, 10),
           employeeId: employeeId,
           isProfileVerified: Status.PENDING,
-          profileRatio: "30%",
+          profileRatio: 30,
           approvedBy: req.user._id,
           isActive: true,
           createdBy: req.user._id,
@@ -146,15 +146,31 @@ export const updateEducationAndCompanyDetails = async (req, res) => {
       req.body.dataType === "education"
         ? { education: reqData }
         : { workDetail: reqData };
-    const updatedData = await employee.updateOne(
-      {
-        _id: new mongoose.Types.ObjectId(validData.id),
-      },
-      { $push: query }
-    );
+    if (validData.actionType === "add") {
+      await employee.updateOne(
+        {
+          _id: new mongoose.Types.ObjectId(validData.id),
+        },
+        { $push: query, $set: { updatedBy: req.user._id } }
+      );
+    } else {
+      const findQuery =
+        validData.dataType === "education"
+          ? {
+              "education.$._id": new mongoose.Types.ObjectId(
+                validData.productId
+              ),
+            }
+          : {
+              "workDetail.$._id": new mongoose.Types.ObjectId(
+                validData.productId
+              ),
+            };
+      await employee.updateOne(findQuery, { $set: query });
+    }
 
     return res.status(StatusCodes.OK).json({
-      message: "Data inserted successfully successfully",
+      message: "Data inserted successfully",
       data: updatedData,
     });
   } catch (error) {
@@ -177,6 +193,120 @@ export const getDetails = async (req, res) => {
       .json({ message: "Data fetched successfully", data: findData });
   } catch (error) {
     res.status(StatusCodes.BAD_REQUEST).json({ message: error });
+  }
+};
+
+export const detailsUpdateUser = async (req, res) => {
+  try {
+    const selectValodation =
+      req.body.dataType === "basic"
+        ? adminSignUpSchema30
+        : req.body.dataType === "educationAndWork"
+        ? educationOrCompanyDetailSchema30
+        : req.body.dataType === "document"
+        ? documentsSchema20
+        : req.body.dataType === "account"
+        ? accountDetailSchema20
+        : "";
+    const validatedUser = await selectValodation.validate(req.body);
+    const reqData =
+      validatedUser.dataType === "basic"
+        ? {
+            name: validatedUser.name,
+            username: validatedUser.username,
+            mobile: validatedUser.mobile,
+            email: validatedUser.email,
+            dob: validatedUser.dob,
+            position: validatedUser.position,
+            address: validatedUser.address,
+            state: validatedUser.state,
+            country: validatedUser.country,
+            city: validatedUser.city,
+            pincode: validatedUser.pincode,
+            jobBranchName: validatedUser.jobBranchName,
+            fresherOrExperience: validatedUser.fresherOrExperience,
+            pageIndex: 0,
+          }
+        : validatedUser.dataType === "educationAndWork"
+        ? {
+            education: validatedUser.education,
+
+            workDetail: validatedUser.workDetail,
+            pageIndex: 1,
+          }
+        : validatedUser.dataType === "document"
+        ? {
+            aadharNumber: validatedUser.aadharNumber,
+            voterNumber: validatedUser.voterNumber,
+            panNumber: validatedUser.panNumber,
+            passportNumber: validatedUser.passportNumber,
+            pageIndex: 2,
+          }
+        : validatedUser.dataType === "account"
+        ? {
+            bankName: validatedUser.bankName,
+            accountNumber: validatedUser.accountNumber,
+            branchName: validatedUser.branchName,
+            ifsc: validatedUser.ifsc,
+            pageIndex: 3,
+          }
+        : null;
+
+    if (req.files.userImage) {
+      const file = req.files.userImage;
+      const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
+      reqData.userImage = imageUrl;
+    }
+    if (req.files.passportImage) {
+      const file = req.files.passportImage;
+      const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
+      reqData.passportImage = imageUrl;
+    }
+    if (req.files.voterImage) {
+      const file = req.files.voterImage;
+      const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
+      reqData.voterImage = imageUrl;
+    }
+    if (req.files.panImage) {
+      const file = req.files.panImage;
+      const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
+      reqData.panImage = imageUrl;
+    }
+    if (req.files.aadharImage) {
+      const file = req.files.aadharImage;
+      const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
+      reqData.aadharImage = imageUrl;
+    }
+
+    if (req.files.passbookImage) {
+      const file = req.files.passbookImage;
+      const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
+      reqData.passbookImage = imageUrl;
+    }
+    if (req.files.uanImage) {
+      const file = req.files.uanImage;
+      const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
+      reqData.uanImage = imageUrl;
+    }
+
+    const query = {
+      ...reqData,
+      profileRatio: validatedUser.profileRatio,
+      updatedBy: req.user._id,
+    };
+    const updatedData = await employee.updateOne(
+      {
+        _id: new mongoose.Types.ObjectId(validData.id),
+      },
+      { $set: query }
+    );
+
+    return res.status(StatusCodes.OK).json({
+      message: "Data updated successfully",
+      data: updatedData,
+    });
+  } catch (error) {
+    return res.status(StatusCodes.BAD_REQUEST).json({ message: error });
   }
 };
 

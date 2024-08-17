@@ -3,6 +3,7 @@ import {
   adminSignUpSchemaFirst,
   city,
   country,
+  detailsUpdateUser,
   findIFSC,
   getDetails,
   login,
@@ -30,7 +31,8 @@ EmployeeRoutes.route("/education-update").post(
   tokenValidation,
   updateEducationAndCompanyDetails
 );
-EmployeeRoutes.route("/:id").post(tokenValidation, getDetails);
+EmployeeRoutes.route("/update").post(tokenValidation, detailsUpdateUser);
+EmployeeRoutes.route("/:id").get(tokenValidation, getDetails);
 EmployeeRoutes.route("/update-education").post(
   tokenValidation,
   updateEducationDetails
