@@ -157,16 +157,34 @@ export const updateEducationAndCompanyDetails = async (req, res) => {
       const findQuery =
         validData.dataType === "education"
           ? {
-              "education.$._id": new mongoose.Types.ObjectId(
-                validData.productId
-              ),
+              "education._id": new mongoose.Types.ObjectId(validData.productId),
             }
           : {
-              "workDetail.$._id": new mongoose.Types.ObjectId(
+              "workDetail._id": new mongoose.Types.ObjectId(
                 validData.productId
               ),
             };
-      await employee.updateOne(findQuery, { $set: query });
+      const updateQuery =
+        req.body.dataType === "education"
+          ? {
+              "education.$.boardName": validData.boardName,
+              "education.$.passingYear": validData.passingYear,
+              "education.$.marksPercentage": validData.marksPercentage,
+              "education.$.resultImage": validData.resultImage,
+              updatedBy: req.user._id,
+            }
+          : {
+              "workDetail.$.companyName": validData.companyName,
+              "workDetail.$.position": validData.position,
+              "workDetail.$.startingYear": validData.startingYear,
+              "workDetail.$.endingYear": validData.endingYear,
+              "workDetail.$.experienceLetter": validData.experienceLetter,
+              "workDetail.$.relievingLetter": validData.relievingLetter,
+              "workDetail.$.appointmentLetter": validData.appointmentLetter,
+              "workDetail.$.salarySlip": validData.salarySlip,
+              updatedBy: req.user._id,
+            };
+      await employee.updateOne(findQuery, { $set: updateQuery });
     }
 
     return res.status(StatusCodes.OK).json({
@@ -185,7 +203,7 @@ export const getDetails = async (req, res) => {
     const id = req.params.id;
     const findData = await employee.findOne(
       { _id: new mongoose.Types.ObjectId(id) },
-      { password: 1 }
+      { password: 0 }
     );
 
     return res
