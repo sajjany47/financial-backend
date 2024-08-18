@@ -16,7 +16,6 @@ export const tokenValidation = async (req, res, next) => {
     const token = authToken.split(" ")[1];
 
     const verifyToken = jwt.verify(token, process.env.SECRET_KEY);
-    console.log(verifyToken);
 
     const verifySession = await employee.findOne({
       _id: new mongoose.Types.ObjectId(verifyToken._id),
