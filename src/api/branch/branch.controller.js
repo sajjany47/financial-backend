@@ -124,13 +124,11 @@ export const dataTable = async (req, res) => {
     const data = await branch.aggregate([
       { $match: query.length > 0 ? { $and: query } : {} },
       {
-        $sort: {
-          $sort: reqData.hasOwnProperty("sort")
-            ? reqData.sort
-            : {
-                name: 1,
-              },
-        },
+        $sort: reqData.hasOwnProperty("sort")
+          ? reqData.sort
+          : {
+              name: 1,
+            },
       },
       { $skip: start },
       { $limit: limit },

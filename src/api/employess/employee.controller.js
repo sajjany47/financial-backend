@@ -706,7 +706,7 @@ export const dataTable = async (req, res) => {
       query.push({ name: { $regex: `^${reqData.name}`, $options: "i" } });
     }
     if (reqData.hasOwnProperty("position")) {
-      query.push({ name: { $regex: `^${reqData.name}`, $options: "i" } });
+      query.push({ name: { $regex: `^${reqData.position}`, $options: "i" } });
     }
     if (reqData.hasOwnProperty("mobile")) {
       query.push({ country: { $regex: `^${reqData.country}`, $options: "i" } });
@@ -730,14 +730,18 @@ export const dataTable = async (req, res) => {
     const data = await employee.aggregate([
       { $match: query.length > 0 ? { $and: query } : {} },
       {
-        $sort: {
-          $sort: reqData.hasOwnProperty("sort")
-            ? reqData.sort
-            : {
-                name: 1,
-              },
+        $sort: reqData.hasOwnProperty("sort")
+          ? reqData.sort
+          : {
+              name: 1,
+            },
+      },
+      {
+        $project: {
+          password: 0,
         },
       },
+
       { $skip: start },
       { $limit: limit },
     ]);

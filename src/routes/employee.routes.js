@@ -34,7 +34,7 @@ EmployeeRoutes.route("/education-update").post(
 );
 EmployeeRoutes.route("/update").post(tokenValidation, detailsUpdateUser);
 EmployeeRoutes.route("/:id").get(tokenValidation, getDetails);
-EmployeeRoutes.route("/datatable").post(tokenValidation, dataTable);
+EmployeeRoutes.route("/datatable").post(dataTable);
 EmployeeRoutes.route("/update-education").post(
   tokenValidation,
   updateEducationDetails
