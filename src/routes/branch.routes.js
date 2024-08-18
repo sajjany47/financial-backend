@@ -12,6 +12,6 @@ const BranchRoutes = express.Router();
 BranchRoutes.route("/create").post(tokenValidation, createBranch);
 BranchRoutes.route("/update").post(tokenValidation, updateBranch);
 BranchRoutes.route("/").get(tokenValidation, branchList);
-BranchRoutes.route("/datatable").post(dataTable);
+BranchRoutes.route("/datatable").post(tokenValidation, dataTable);
 
 export default BranchRoutes;

@@ -34,7 +34,7 @@ EmployeeRoutes.route("/education-update").post(
 );
 EmployeeRoutes.route("/update").post(tokenValidation, detailsUpdateUser);
 EmployeeRoutes.route("/:id").get(tokenValidation, getDetails);
-EmployeeRoutes.route("/datatable").post(dataTable);
+EmployeeRoutes.route("/datatable").post(tokenValidation, dataTable);
 EmployeeRoutes.route("/update-education").post(
   tokenValidation,
   updateEducationDetails
@@ -50,9 +50,9 @@ EmployeeRoutes.route("/update-account").post(
 EmployeeRoutes.route("/update-basic").post(tokenValidation, updateBasicDetails);
 EmployeeRoutes.route("/update-password").post(tokenValidation, resetPassword);
 EmployeeRoutes.route("/logout").get(tokenValidation, logout);
-EmployeeRoutes.route("/country").get(tokenValidation, country);
-EmployeeRoutes.route("/state").post(tokenValidation, state);
-EmployeeRoutes.route("/city").post(tokenValidation, city);
+EmployeeRoutes.route("/country").get(country);
+EmployeeRoutes.route("/state").post(state);
+EmployeeRoutes.route("/city").post(city);
 EmployeeRoutes.route("/ifsc").post(tokenValidation, findIFSC);
 
 export default EmployeeRoutes;
