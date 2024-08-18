@@ -693,3 +693,61 @@ export const findIFSC = async (req, res) => {
     return res.status(StatusCodes.BAD_REQUEST).json({ message: error });
   }
 };
+
+export const dataTable = async (req, res) => {
+  try {
+    const reqData = req.body;
+    const page = reqData.page;
+    const limit = reqData.limit;
+    const start = page * limit - limit;
+
+    const query = [{ isActive: reqData.isActive }];
+    if (reqData.hasOwnProperty("name")) {
+      query.push({ name: { $regex: `^${reqData.name}`, $options: "i" } });
+    }
+    if (reqData.hasOwnProperty("position")) {
+      query.push({ name: { $regex: `^${reqData.name}`, $options: "i" } });
+    }
+    if (reqData.hasOwnProperty("mobile")) {
+      query.push({ country: { $regex: `^${reqData.country}`, $options: "i" } });
+    }
+    if (reqData.hasOwnProperty("branch")) {
+      query.push({ state: { $regex: `^${reqData.state}`, $options: "i" } });
+    }
+    if (reqData.hasOwnProperty("email")) {
+      query.push({ city: { $regex: `^${reqData.city}`, $options: "i" } });
+    }
+    if (reqData.hasOwnProperty("employeeId")) {
+      query.push({ pincode: { $regex: `^${reqData.pincode}`, $options: "i" } });
+    }
+    if (reqData.hasOwnProperty("username")) {
+      query.push({ code: { $regex: `^${reqData.code}`, $options: "i" } });
+    }
+
+    const countData = await employee.countDocuments([
+      { $match: query.length > 0 ? { $and: query } : {} },
+    ]);
+    const data = await employee.aggregate([
+      { $match: query.length > 0 ? { $and: query } : {} },
+      {
+        $sort: {
+          $sort: reqData.hasOwnProperty("sort")
+            ? reqData.sort
+            : {
+                name: 1,
+              },
+        },
+      },
+      { $skip: start },
+      { $limit: limit },
+    ]);
+
+    return res.status(StatusCodes.OK).json({
+      message: "Data fetched successfully",
+      data: data,
+      count: countData,
+    });
+  } catch (error) {
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error });
+  }
+};
