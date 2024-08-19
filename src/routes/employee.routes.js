@@ -1,16 +1,12 @@
 import express from "express";
 import {
   adminSignUpSchemaFirst,
-  city,
-  country,
   dataTable,
   detailsUpdateUser,
-  findIFSC,
   getDetails,
   login,
   logout,
   resetPassword,
-  state,
   updateAccountDetails,
   updateBasicDetails,
   updateDocumentDetails,
@@ -50,9 +46,5 @@ EmployeeRoutes.route("/update-account").post(
 EmployeeRoutes.route("/update-basic").post(tokenValidation, updateBasicDetails);
 EmployeeRoutes.route("/update-password").post(tokenValidation, resetPassword);
 EmployeeRoutes.route("/logout").get(tokenValidation, logout);
-EmployeeRoutes.route("/country").get(country);
-EmployeeRoutes.route("/state").post(state);
-EmployeeRoutes.route("/city").post(city);
-EmployeeRoutes.route("/ifsc").post(tokenValidation, findIFSC);
 
 export default EmployeeRoutes;

@@ -18,7 +18,6 @@ import bcrypt from "bcrypt";
 import { welcome } from "../../template/wlecome.js";
 import mongoose from "mongoose";
 import { nanoid } from "nanoid";
-import axios from "axios";
 import employee from "./employee.model.js";
 
 export const adminSignUpSchemaFirst = async (req, res) => {
@@ -603,92 +602,6 @@ export const logout = async (req, res) => {
     );
 
     return res.status(StatusCodes.OK).json({ message: "Logout successfully" });
-  } catch (error) {
-    return res.status(StatusCodes.BAD_REQUEST).json({ message: error });
-  }
-};
-
-export const country = async (req, res) => {
-  try {
-    const countryList = await axios.get(
-      `https://api.countrystatecity.in/v1/countries`,
-      {
-        headers: {
-          "X-CSCAPI-KEY":
-            "OU5ycmZrek91NnpXVjdUTVJoUVZ1N3ZWWWJGM3lnQVB0N0djYngzMA==",
-        },
-      }
-    );
-
-    const jsonString = JSON.stringify(countryList, getCircularReplacer());
-
-    res.status(StatusCodes.OK).json({
-      message: "Data fetched successfully successfully",
-      data: JSON.parse(jsonString).data,
-    });
-  } catch (error) {
-    return res.status(StatusCodes.BAD_REQUEST).json({ message: error });
-  }
-};
-
-export const state = async (req, res) => {
-  try {
-    const countryList = await axios.get(
-      `https://api.countrystatecity.in/v1/countries/${req.body.country}/states`,
-      {
-        headers: {
-          "X-CSCAPI-KEY":
-            "OU5ycmZrek91NnpXVjdUTVJoUVZ1N3ZWWWJGM3lnQVB0N0djYngzMA==",
-        },
-      }
-    );
-
-    const jsonString = JSON.stringify(countryList, getCircularReplacer());
-
-    res.status(StatusCodes.OK).json({
-      message: "Data fetched successfully successfully",
-      data: JSON.parse(jsonString).data,
-    });
-  } catch (error) {
-    return res.status(StatusCodes.BAD_REQUEST).json({ message: error });
-  }
-};
-
-export const city = async (req, res) => {
-  try {
-    const countryList = await axios.get(
-      `https://api.countrystatecity.in/v1/countries/${req.body.country}/states/${req.body.state}/cities`,
-      {
-        headers: {
-          "X-CSCAPI-KEY":
-            "OU5ycmZrek91NnpXVjdUTVJoUVZ1N3ZWWWJGM3lnQVB0N0djYngzMA==",
-        },
-      }
-    );
-
-    const jsonString = JSON.stringify(countryList, getCircularReplacer());
-
-    res.status(StatusCodes.OK).json({
-      message: "Data fetched successfully successfully",
-      data: JSON.parse(jsonString).data,
-    });
-  } catch (error) {
-    return res.status(StatusCodes.BAD_REQUEST).json({ message: error });
-  }
-};
-
-export const findIFSC = async (req, res) => {
-  try {
-    const countryList = await axios.get(
-      `https://ifsc.razorpay.com/${req.body.ifsc}`
-    );
-
-    const jsonString = JSON.stringify(countryList, getCircularReplacer());
-
-    res.status(StatusCodes.OK).json({
-      message: "Data fetched successfully successfully",
-      data: JSON.parse(jsonString).data,
-    });
   } catch (error) {
     return res.status(StatusCodes.BAD_REQUEST).json({ message: error });
   }
