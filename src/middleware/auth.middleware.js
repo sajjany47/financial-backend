@@ -33,7 +33,6 @@ export const tokenValidation = async (req, res, next) => {
       });
     }
 
-    // Attach the verified token payload to the request object
     req.user = verifyToken;
 
     next();
@@ -47,5 +46,21 @@ export const tokenValidation = async (req, res, next) => {
     res
       .status(StatusCodes.BAD_REQUEST)
       .json({ message: message, details: error.message });
+  }
+};
+
+export const generateRefreshToken = async (req, res, next) => {
+  if (!req.user) {
+    res.status(StatusCodes.UNAUTHORIZED).json({ message: "Invalid token" });
+  }
+
+  try {
+    const accessToken = generateAccessToken(req.user);
+    const refreshToken = generateRefreshToken(req.user);
+    return res
+      .header("Authorization", `Bearer ${accessToken}`)
+      .json({ accessToken: accessToken, refreshToken: refreshToken });
+  } catch (error) {
+    return res.status(StatusCodes.BAD_REQUEST).json("Invalid refresh token.");
   }
 };
