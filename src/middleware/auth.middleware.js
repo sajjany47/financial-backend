@@ -37,15 +37,7 @@ export const tokenValidation = async (req, res, next) => {
 
     next();
   } catch (error) {
-    let message = "Invalid token.";
-    if (error.name === "TokenExpiredError") {
-      message = "Token has expired.";
-    } else if (error.name === "JsonWebTokenError") {
-      message = "Token is malformed.";
-    }
-    res
-      .status(StatusCodes.BAD_REQUEST)
-      .json({ message: message, details: error.message });
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error });
   }
 };
 
