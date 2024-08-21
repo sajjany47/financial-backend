@@ -18,8 +18,8 @@ export const generateAccessToken = (data) => {
     sessionId: data.sessionId,
   };
   const accessToken = jwt.sign(a, process.env.SECRET_KEY, {
-    expiresIn: "1h",
-    // expiresIn: 10,
+    // expiresIn: "1h",
+    expiresIn: "20s",
   });
 
   return accessToken;
@@ -38,8 +38,8 @@ export const generateRefreshToken = (data) => {
     sessionId: data.sessionId,
   };
   const refreshToken = jwt.sign(a, process.env.SECRET_KEY, {
-    expiresIn: "6h",
-    // expiresIn: 15,
+    // expiresIn: "6h",
+    expiresIn: "30s",
   });
 
   return refreshToken;

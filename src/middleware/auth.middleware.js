@@ -6,41 +6,36 @@ import { generateAccessToken, generateRefreshToken } from "../utilis/utilis.js";
 
 export const tokenValidation = async (req, res, next) => {
   const authToken = req.header("authorization");
-
-  if (typeof authToken !== "undefined") {
+  try {
     const token = authToken.split(" ")[1];
-
-    jwt.verify(token, process.env.SECRET_KEY, (err, result) => {
-      if (err) {
-        return res
-          .status(403)
-          .json({ message: "Invalid token. User does not exist" });
-      }
-
-      const verifySession = employee.findOne({
-        _id: new mongoose.Types.ObjectId(result._id),
+    const verifyToken = jwt.verify(token, process.env.SECRET_KEY);
+    if (verifyToken) {
+      const verifySession = await employee.findOne({
+        _id: new mongoose.Types.ObjectId(verifyToken._id),
       });
-      console.log(verifySession);
-      console.log("d", verifySession.sessionId);
-      console.log("l", result.sessionId);
+
       if (!verifySession) {
         return res
           .status(StatusCodes.UNAUTHORIZED)
           .json({ message: "Invalid session. User login first" });
       }
 
-      if (verifySession.sessionId !== result.sessionId) {
+      if (verifySession.sessionId !== verifyToken.sessionId) {
         return res.status(StatusCodes.UNAUTHORIZED).json({
           message: "Access Denied due to new login from another device.",
         });
       }
 
-      req.user = result;
+      req.user = verifyToken;
 
       next();
-    });
-  } else {
-    return res
+    } else {
+      return res
+        .status(StatusCodes.FORBIDDEN)
+        .json({ message: "Invalid token" });
+    }
+  } catch (error) {
+    res
       .status(StatusCodes.UNAUTHORIZED)
       .json({ message: "Access Denied. No token provided." });
   }
