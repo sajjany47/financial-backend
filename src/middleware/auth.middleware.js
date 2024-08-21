@@ -41,7 +41,7 @@ export const tokenValidation = async (req, res, next) => {
   }
 };
 
-export const generateRefreshToken = async (req, res, next) => {
+export const refreshToken = async (req, res, next) => {
   if (!req.user) {
     res.status(StatusCodes.UNAUTHORIZED).json({ message: "Invalid token" });
   }

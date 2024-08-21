@@ -10,16 +10,13 @@ import {
   updateEducationAndCompanyDetails,
 } from "../api/employess/employee.controller.js";
 import {
-  generateRefreshToken,
+  refreshToken,
   tokenValidation,
 } from "../middleware/auth.middleware.js";
 
 const EmployeeRoutes = express.Router();
 
-EmployeeRoutes.route("/refresh-token").get(
-  tokenValidation,
-  generateRefreshToken
-);
+EmployeeRoutes.route("/refresh-token").post(tokenValidation, refreshToken);
 EmployeeRoutes.route("/login").post(login);
 EmployeeRoutes.route("/admin-signup").post(
   tokenValidation,
