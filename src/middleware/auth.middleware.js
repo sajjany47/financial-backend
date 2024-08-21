@@ -2,6 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
 import employee from "../api/employess/employee.model.js";
+import { generateAccessToken, generateRefreshToken } from "../utilis/utilis.js";
 
 export const tokenValidation = async (req, res, next) => {
   const authToken = req.header("authorization");
@@ -37,11 +38,11 @@ export const tokenValidation = async (req, res, next) => {
 
     next();
   } catch (error) {
-    res.status(StatusCodes.BAD_REQUEST).json({ message: error });
+    res.status(StatusCodes.UNAUTHORIZED).json({ message: error });
   }
 };
 
-export const refreshToken = async (req, res, next) => {
+export const refreshTokens = async (req, res, next) => {
   if (!req.user) {
     res.status(StatusCodes.UNAUTHORIZED).json({ message: "Invalid token" });
   }
