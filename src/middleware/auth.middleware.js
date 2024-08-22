@@ -30,6 +30,7 @@ export const tokenValidation = async (req, res, next) => {
 
       next();
     } else {
+      next();
       return res
         .status(StatusCodes.FORBIDDEN)
         .json({ message: "Invalid token" });
