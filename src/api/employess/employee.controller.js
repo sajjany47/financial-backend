@@ -373,7 +373,7 @@ export const login = async (req, res) => {
         } else {
           return res
             .status(StatusCodes.UNAUTHORIZED)
-            .json({ message: "invalid password" });
+            .json({ message: "Invalid password" });
         }
       } else {
         return res

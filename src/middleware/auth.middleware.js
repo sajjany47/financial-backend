@@ -8,31 +8,31 @@ export const tokenValidation = async (req, res, next) => {
   const authToken = req.header("authorization");
   try {
     const token = authToken.split(" ")[1];
-    const verifyToken = jwt.verify(token, process.env.SECRET_KEY);
-    if (verifyToken) {
-      const verifySession = await employee.findOne({
-        _id: new mongoose.Types.ObjectId(verifyToken._id),
-      });
-
-      if (!verifySession) {
+    jwt.verify(token, process.env.SECRET_KEY, (err, result) => {
+      if (err) {
         return res
-          .status(StatusCodes.UNAUTHORIZED)
-          .json({ message: "Invalid session. User login first" });
+          .status(StatusCodes.FORBIDDEN)
+          .json({ message: "Invalid token" });
       }
+      req.user = result;
+    });
+    console.log(req.user);
+    const verifySession = await employee.findOne({
+      _id: new mongoose.Types.ObjectId(req.user._id),
+    });
 
-      if (verifySession.sessionId !== verifyToken.sessionId) {
-        return res.status(StatusCodes.UNAUTHORIZED).json({
-          message: "Access Denied due to new login from another device.",
-        });
-      }
-
-      req.user = verifyToken;
-      next();
-    } else {
+    if (!verifySession) {
       return res
-        .status(StatusCodes.FORBIDDEN)
-        .json({ message: "Invalid token" });
+        .status(StatusCodes.UNAUTHORIZED)
+        .json({ message: "Invalid session. User login first" });
     }
+
+    if (verifySession.sessionId !== req.user.sessionId) {
+      return res.status(StatusCodes.UNAUTHORIZED).json({
+        message: "Access Denied due to new login from another device.",
+      });
+    }
+    next();
   } catch (error) {
     res
       .status(StatusCodes.UNAUTHORIZED)
@@ -41,10 +41,6 @@ export const tokenValidation = async (req, res, next) => {
 };
 
 export const refreshTokens = async (req, res, next) => {
-  // if (!req.user._id) {
-  //   res.status(StatusCodes.UNAUTHORIZED).json({ message: "Unauthorized" });
-  // }
-
   try {
     const authToken = req.header("authorization");
     const token = authToken.split(" ")[1];
@@ -52,10 +48,12 @@ export const refreshTokens = async (req, res, next) => {
 
     const accessToken = generateAccessToken(verifyToken);
     const refreshToken = generateRefreshToken(verifyToken);
-    req.user = verifyToken;
-    return res
+
+    res
       .header("Authorization", `Bearer ${accessToken}`)
       .json({ accessToken: accessToken, refreshToken: refreshToken });
+
+    req.user = verifyToken;
   } catch (error) {
     return res.status(StatusCodes.UNAUTHORIZED).json("Invalid refresh token.");
   }
