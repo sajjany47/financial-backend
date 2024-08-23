@@ -27,10 +27,8 @@ export const tokenValidation = async (req, res, next) => {
       }
 
       req.user = verifyToken;
-
       next();
     } else {
-      next();
       return res
         .status(StatusCodes.FORBIDDEN)
         .json({ message: "Invalid token" });
@@ -43,8 +41,8 @@ export const tokenValidation = async (req, res, next) => {
 };
 
 export const refreshTokens = async (req, res, next) => {
-  if (!req.user) {
-    res.status(StatusCodes.UNAUTHORIZED).json({ message: "Invalid token" });
+  if (!req.user._id) {
+    res.status(StatusCodes.UNAUTHORIZED).json({ message: "Unauthorized" });
   }
 
   try {
@@ -54,7 +52,6 @@ export const refreshTokens = async (req, res, next) => {
       .header("Authorization", `Bearer ${accessToken}`)
       .json({ accessToken: accessToken, refreshToken: refreshToken });
   } catch (error) {
-    console.log("object");
-    return res.status(StatusCodes.BAD_REQUEST).json("Invalid refresh token.");
+    return res.status(StatusCodes.UNAUTHORIZED).json("Invalid refresh token.");
   }
 };

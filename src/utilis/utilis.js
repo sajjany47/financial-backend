@@ -19,7 +19,7 @@ export const generateAccessToken = (data) => {
   };
   const accessToken = jwt.sign(a, process.env.SECRET_KEY, {
     // expiresIn: "1h",
-    expiresIn: "20s",
+    expiresIn: "10s",
   });
 
   return accessToken;
@@ -39,7 +39,7 @@ export const generateRefreshToken = (data) => {
   };
   const refreshToken = jwt.sign(a, process.env.SECRET_KEY, {
     // expiresIn: "6h",
-    expiresIn: "30s",
+    expiresIn: "15s",
   });
 
   return refreshToken;
