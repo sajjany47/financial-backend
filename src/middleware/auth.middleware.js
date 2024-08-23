@@ -41,13 +41,18 @@ export const tokenValidation = async (req, res, next) => {
 };
 
 export const refreshTokens = async (req, res, next) => {
-  if (!req.user._id) {
-    res.status(StatusCodes.UNAUTHORIZED).json({ message: "Unauthorized" });
-  }
+  // if (!req.user._id) {
+  //   res.status(StatusCodes.UNAUTHORIZED).json({ message: "Unauthorized" });
+  // }
 
   try {
-    const accessToken = generateAccessToken(req.user);
-    const refreshToken = generateRefreshToken(req.user);
+    const authToken = req.header("authorization");
+    const token = authToken.split(" ")[1];
+    const verifyToken = jwt.verify(token, process.env.SECRET_KEY);
+
+    const accessToken = generateAccessToken(verifyToken);
+    const refreshToken = generateRefreshToken(verifyToken);
+    req.user = verifyToken;
     return res
       .header("Authorization", `Bearer ${accessToken}`)
       .json({ accessToken: accessToken, refreshToken: refreshToken });
