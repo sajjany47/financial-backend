@@ -12,25 +12,25 @@ export const tokenValidation = async (req, res, next) => {
       .status(StatusCodes.UNAUTHORIZED)
       .json({ message: "Access Denied. No token provided." });
   }
-  try {
-    const token = authToken.split(" ")[1];
-    jwt.verify(token, process.env.SECRET_KEY, async (err, decodedToken) => {
-      if (err) {
-        if (err.name === "TokenExpiredError") {
-          // Token has expired, send 403 to indicate refresh token needed
-          return res
-            .status(StatusCodes.FORBIDDEN)
-            .json({ message: "Token expired. Please refresh your token." });
-        } else {
-          // Invalid token
-          return res
-            .status(StatusCodes.UNAUTHORIZED)
-            .json({ message: "Invalid token. Access Denied." });
-        }
+
+  const token = authToken.split(" ")[1];
+
+  jwt.verify(token, process.env.SECRET_KEY, async (err, decodedToken) => {
+    if (err) {
+      if (err.name === "TokenExpiredError") {
+        return res
+          .status(StatusCodes.FORBIDDEN)
+          .json({ message: "Token expired. Please refresh your token." });
+      } else {
+        return res
+          .status(StatusCodes.UNAUTHORIZED)
+          .json({ message: "Invalid token. Access Denied." });
       }
-      req.user = decodedToken;
+    }
+
+    try {
       const verifySession = await employee.findOne({
-        _id: new mongoose.Types.ObjectId(req.user._id),
+        _id: new mongoose.Types.ObjectId(decodedToken._id),
       });
 
       if (!verifySession) {
@@ -39,36 +39,50 @@ export const tokenValidation = async (req, res, next) => {
           .json({ message: "Invalid session. Please login first." });
       }
 
-      if (verifySession.sessionId !== req.user.sessionId) {
+      if (verifySession.sessionId !== decodedToken.sessionId) {
         return res.status(StatusCodes.UNAUTHORIZED).json({
           message: "Access Denied due to new login from another device.",
         });
       }
 
-      next(); // Proceed to the next middleware or route handler
-    });
-  } catch (error) {
-    return res
-      .status(StatusCodes.UNAUTHORIZED)
-      .json({ message: "Access Denied. Invalid or expired token." });
-  }
+      req.user = decodedToken;
+      next();
+    } catch (error) {
+      return res
+        .status(StatusCodes.UNAUTHORIZED)
+        .json({ message: "Access Denied. Invalid or expired token." });
+    }
+  });
 };
 
 export const refreshTokens = async (req, res, next) => {
-  try {
-    const authToken = req.header("authorization");
-    const token = authToken.split(" ")[1];
-    const verifyToken = jwt.verify(token, process.env.SECRET_KEY);
+  const authToken = req.header("authorization");
 
-    const accessToken = generateAccessToken(verifyToken);
-    const refreshToken = generateRefreshToken(verifyToken);
-
-    res
-      .header("Authorization", `Bearer ${accessToken}`)
-      .json({ accessToken: accessToken, refreshToken: refreshToken });
-
-    req.user = verifyToken;
-  } catch (error) {
-    return res.status(StatusCodes.BAD_REQUEST).json("Invalid refresh token.");
+  if (!authToken) {
+    return res
+      .status(StatusCodes.UNAUTHORIZED)
+      .json({ message: "No refresh token provided." });
   }
+
+  const token = authToken.split(" ")[1];
+
+  jwt.verify(token, process.env.SECRET_KEY, async (err, decodedToken) => {
+    if (err) {
+      return res
+        .status(StatusCodes.UNAUTHORIZED)
+        .json({ message: "Invalid refresh token." });
+    }
+
+    try {
+      const accessToken = generateAccessToken(decodedToken);
+      const refreshToken = generateRefreshToken(decodedToken);
+      res
+        .header("Authorization", `Bearer ${accessToken}`)
+        .json({ accessToken, refreshToken });
+    } catch (error) {
+      return res
+        .status(StatusCodes.UNAUTHORIZED)
+        .json({ message: "Failed to generate tokens." });
+    }
+  });
 };
