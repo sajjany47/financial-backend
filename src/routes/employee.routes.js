@@ -16,7 +16,7 @@ import {
 
 const EmployeeRoutes = express.Router();
 
-EmployeeRoutes.route("/refresh-token").get(tokenValidation, refreshTokens);
+EmployeeRoutes.route("/refresh-token").get(refreshTokens);
 EmployeeRoutes.route("/login").post(login);
 EmployeeRoutes.route("/admin-signup").post(
   tokenValidation,
