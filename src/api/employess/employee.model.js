@@ -82,6 +82,7 @@ const employeeSchema = new mongoose.Schema(
     isActive: Boolean,
     createdBy: String,
     updatedBy: String,
+    pageIndex: Number,
   },
   {
     timestamps: true,

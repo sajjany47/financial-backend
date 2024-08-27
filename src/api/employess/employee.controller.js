@@ -55,6 +55,7 @@ export const adminSignUpSchemaFirst = async (req, res) => {
           createdBy: req.user._id,
           isProfileVerified: Status.PENDING,
           isPasswordReset: false,
+          pageIndex: 0,
         };
 
         if (req.files) {
