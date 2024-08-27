@@ -74,8 +74,24 @@ export const refreshTokens = async (req, res, next) => {
     }
 
     try {
+      const verifySession = await employee.findOne({
+        _id: new mongoose.Types.ObjectId(decodedToken._id),
+      });
+
+      if (!verifySession) {
+        return res
+          .status(StatusCodes.UNAUTHORIZED)
+          .json({ message: "Invalid session. Please login first." });
+      }
+
+      if (verifySession.sessionId !== decodedToken.sessionId) {
+        return res.status(StatusCodes.UNAUTHORIZED).json({
+          message: "Access Denied due to new login from another device.",
+        });
+      }
       const accessToken = generateAccessToken(decodedToken);
       const refreshToken = generateRefreshToken(decodedToken);
+      req.user = decodedToken;
       res
         .header("Authorization", `Bearer ${accessToken}`)
         .json({ accessToken, refreshToken });
