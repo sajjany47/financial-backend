@@ -225,7 +225,9 @@ export const detailsUpdateUser = async (req, res) => {
         : req.body.dataType === "account"
         ? accountDetailSchema20
         : "";
+
     const validatedUser = await selectValodation.validate(req.body);
+
     const reqData =
       validatedUser.dataType === "basic"
         ? {
@@ -313,7 +315,7 @@ export const detailsUpdateUser = async (req, res) => {
     };
     const updatedData = await employee.updateOne(
       {
-        _id: new mongoose.Types.ObjectId(validData.id),
+        _id: new mongoose.Types.ObjectId(validatedUser.id),
       },
       { $set: query }
     );

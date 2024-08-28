@@ -4,7 +4,6 @@ import { fresherOrExperience, Position, Status } from "./EmployeeConfig.js";
 export const adminSignUpSchema30 = Yup.object().shape({
   username: Yup.string().required("Username is required"),
   name: Yup.string().required("Name is required"),
-  userImage: Yup.string().required("User Profile Picture is required"),
   mobile: Yup.string().required("Mobile number is required"),
   fresherOrExperience: Yup.string()
     .oneOf([fresherOrExperience.EXPERIENCE, fresherOrExperience.FRESHER])
