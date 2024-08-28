@@ -97,14 +97,6 @@ export const documentsSchema20 = Yup.object().shape({
   passportNumber: Yup.string(),
   // .required("Passport number is required")
   // .matches("/^[A-Z]{1}[0-9]{7}$/", "Enter valid Passport number"),
-  aadharImage: Yup.string().required("Aadhar Image is required"),
-  voterImage: Yup.string().required("Voter Image is required"),
-  panImage: Yup.string().required("Pan Image is required"),
-  passportImage: Yup.string().when("passportNumber", {
-    is: (val) => val !== "" && val !== undefined, // Check if passportNumber is not empty
-    then: () => Yup.string().required("Passport Image is required"),
-    otherwise: () => Yup.string().notRequired(),
-  }),
 });
 export const accountDetailSchema20 = Yup.object().shape({
   bankName: Yup.string().required("Bank name is required"),
@@ -112,9 +104,4 @@ export const accountDetailSchema20 = Yup.object().shape({
   // .matches("/^d{9,18}$/", "Enter valid Account number"),
   branchName: Yup.string().required("Branch name is required"),
   ifsc: Yup.string().required("IFSC code is required"),
-  passbookImage: Yup.string().required("Passbook Front Page image is required"),
-  uanImage: Yup.string().when("uan", {
-    is: (val) => val !== "" && val !== undefined,
-    then: () => Yup.string().required("UAN image is required"),
-  }),
 });

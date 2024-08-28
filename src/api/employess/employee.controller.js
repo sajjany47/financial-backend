@@ -1,5 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import {
+  accountDetailSchema20,
   adminSignUpSchema30,
   documentsSchema20,
   educationOrCompanyDetailSchema30,
@@ -98,6 +99,7 @@ export const adminSignUpSchemaFirst = async (req, res) => {
 export const updateEducationAndCompanyDetails = async (req, res) => {
   try {
     const validData = req.body;
+
     const reqData =
       req.body.dataType === "education"
         ? {
@@ -116,35 +118,39 @@ export const updateEducationAndCompanyDetails = async (req, res) => {
             appointmentLetter: validData.appointmentLetter,
             salarySlip: validData.salarySlip,
           };
-    if (req.files.resultImage) {
-      const file = req.files.resultImage;
-      const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
-      reqData.resultImage = imageUrl;
+    if (req.files) {
+      if (req.files.resultImage) {
+        const file = req.files.resultImage;
+        const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
+        reqData.resultImage = imageUrl;
+      }
+      if (req.files.experienceLetter) {
+        const file = req.files.experienceLetter;
+        const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
+        reqData.experienceLetter = imageUrl;
+      }
+      if (req.files.relievingLetter) {
+        const file = req.files.relievingLetter;
+        const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
+        reqData.relievingLetter = imageUrl;
+      }
+      if (req.files.appointmentLetter) {
+        const file = req.files.appointmentLetter;
+        const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
+        reqData.appointmentLetter = imageUrl;
+      }
+      if (req.files.salarySlip) {
+        const file = req.files.salarySlip;
+        const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
+        reqData.salarySlip = imageUrl;
+      }
     }
-    if (req.files.experienceLetter) {
-      const file = req.files.experienceLetter;
-      const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
-      reqData.experienceLetter = imageUrl;
-    }
-    if (req.files.relievingLetter) {
-      const file = req.files.relievingLetter;
-      const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
-      reqData.relievingLetter = imageUrl;
-    }
-    if (req.files.appointmentLetter) {
-      const file = req.files.appointmentLetter;
-      const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
-      reqData.appointmentLetter = imageUrl;
-    }
-    if (req.files.salarySlip) {
-      const file = req.files.salarySlip;
-      const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
-      reqData.salarySlip = imageUrl;
-    }
+
     const query =
       req.body.dataType === "education"
         ? { education: reqData }
         : { workDetail: reqData };
+
     if (validData.actionType === "add") {
       await employee.updateOne(
         {
@@ -188,7 +194,6 @@ export const updateEducationAndCompanyDetails = async (req, res) => {
 
     return res.status(StatusCodes.OK).json({
       message: "Data inserted successfully",
-      data: updatedData,
     });
   } catch (error) {
     res.status(StatusCodes.BAD_GATEWAY).json({
@@ -225,7 +230,7 @@ export const detailsUpdateUser = async (req, res) => {
         : req.body.dataType === "account"
         ? accountDetailSchema20
         : "";
-
+    // console.log(req.body);
     const validatedUser = await selectValodation.validate(req.body);
 
     const reqData =
@@ -267,45 +272,47 @@ export const detailsUpdateUser = async (req, res) => {
             accountNumber: validatedUser.accountNumber,
             branchName: validatedUser.branchName,
             ifsc: validatedUser.ifsc,
+            uan: validatedUser.uan,
             pageIndex: 3,
           }
         : null;
+    if (req.files) {
+      if (req.files.userImage) {
+        const file = req.files.userImage;
+        const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
+        reqData.userImage = imageUrl;
+      }
+      if (req.files.passportImage) {
+        const file = req.files.passportImage;
+        const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
+        reqData.passportImage = imageUrl;
+      }
+      if (req.files.voterImage) {
+        const file = req.files.voterImage;
+        const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
+        reqData.voterImage = imageUrl;
+      }
+      if (req.files.panImage) {
+        const file = req.files.panImage;
+        const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
+        reqData.panImage = imageUrl;
+      }
+      if (req.files.aadharImage) {
+        const file = req.files.aadharImage;
+        const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
+        reqData.aadharImage = imageUrl;
+      }
 
-    if (req.files.userImage) {
-      const file = req.files.userImage;
-      const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
-      reqData.userImage = imageUrl;
-    }
-    if (req.files.passportImage) {
-      const file = req.files.passportImage;
-      const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
-      reqData.passportImage = imageUrl;
-    }
-    if (req.files.voterImage) {
-      const file = req.files.voterImage;
-      const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
-      reqData.voterImage = imageUrl;
-    }
-    if (req.files.panImage) {
-      const file = req.files.panImage;
-      const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
-      reqData.panImage = imageUrl;
-    }
-    if (req.files.aadharImage) {
-      const file = req.files.aadharImage;
-      const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
-      reqData.aadharImage = imageUrl;
-    }
-
-    if (req.files.passbookImage) {
-      const file = req.files.passbookImage;
-      const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
-      reqData.passbookImage = imageUrl;
-    }
-    if (req.files.uanImage) {
-      const file = req.files.uanImage;
-      const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
-      reqData.uanImage = imageUrl;
+      if (req.files.passbookImage) {
+        const file = req.files.passbookImage;
+        const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
+        reqData.passbookImage = imageUrl;
+      }
+      if (req.files.uanImage) {
+        const file = req.files.uanImage;
+        const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
+        reqData.uanImage = imageUrl;
+      }
     }
 
     const query = {
@@ -313,6 +320,7 @@ export const detailsUpdateUser = async (req, res) => {
       profileRatio: validatedUser.profileRatio,
       updatedBy: req.user._id,
     };
+
     const updatedData = await employee.updateOne(
       {
         _id: new mongoose.Types.ObjectId(validatedUser.id),
@@ -325,6 +333,7 @@ export const detailsUpdateUser = async (req, res) => {
       data: updatedData,
     });
   } catch (error) {
+    console.log(error);
     return res.status(StatusCodes.BAD_REQUEST).json({ message: error });
   }
 };
