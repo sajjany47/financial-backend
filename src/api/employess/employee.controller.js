@@ -273,7 +273,7 @@ export const detailsUpdateUser = async (req, res) => {
             branchName: validatedUser.branchName,
             ifsc: validatedUser.ifsc,
             uan: validatedUser.uan,
-            pageIndex: 3,
+            pageIndex: 0,
           }
         : null;
     if (req.files) {
