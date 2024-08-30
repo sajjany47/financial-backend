@@ -461,7 +461,7 @@ export const dataTable = async (req, res) => {
     const limit = reqData.limit;
     const start = page * limit - limit;
 
-    const query = [{ isActive: reqData.isActive }];
+    const query = [];
     if (reqData.hasOwnProperty("name")) {
       query.push({ name: { $regex: `^${reqData.name}`, $options: "i" } });
     }
@@ -472,10 +472,19 @@ export const dataTable = async (req, res) => {
       query.push({ state: { $regex: `^${reqData.state}`, $options: "i" } });
     }
     if (reqData.hasOwnProperty("employeeId")) {
-      query.push({ pincode: { $regex: `^${reqData.pincode}`, $options: "i" } });
+      query.push({
+        employeeId: { $regex: `^${reqData.employeeId}`, $options: "i" },
+      });
     }
     if (reqData.hasOwnProperty("username")) {
-      query.push({ code: { $regex: `^${reqData.code}`, $options: "i" } });
+      query.push({
+        username: { $regex: `^${reqData.username}`, $options: "i" },
+      });
+    }
+    if (reqData.hasOwnProperty("isActive")) {
+      query.push({
+        isActive: reqData.isActive,
+      });
     }
 
     const countData = await employee.countDocuments([
