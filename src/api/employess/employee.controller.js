@@ -468,14 +468,8 @@ export const dataTable = async (req, res) => {
     if (reqData.hasOwnProperty("position")) {
       query.push({ name: { $regex: `^${reqData.position}`, $options: "i" } });
     }
-    if (reqData.hasOwnProperty("mobile")) {
-      query.push({ country: { $regex: `^${reqData.country}`, $options: "i" } });
-    }
     if (reqData.hasOwnProperty("branch")) {
       query.push({ state: { $regex: `^${reqData.state}`, $options: "i" } });
-    }
-    if (reqData.hasOwnProperty("email")) {
-      query.push({ city: { $regex: `^${reqData.city}`, $options: "i" } });
     }
     if (reqData.hasOwnProperty("employeeId")) {
       query.push({ pincode: { $regex: `^${reqData.pincode}`, $options: "i" } });
