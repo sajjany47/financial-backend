@@ -45,7 +45,7 @@ export const adminSignUpSchemaFirst = async (req, res) => {
           country: validatedUser.country,
           city: validatedUser.city,
           pincode: validatedUser.pincode,
-          jobBranchName: validatedUser.jobBranchName,
+          branch: new mongoose.Types.ObjectId(validatedUser.branch),
           fresherOrExperience: validatedUser.fresherOrExperience,
           password: await bcrypt.hash(password, 10),
           employeeId: employeeId,
@@ -247,7 +247,7 @@ export const detailsUpdateUser = async (req, res) => {
             country: validatedUser.country,
             city: validatedUser.city,
             pincode: validatedUser.pincode,
-            jobBranchName: validatedUser.jobBranchName,
+            branch: new mongoose.Types.ObjectId(validatedUser.branch),
             fresherOrExperience: validatedUser.fresherOrExperience,
             pageIndex: 0,
           }
@@ -270,7 +270,7 @@ export const detailsUpdateUser = async (req, res) => {
         ? {
             bankName: validatedUser.bankName,
             accountNumber: validatedUser.accountNumber,
-            branchName: validatedUser.branchName,
+            bankBranchName: validatedUser.bankBranchName,
             ifsc: validatedUser.ifsc,
             uan: validatedUser.uan,
             pageIndex: 0,
@@ -356,7 +356,7 @@ export const login = async (req, res) => {
             username: validUser.username,
             name: validUser.name,
             position: validUser.position,
-            jobBranchName: validUser.jobBranchName,
+            branch: validUser.branch,
             country: validUser.country,
             state: validUser.state,
             isPasswordReset: validUser.isPasswordReset,
@@ -411,6 +411,7 @@ export const resetPassword = async (req, res) => {
 
     const updatedPassword = await employee.updateOne(
       { _id: new mongoose.Types.ObjectId(reqData.id) },
+
       {
         $set: {
           password: await bcrypt.hash(reqData.password, 10),

@@ -31,7 +31,7 @@ export const adminSignUpSchema30 = Yup.object().shape({
     ])
     .required("Position is required"),
 
-  jobBranchName: Yup.string().required("Branch is required"),
+  branch: Yup.string().required("Branch is required"),
   address: Yup.string().required("Address is required"),
   state: Yup.string().required("State is required"),
   country: Yup.string().required("Country is required"),
@@ -102,6 +102,6 @@ export const accountDetailSchema20 = Yup.object().shape({
   bankName: Yup.string().required("Bank name is required"),
   accountNumber: Yup.string().required("Account number is required"),
   // .matches("/^d{9,18}$/", "Enter valid Account number"),
-  branchName: Yup.string().required("Branch name is required"),
+  bankBranchName: Yup.string().required("Branch name is required"),
   ifsc: Yup.string().required("IFSC code is required"),
 });
