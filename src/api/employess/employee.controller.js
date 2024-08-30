@@ -497,11 +497,30 @@ export const dataTable = async (req, res) => {
             },
       },
       {
-        $project: {
-          password: 0,
+        $lookup: {
+          from: "branches",
+          localField: "branch",
+          foreignField: "_id",
+          as: "branch",
         },
       },
-
+      {
+        $unwind: {
+          path: "$branch",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $project: {
+          branch: "$branch.name",
+          branchCode: "$branch.code",
+          employeeId: 1,
+          name: 1,
+          username: 1,
+          position: 1,
+          isActive: 1,
+        },
+      },
       { $skip: start },
       { $limit: limit },
     ]);
