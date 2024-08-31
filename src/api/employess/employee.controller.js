@@ -7,18 +7,22 @@ import {
 } from "./employee.schema.js";
 import { Status } from "./EmployeeConfig.js";
 import {
+  cityList,
+  countryList,
   generateAccessToken,
   generateEmployeeId,
   generatePassword,
   generateRefreshToken,
   ImageUpload,
   MailSend,
+  stateList,
 } from "../../utilis/utilis.js";
 import bcrypt from "bcrypt";
 import { welcome } from "../../template/wlecome.js";
 import mongoose from "mongoose";
 import { nanoid } from "nanoid";
 import employee from "./employee.model.js";
+import { json } from "express";
 
 export const adminSignUpSchemaFirst = async (req, res) => {
   try {
@@ -449,6 +453,56 @@ export const logout = async (req, res) => {
     );
 
     return res.status(StatusCodes.OK).json({ message: "Logout successfully" });
+  } catch (error) {
+    return res.status(StatusCodes.BAD_REQUEST).json({ message: error });
+  }
+};
+
+export const country = async (req, res) => {
+  try {
+    const countryData = await countryList();
+
+    return res.status(StatusCodes.OK).json({ data: countryData });
+  } catch (error) {
+    return res.status(StatusCodes.BAD_REQUEST).json({ message: error });
+  }
+};
+
+export const state = async (req, res) => {
+  try {
+    const country = req.params.country;
+
+    const stateData = await stateList(country);
+
+    return res.status(StatusCodes.OK).json({ data: stateData });
+  } catch (error) {
+    return res.status(StatusCodes.BAD_REQUEST).json({ message: error });
+  }
+};
+
+export const city = async (req, res) => {
+  try {
+    const { country, state } = req.query;
+    console.log(country);
+    console.log(state);
+    const stateData = await cityList(country, state);
+
+    return res.status(StatusCodes.OK).json({ data: stateData });
+  } catch (error) {
+    return res.status(StatusCodes.BAD_REQUEST).json({ message: error });
+  }
+};
+
+export const ifsc = async (req, res) => {
+  try {
+    const searchCode = req.params.code;
+    const response = await fetch(`https://ifsc.razorpay.com/${searchCode}`, {
+      method: "GET",
+    });
+
+    const result = await response.json();
+
+    return res.status(StatusCodes.OK).json({ data: result });
   } catch (error) {
     return res.status(StatusCodes.BAD_REQUEST).json({ message: error });
   }

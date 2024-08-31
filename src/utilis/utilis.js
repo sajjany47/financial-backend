@@ -107,3 +107,78 @@ export const ImageUpload = async (folderName, image) => {
 
   return a.url;
 };
+
+export const countryList = async () => {
+  var headers = new Headers();
+  headers.append(
+    "X-CSCAPI-KEY",
+    "OU5ycmZrek91NnpXVjdUTVJoUVZ1N3ZWWWJGM3lnQVB0N0djYngzMA=="
+  );
+
+  var requestOptions = {
+    method: "GET",
+    headers: headers,
+    redirect: "follow",
+  };
+
+  try {
+    const response = await fetch(
+      "https://api.countrystatecity.in/v1/countries",
+      requestOptions
+    );
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const stateList = async (country) => {
+  var headers = new Headers();
+  headers.append(
+    "X-CSCAPI-KEY",
+    "OU5ycmZrek91NnpXVjdUTVJoUVZ1N3ZWWWJGM3lnQVB0N0djYngzMA=="
+  );
+
+  var requestOptions = {
+    method: "GET",
+    headers: headers,
+    redirect: "follow",
+  };
+
+  try {
+    const response = await fetch(
+      `https://api.countrystatecity.in/v1/countries/${country}/states`,
+      requestOptions
+    );
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const cityList = async (country, state) => {
+  var headers = new Headers();
+  headers.append(
+    "X-CSCAPI-KEY",
+    "OU5ycmZrek91NnpXVjdUTVJoUVZ1N3ZWWWJGM3lnQVB0N0djYngzMA=="
+  );
+
+  var requestOptions = {
+    method: "GET",
+    headers: headers,
+    redirect: "follow",
+  };
+
+  try {
+    const response = await fetch(
+      `https://api.countrystatecity.in/v1/countries/${country}/states/${state}/cities`,
+      requestOptions
+    );
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    throw error;
+  }
+};
