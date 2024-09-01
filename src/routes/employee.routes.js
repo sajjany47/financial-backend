@@ -30,6 +30,7 @@ EmployeeRoutes.route("/education-update").post(
   tokenValidation,
   updateEducationAndCompanyDetails
 );
+EmployeeRoutes.route("/logout").get(tokenValidation, logout);
 EmployeeRoutes.route("/country").get(tokenValidation, country);
 EmployeeRoutes.route("/state/:country").get(tokenValidation, state);
 EmployeeRoutes.route("/city").get(tokenValidation, city);
@@ -38,6 +39,5 @@ EmployeeRoutes.route("/update").post(tokenValidation, detailsUpdateUser);
 EmployeeRoutes.route("/:id").get(tokenValidation, getDetails);
 EmployeeRoutes.route("/datatable").post(tokenValidation, dataTable);
 EmployeeRoutes.route("/update-password").post(tokenValidation, resetPassword);
-EmployeeRoutes.route("/logout").get(tokenValidation, logout);
 
 export default EmployeeRoutes;
