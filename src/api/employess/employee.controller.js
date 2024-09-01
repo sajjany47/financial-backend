@@ -483,8 +483,7 @@ export const state = async (req, res) => {
 export const city = async (req, res) => {
   try {
     const { country, state } = req.query;
-    console.log(country);
-    console.log(state);
+
     const stateData = await cityList(country, state);
 
     return res.status(StatusCodes.OK).json({ data: stateData });
