@@ -521,8 +521,10 @@ export const dataTable = async (req, res) => {
     if (reqData.hasOwnProperty("position")) {
       query.push({ name: { $regex: `^${reqData.position}`, $options: "i" } });
     }
-    if (reqData.hasOwnProperty("branch")) {
-      query.push({ state: { $regex: `^${reqData.state}`, $options: "i" } });
+    if (reqData.hasOwnProperty("branchCode")) {
+      query.push({
+        branchCode: { $regex: `^${reqData.branchCode}`, $options: "i" },
+      });
     }
     if (reqData.hasOwnProperty("employeeId")) {
       query.push({
@@ -539,19 +541,7 @@ export const dataTable = async (req, res) => {
         isActive: reqData.isActive,
       });
     }
-
-    const countData = await employee.countDocuments([
-      { $match: query.length > 0 ? { $and: query } : {} },
-    ]);
-    const data = await employee.aggregate([
-      { $match: query.length > 0 ? { $and: query } : {} },
-      {
-        $sort: reqData.hasOwnProperty("sort")
-          ? reqData.sort
-          : {
-              name: 1,
-            },
-      },
+    const findQuery = [
       {
         $lookup: {
           from: "branches",
@@ -577,6 +567,19 @@ export const dataTable = async (req, res) => {
           isActive: 1,
         },
       },
+      { $match: query.length > 0 ? { $and: query } : {} },
+    ];
+    const countData = await employee.countDocuments([...findQuery]);
+    const data = await employee.aggregate([
+      ...findQuery,
+      {
+        $sort: reqData.hasOwnProperty("sort")
+          ? reqData.sort
+          : {
+              name: 1,
+            },
+      },
+
       { $skip: start },
       { $limit: limit },
     ]);
