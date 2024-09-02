@@ -519,7 +519,9 @@ export const dataTable = async (req, res) => {
       query.push({ name: { $regex: `^${reqData.name}`, $options: "i" } });
     }
     if (reqData.hasOwnProperty("position")) {
-      query.push({ name: { $regex: `^${reqData.position}`, $options: "i" } });
+      query.push({
+        position: { $regex: `^${reqData.position}`, $options: "i" },
+      });
     }
     if (reqData.hasOwnProperty("branchCode")) {
       query.push({
