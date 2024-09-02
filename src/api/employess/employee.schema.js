@@ -62,29 +62,30 @@ export const educationOrCompanyDetailSchema30 = Yup.object().shape({
     .min(1, "At least one education detail is required"),
 
   workDetail: Yup.array().when("fresherOrExperience", {
-    is: (val) => val === fresherOrExperience.EXPERIENCE,
-    then: Yup.array()
-      .of(
-        Yup.object().shape({
-          companyName: Yup.string().required("Company name is required"),
-          position: Yup.string().required("Position is required"),
-          startingYear: Yup.string().required("Starting year is required"),
-          endingYear: Yup.string().required("Ending year is required"),
-          experienceLetter: Yup.string().required(
-            "Experience Letter is required"
-          ),
-          relievingLetter: Yup.string().required(
-            "Relieving Letter is required"
-          ),
-          appointmentLetter: Yup.string().required(
-            "Appointment Letter is required"
-          ),
-          salarySlip: Yup.string().required("Salary Slip is required"),
-        })
-      )
-      .required("Work details are required")
-      .min(1, "At least one work detail is required"),
-    otherwise: () => Yup.array().notRequired(),
+    is: (val) => val === fresherOrExperience.EXPERIENCE, // Check for "EXPERIENCE"
+    then: (schema) =>
+      schema
+        .of(
+          Yup.object().shape({
+            companyName: Yup.string().required("Company name is required"),
+            position: Yup.string().required("Position is required"),
+            startingYear: Yup.string().required("Starting year is required"),
+            endingYear: Yup.string().required("Ending year is required"),
+            experienceLetter: Yup.string().required(
+              "Experience Letter is required"
+            ),
+            relievingLetter: Yup.string().required(
+              "Relieving Letter is required"
+            ),
+            appointmentLetter: Yup.string().required(
+              "Appointment Letter is required"
+            ),
+            salarySlip: Yup.string().required("Salary Slip is required"),
+          })
+        )
+        .min(1, "At least one work detail is required")
+        .required("Work details are required"), // Validate if EXPERIENCE
+    otherwise: (schema) => schema.notRequired(), // If FRESHER, it is not required
   }),
 });
 export const documentsSchema20 = Yup.object().shape({
