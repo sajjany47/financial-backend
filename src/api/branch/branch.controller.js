@@ -3,6 +3,7 @@ import { createBranchSchema } from "./branch.schema.js";
 import branch from "./branch.model.js";
 import mongoose from "mongoose";
 import { query } from "express";
+import { cityList, countryList, stateList } from "../../utilis/utilis.js";
 
 export const createBranch = async (req, res) => {
   try {
@@ -98,7 +99,7 @@ export const dataTable = async (req, res) => {
     const limit = reqData.limit;
     const start = page * limit - limit;
 
-    const query = [{ isActive: reqData.isActive }];
+    const query = [];
     if (reqData.hasOwnProperty("name")) {
       query.push({ name: { $regex: `^${reqData.name}`, $options: "i" } });
     }
@@ -117,10 +118,14 @@ export const dataTable = async (req, res) => {
     if (reqData.hasOwnProperty("code")) {
       query.push({ code: { $regex: `^${reqData.code}`, $options: "i" } });
     }
+    if (reqData.hasOwnProperty("isActive")) {
+      query.push({ isActive: reqData.isActive });
+    }
 
     const countData = await branch.countDocuments([
       { $match: query.length > 0 ? { $and: query } : {} },
     ]);
+
     const data = await branch.aggregate([
       { $match: query.length > 0 ? { $and: query } : {} },
       {
@@ -134,9 +139,46 @@ export const dataTable = async (req, res) => {
       { $limit: limit },
     ]);
 
+    let finalData = [];
+
+    for (const value of data) {
+      const response = {};
+      const countryData = await countryList();
+
+      if (countryList) {
+        const filterCountry = countryData.find(
+          (item) => item.id === Number(value.country)
+        );
+
+        if (filterCountry) {
+          response.country = filterCountry.name;
+          const stateData = await stateList(filterCountry.iso2);
+
+          const filterState = stateData.find(
+            (stateItem) => stateItem.id === Number(value.state)
+          );
+
+          if (filterState) {
+            response.state = filterState.name;
+            const cityData = await cityList(
+              filterCountry.iso2,
+              filterState.iso2
+            );
+            const filterCity = cityData.find(
+              (cityItem) => cityItem.id === Number(value.city)
+            );
+            if (filterCity) {
+              response.city = filterCity.name;
+            }
+          }
+          await finalData.push({ ...value, ...response });
+        }
+      }
+    }
+
     return res.status(StatusCodes.OK).json({
       message: "Data fetched successfully",
-      data: data,
+      data: finalData,
       count: countData,
     });
   } catch (error) {

@@ -182,3 +182,38 @@ export const cityList = async (country, state) => {
     throw error;
   }
 };
+
+export const fetchCountryStateCityData = async (data) => {
+  const response = {};
+  const countryData = await countryList();
+
+  if (countryList) {
+    const filterCountry = countryData.find(
+      (item) => item.id === Number(value.country)
+    );
+
+    if (filterCountry) {
+      const stateData = await stateList(filterCountry.iso2);
+
+      response.state = stateData.map((item) => ({
+        label: item.name,
+        value: item.id,
+      }));
+
+      const filterState = stateData.find(
+        (stateItem) => stateItem.id === Number(value.state)
+      );
+
+      if (filterState) {
+        const cityData = await cityList(filterCountry.iso2, filterState.iso2);
+
+        response.city = cityData.map((item) => ({
+          label: item.name,
+          value: item.id,
+        }));
+      }
+    }
+
+    return response;
+  }
+};
