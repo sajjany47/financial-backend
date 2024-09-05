@@ -1,8 +1,6 @@
 import express from "express";
 import {
   adminSignUpSchemaFirst,
-  city,
-  country,
   dataTable,
   detailsUpdateUser,
   getDetails,
@@ -10,7 +8,6 @@ import {
   login,
   logout,
   resetPassword,
-  state,
   updateEducationAndCompanyDetails,
 } from "../api/employess/employee.controller.js";
 import {
@@ -31,9 +28,7 @@ EmployeeRoutes.route("/education-update").post(
   updateEducationAndCompanyDetails
 );
 EmployeeRoutes.route("/logout").get(tokenValidation, logout);
-EmployeeRoutes.route("/country").get(tokenValidation, country);
-EmployeeRoutes.route("/state/:country").get(tokenValidation, state);
-EmployeeRoutes.route("/city").get(tokenValidation, city);
+
 EmployeeRoutes.route("/ifsc/:code").get(tokenValidation, ifsc);
 EmployeeRoutes.route("/update").post(tokenValidation, detailsUpdateUser);
 EmployeeRoutes.route("/:id").get(tokenValidation, getDetails);

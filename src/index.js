@@ -5,6 +5,7 @@ import fileUpload from "express-fileupload";
 import cors from "cors";
 import BranchRoutes from "./routes/branch.routes.js";
 import EmployeeRoutes from "./routes/employee.routes.js";
+import RegionalRoutes from "./routes/regional.routes.js";
 
 function main() {
   const port = process.env.port;
@@ -37,5 +38,6 @@ function main() {
 
   app.use("/user", EmployeeRoutes);
   app.use("/branch", BranchRoutes);
+  app.use("/regional", RegionalRoutes);
 }
 main();

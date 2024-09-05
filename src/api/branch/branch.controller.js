@@ -2,8 +2,6 @@ import { StatusCodes } from "http-status-codes";
 import { createBranchSchema } from "./branch.schema.js";
 import branch from "./branch.model.js";
 import mongoose from "mongoose";
-import { query } from "express";
-import { cityList, countryList, stateList } from "../../utilis/utilis.js";
 
 export const createBranch = async (req, res) => {
   try {
@@ -139,46 +137,9 @@ export const dataTable = async (req, res) => {
       { $limit: limit },
     ]);
 
-    let finalData = [];
-
-    for (const value of data) {
-      const response = {};
-      const countryData = await countryList();
-
-      if (countryList) {
-        const filterCountry = countryData.find(
-          (item) => item.id === Number(value.country)
-        );
-
-        if (filterCountry) {
-          response.country = filterCountry.name;
-          const stateData = await stateList(filterCountry.iso2);
-
-          const filterState = stateData.find(
-            (stateItem) => stateItem.id === Number(value.state)
-          );
-
-          if (filterState) {
-            response.state = filterState.name;
-            const cityData = await cityList(
-              filterCountry.iso2,
-              filterState.iso2
-            );
-            const filterCity = cityData.find(
-              (cityItem) => cityItem.id === Number(value.city)
-            );
-            if (filterCity) {
-              response.city = filterCity.name;
-            }
-          }
-          await finalData.push({ ...value, ...response });
-        }
-      }
-    }
-
     return res.status(StatusCodes.OK).json({
       message: "Data fetched successfully",
-      data: finalData,
+      data: [],
       count: countData,
     });
   } catch (error) {
