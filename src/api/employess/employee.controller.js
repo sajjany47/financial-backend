@@ -334,7 +334,6 @@ export const detailsUpdateUser = async (req, res) => {
       data: updatedData,
     });
   } catch (error) {
-    console.log(error);
     return res.status(StatusCodes.BAD_REQUEST).json({ message: error });
   }
 };
