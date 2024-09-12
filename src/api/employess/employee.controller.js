@@ -7,6 +7,7 @@ import {
 } from "./employee.schema.js";
 import { Status } from "./EmployeeConfig.js";
 import {
+  BuildRegexQuery,
   generateAccessToken,
   generateEmployeeId,
   generatePassword,
@@ -19,7 +20,6 @@ import { welcome } from "../../template/wlecome.js";
 import mongoose from "mongoose";
 import { nanoid } from "nanoid";
 import employee from "./employee.model.js";
-import { json } from "express";
 
 export const adminSignUpSchemaFirst = async (req, res) => {
   try {
@@ -42,9 +42,9 @@ export const adminSignUpSchemaFirst = async (req, res) => {
           dob: validatedUser.dob,
           position: validatedUser.position,
           address: validatedUser.address,
-          state: validatedUser.state,
-          country: validatedUser.country,
-          city: validatedUser.city,
+          state: Number(validatedUser.state),
+          country: Number(validatedUser.country),
+          city: Number(validatedUser.city),
           pincode: validatedUser.pincode,
           branch: new mongoose.Types.ObjectId(validatedUser.branch),
           fresherOrExperience: validatedUser.fresherOrExperience,
@@ -244,9 +244,9 @@ export const detailsUpdateUser = async (req, res) => {
             dob: validatedUser.dob,
             position: validatedUser.position,
             address: validatedUser.address,
-            state: validatedUser.state,
-            country: validatedUser.country,
-            city: validatedUser.city,
+            state: Number(validatedUser.state),
+            country: Number(validatedUser.country),
+            city: Number(validatedUser.city),
             pincode: validatedUser.pincode,
             branch: new mongoose.Types.ObjectId(validatedUser.branch),
             fresherOrExperience: validatedUser.fresherOrExperience,
@@ -477,30 +477,22 @@ export const dataTable = async (req, res) => {
     const start = page * limit - limit;
 
     const query = [];
-    if (reqData.hasOwnProperty("name")) {
-      query.push({ name: { $regex: `^${reqData.name}`, $options: "i" } });
+    if (reqData.name) {
+      query.push(BuildRegexQuery("name", reqData.name));
     }
-    if (reqData.hasOwnProperty("position")) {
-      query.push({
-        position: { $regex: `^${reqData.position}`, $options: "i" },
-      });
+    if (reqData.position) {
+      query.push(BuildRegexQuery("position", reqData.position));
     }
-    if (reqData.hasOwnProperty("branchCode")) {
-      query.push({
-        branchCode: { $regex: `^${reqData.branchCode}`, $options: "i" },
-      });
+    if (reqData.branchCode) {
+      query.push(BuildRegexQuery("branchCode", reqData.branchCode));
     }
-    if (reqData.hasOwnProperty("employeeId")) {
-      query.push({
-        employeeId: { $regex: `^${reqData.employeeId}`, $options: "i" },
-      });
+    if (reqData.employeeId) {
+      query.push(BuildRegexQuery("employeeId", reqData.employeeId));
     }
-    if (reqData.hasOwnProperty("username")) {
-      query.push({
-        username: { $regex: `^${reqData.username}`, $options: "i" },
-      });
+    if (reqData.username) {
+      query.push(BuildRegexQuery("username", reqData.username));
     }
-    if (reqData.hasOwnProperty("isActive")) {
+    if (reqData.isActive) {
       query.push({
         isActive: reqData.isActive,
       });
@@ -537,11 +529,7 @@ export const dataTable = async (req, res) => {
     const data = await employee.aggregate([
       ...findQuery,
       {
-        $sort: reqData.hasOwnProperty("sort")
-          ? reqData.sort
-          : {
-              name: 1,
-            },
+        $sort: reqData.sort || { name: 1 },
       },
 
       { $skip: start },

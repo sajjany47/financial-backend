@@ -107,3 +107,7 @@ export const ImageUpload = async (folderName, image) => {
 
   return a.url;
 };
+
+export const BuildRegexQuery = (field, value) => {
+  return { [field]: { $regex: `^${value}`, $options: "i" } };
+};
