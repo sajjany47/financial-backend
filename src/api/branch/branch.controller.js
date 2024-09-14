@@ -97,7 +97,6 @@ export const dataTable = async (req, res) => {
     const page = reqData.page;
     const limit = reqData.limit;
     const start = page * limit - limit;
-
     const query = [];
     if (reqData.name) {
       query.push(BuildRegexQuery("name", reqData.name));
@@ -117,10 +116,10 @@ export const dataTable = async (req, res) => {
     if (reqData.code) {
       query.push(BuildRegexQuery("code", reqData.code));
     }
-    if (reqData.isActive) {
+    if (reqData.hasOwnProperty("isActive")) {
       query.push({ isActive: reqData.isActive });
     }
-
+    console.log(query);
     const countData = await branch.countDocuments([
       { $match: query.length > 0 ? { $and: query } : {} },
     ]);
