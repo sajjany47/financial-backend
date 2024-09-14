@@ -35,6 +35,10 @@ const loanModel = new mongoose.Schema(
     loanVerifiedBy: mongoose.Schema.Types.ObjectId,
     branch: mongoose.Schema.Types.ObjectId,
     loanAllotAgent: mongoose.Schema.Types.ObjectId,
+    applicationStaus: {
+      type: String,
+      enum: ["new", "process", "completed", "pending_verified", "verified"],
+    },
     employeeType: { type: String, trim: true, enum: EmployeeTypes },
     resisdentAddress: { type: String },
     resisdentState: Number,
