@@ -119,7 +119,6 @@ export const dataTable = async (req, res) => {
     if (reqData.hasOwnProperty("isActive")) {
       query.push({ isActive: reqData.isActive });
     }
-    console.log(query);
     const countData = await branch.countDocuments([
       { $match: query.length > 0 ? { $and: query } : {} },
     ]);
