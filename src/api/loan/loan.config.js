@@ -51,3 +51,18 @@ export const GenerateApplicationNumber = (loanType) => {
 
   return `${prefix}${year}${month}${day}${randomNumber}`;
 };
+
+// const myPincode = 700053;
+// const pincodes = [700026, 700045, 700007, 700012, 700057, 700001];
+
+// // Function to find the nearest pincode
+// function findNearestPincode(myPincode, pincodes) {
+//   return pincodes.reduce((nearest, currentPincode) => {
+//     return Math.abs(currentPincode - myPincode) < Math.abs(nearest - myPincode)
+//       ? currentPincode
+//       : nearest;
+//   });
+// }
+
+// const nearestPincode = findNearestPincode(myPincode, pincodes);
+// console.log(`The nearest pincode is: ${nearestPincode}`);
