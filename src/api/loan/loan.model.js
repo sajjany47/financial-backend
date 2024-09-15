@@ -2,11 +2,13 @@ import mongoose from "mongoose";
 import {
   EmployeeTypes,
   LoanApplicationSteps,
+  LoanTypes,
   ResidenceTypes,
 } from "./loan.config.js";
 
 const loanModel = new mongoose.Schema(
   {
+    applicationNumber: String,
     name: String,
     fatherName: String,
     motherName: String,
@@ -18,7 +20,7 @@ const loanModel = new mongoose.Schema(
       enum: ResidenceTypes,
     },
     loanAmount: Number,
-    loanType: String,
+    loanType: { type: Array },
     monthlyIncome: Number,
     loanTenure: Number,
     interestRate: Number,
@@ -37,7 +39,7 @@ const loanModel = new mongoose.Schema(
     loanAllotAgent: mongoose.Schema.Types.ObjectId,
     applicationStaus: {
       type: String,
-      enum: ["new", "process", "completed", "pending_verified", "verified"],
+      enum: ["new", "in_progress", "approved", "rejected"],
     },
     employeeType: { type: String, trim: true, enum: EmployeeTypes },
     resisdentAddress: { type: String },
