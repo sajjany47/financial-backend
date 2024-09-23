@@ -3,11 +3,12 @@ import { LoanTypes } from "../loan/loan.config.js";
 
 const documentModel = new mongoose.Schema(
   {
-    documentType: String,
-    loanType: { type: Array, enum: LoanTypes },
+    documentType: mongoose.Schema.Types.ObjectId,
+    loanType: [mongoose.Schema.Types.ObjectId],
     documentName: String,
-    country: Array,
+    country: [mongoose.Schema.Types.ObjectId],
     optional: Boolean,
+    isActive: Boolean,
   },
   { timestamps: true }
 );
