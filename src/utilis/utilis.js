@@ -13,6 +13,7 @@ export const generateAccessToken = (data) => {
     position: data.position,
     branch: data.branch,
     country: data.country,
+    city: data.city,
     state: data.state,
     isPasswordReset: data.isPasswordReset,
     sessionId: data.sessionId,
@@ -34,6 +35,7 @@ export const generateRefreshToken = (data) => {
     branch: data.branch,
     country: data.country,
     state: data.state,
+    city: data.city,
     isPasswordReset: data.isPasswordReset,
     sessionId: data.sessionId,
   };

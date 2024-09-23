@@ -358,6 +358,7 @@ export const login = async (req, res) => {
             position: validUser.position,
             branch: validUser.branch,
             country: validUser.country,
+            city: validUser.city,
             state: validUser.state,
             isPasswordReset: validUser.isPasswordReset,
             sessionId: sessionID,
