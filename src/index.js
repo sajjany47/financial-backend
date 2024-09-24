@@ -7,6 +7,7 @@ import BranchRoutes from "./routes/branch.routes.js";
 import EmployeeRoutes from "./routes/employee.routes.js";
 import RegionalRoutes from "./routes/regional.routes.js";
 import LoanRoutes from "./routes/loan.routes.js";
+import DocumentRoutes from "./routes/dcoument.routes.js";
 
 function main() {
   const port = process.env.port;
@@ -41,5 +42,6 @@ function main() {
   app.use("/branch", BranchRoutes);
   app.use("/regional", RegionalRoutes);
   app.use("/loan", LoanRoutes);
+  app.use("/document", DocumentRoutes);
 }
 main();
