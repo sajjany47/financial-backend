@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 const documentTypeModel = new mongoose.Schema(
   {
     name: String,
+    entity: String,
     description: String,
     isActive: Boolean,
     createdBy: String,

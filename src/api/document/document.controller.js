@@ -19,6 +19,7 @@ export const typeCreate = async (req, res, next) => {
         const data = new documentType({
           name: validateData.name,
           description: validateData.description,
+          entity: validateData.name.toLowerCase().replace(/ /g, "_"),
           isActive: true,
           createdBy: req.user.username,
         });
@@ -85,6 +86,7 @@ export const documentCreate = async (req, res, next) => {
             (item) => new mongoose.Types.ObjectId(item)
           ),
           documentName: validateData.documentName,
+          entity: validateData.documentName.toLowerCase().replace(/ /g, "_"),
           country: validateData.country.map(
             (item) => new mongoose.Types.ObjectId(item)
           ),
@@ -160,6 +162,8 @@ export const loanTypeCreate = async (req, res, next) => {
       } else {
         const data = new loanType({
           name: validateData.name,
+          entity: validateData.name.toLowerCase().replace(/ /g, "_"),
+          icon: validateData.icon,
           country: validateData.country.map(
             (item) => new mongoose.Types.ObjectId(item)
           ),
@@ -194,6 +198,7 @@ export const loanTypeUpdate = async (req, res) => {
             country: validateData.country.map(
               (item) => new mongoose.Types.ObjectId(item)
             ),
+            icon: validateData.icon,
             isActive: validateData.isActive,
             updatedBy: req.user.username,
           },
@@ -207,5 +212,137 @@ export const loanTypeUpdate = async (req, res) => {
   } catch (error) {
     next(error);
     // res.status(StatusCodes.BAD_REQUEST).json({ message: error });
+  }
+};
+
+export const typeList = async (req, res, next) => {
+  try {
+    const list = await documentType.find({});
+    res
+      .status(StatusCodes.OK)
+      .json({ message: "Data fetched successfully", data: list });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const documentList = async (req, res, next) => {
+  try {
+    const list = await document.aggregate([
+      {
+        $match: {},
+      },
+      {
+        $lookup: {
+          from: "countries",
+          localField: "country",
+          foreignField: "_id",
+          as: "country",
+        },
+      },
+
+      {
+        $lookup: {
+          from: "documenttypes",
+          localField: "documentType",
+          foreignField: "_id",
+          as: "documentType",
+        },
+      },
+      {
+        $unwind: {
+          path: "$documentType",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+
+      {
+        $lookup: {
+          from: "loantypes",
+          localField: "loanType",
+          foreignField: "_id",
+          as: "loanType",
+        },
+      },
+      {
+        $project: {
+          isActive: 1,
+          createdBy: 1,
+          updatedBy: 1,
+          documentName: 1,
+          documentType: {
+            name: "$documentType.name",
+            _id: "$documentType._id",
+            entity: "$documentType.entity",
+          },
+          country: {
+            $map: {
+              input: "$country",
+              as: "c",
+              in: {
+                name: "$$c.name",
+                _id: "$$c._id",
+              },
+            },
+          },
+          loanType: {
+            $map: {
+              input: "$loanType",
+              as: "l",
+              in: {
+                name: "$$l.name",
+                _id: "$$l._id",
+                entity: "$$l.entity",
+              },
+            },
+          },
+        },
+      },
+    ]);
+
+    res
+      .status(StatusCodes.OK)
+      .json({ message: "Data fetched successfully", data: list });
+  } catch (error) {
+    next(error);
+  }
+};
+export const loanTypeList = async (req, res, next) => {
+  try {
+    const list = await loanType.aggregate([
+      {
+        $lookup: {
+          from: "countries",
+          localField: "country",
+          foreignField: "_id",
+          as: "country",
+        },
+      },
+      {
+        $project: {
+          name: 1,
+          entity: 1,
+          icon: 1,
+          isActive: 1,
+          createdBy: 1,
+          updatedBy: 1,
+          country: {
+            $map: {
+              input: "$country",
+              as: "c",
+              in: {
+                name: "$$c.name",
+                _id: "$$c._id",
+              },
+            },
+          },
+        },
+      },
+    ]);
+    res
+      .status(StatusCodes.OK)
+      .json({ message: "Data fetched successfully", data: list });
+  } catch (error) {
+    next(error);
   }
 };

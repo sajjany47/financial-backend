@@ -9,6 +9,9 @@ const documentModel = new mongoose.Schema(
     country: [mongoose.Schema.Types.ObjectId],
     optional: Boolean,
     isActive: Boolean,
+    entity: String,
+    createdBy: String,
+    updatedBy: String,
   },
   { timestamps: true }
 );
