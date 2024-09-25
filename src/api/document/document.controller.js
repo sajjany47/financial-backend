@@ -88,7 +88,6 @@ export const documentCreate = async (req, res, next) => {
           documentName: validateData.documentName,
           entity: validateData.documentName.toLowerCase().replace(/ /g, "_"),
           country: validateData.country.map((item) => Number(item)),
-          optional: validateData.optional,
           isActive: true,
           createdBy: req.user.username,
         });
@@ -124,7 +123,6 @@ export const documentUpdate = async (req, res) => {
             ),
             documentName: validateData.documentName,
             country: validateData.country.map((item) => Number(item)),
-            optional: validateData.optional,
             isActive: validateData.isActive,
             updatedBy: req.user.username,
           },
