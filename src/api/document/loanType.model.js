@@ -6,6 +6,7 @@ const loanTypeModel = new mongoose.Schema(
     entity: String,
     country: [Number],
     icon: String,
+    path: String,
     isActive: Boolean,
     createdBy: String,
     updatedBy: String,

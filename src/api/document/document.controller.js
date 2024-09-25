@@ -158,6 +158,7 @@ export const loanTypeCreate = async (req, res, next) => {
           name: validateData.name,
           entity: validateData.name.toLowerCase().replace(/ /g, "_"),
           icon: validateData.icon,
+          path: validateData.path,
           country: validateData.country.map((item) => Number(item)),
           isActive: true,
           createdBy: req.user.username,
@@ -189,6 +190,7 @@ export const loanTypeUpdate = async (req, res) => {
             name: validateData.name,
             country: validateData.country.map((item) => Number(item)),
             icon: validateData.icon,
+            path: validateData.path,
             isActive: validateData.isActive,
             updatedBy: req.user.username,
           },
@@ -422,6 +424,50 @@ export const getDocumentList = async (req, res, next) => {
               entity: "$entity",
             },
           },
+        },
+      },
+    ]);
+
+    res
+      .status(StatusCodes.OK)
+      .json({ message: "Data fetched successfully", data: list });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getLoanTypeList = async (req, res, next) => {
+  try {
+    const list = await loanType.aggregate([
+      {
+        $match: {
+          isActive: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "countries",
+          localField: "country",
+          foreignField: "id",
+          as: "country",
+        },
+      },
+      {
+        $unwind: {
+          path: "$country",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $match: {
+          "country.id": req.body.country,
+        },
+      },
+      {
+        $project: {
+          name: 1,
+          entity: 1,
+          icon: 1,
         },
       },
     ]);
