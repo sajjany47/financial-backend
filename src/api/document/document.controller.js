@@ -87,9 +87,7 @@ export const documentCreate = async (req, res, next) => {
           ),
           documentName: validateData.documentName,
           entity: validateData.documentName.toLowerCase().replace(/ /g, "_"),
-          country: validateData.country.map(
-            (item) => new mongoose.Types.ObjectId(item)
-          ),
+          country: validateData.country.map((item) => Number(item)),
           optional: validateData.optional,
           isActive: true,
           createdBy: req.user.username,
@@ -125,9 +123,7 @@ export const documentUpdate = async (req, res) => {
               (item) => new mongoose.Types.ObjectId(item)
             ),
             documentName: validateData.documentName,
-            country: validateData.country.map(
-              (item) => new mongoose.Types.ObjectId(item)
-            ),
+            country: validateData.country.map((item) => Number(item)),
             optional: validateData.optional,
             isActive: validateData.isActive,
             updatedBy: req.user.username,
@@ -164,9 +160,7 @@ export const loanTypeCreate = async (req, res, next) => {
           name: validateData.name,
           entity: validateData.name.toLowerCase().replace(/ /g, "_"),
           icon: validateData.icon,
-          country: validateData.country.map(
-            (item) => new mongoose.Types.ObjectId(item)
-          ),
+          country: validateData.country.map((item) => Number(item)),
           isActive: true,
           createdBy: req.user.username,
         });
@@ -195,9 +189,7 @@ export const loanTypeUpdate = async (req, res) => {
         {
           $set: {
             name: validateData.name,
-            country: validateData.country.map(
-              (item) => new mongoose.Types.ObjectId(item)
-            ),
+            country: validateData.country.map((item) => Number(item)),
             icon: validateData.icon,
             isActive: validateData.isActive,
             updatedBy: req.user.username,
@@ -236,7 +228,7 @@ export const documentList = async (req, res, next) => {
         $lookup: {
           from: "countries",
           localField: "country",
-          foreignField: "_id",
+          foreignField: "id",
           as: "country",
         },
       },
@@ -281,7 +273,7 @@ export const documentList = async (req, res, next) => {
               as: "c",
               in: {
                 name: "$$c.name",
-                _id: "$$c._id",
+                _id: "$$c.id",
               },
             },
           },
@@ -314,7 +306,7 @@ export const loanTypeList = async (req, res, next) => {
         $lookup: {
           from: "countries",
           localField: "country",
-          foreignField: "_id",
+          foreignField: "id",
           as: "country",
         },
       },
@@ -332,13 +324,110 @@ export const loanTypeList = async (req, res, next) => {
               as: "c",
               in: {
                 name: "$$c.name",
-                _id: "$$c._id",
+                _id: "$$c.id",
               },
             },
           },
         },
       },
     ]);
+    res
+      .status(StatusCodes.OK)
+      .json({ message: "Data fetched successfully", data: list });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getTypeList = async (req, res, next) => {
+  try {
+    const list = await documentType.find({ isActive: true });
+    res
+      .status(StatusCodes.OK)
+      .json({ message: "Data fetched successfully", data: list });
+  } catch (error) {
+    next(error);
+  }
+};
+export const getDocumentList = async (req, res, next) => {
+  try {
+    const list = await document.aggregate([
+      {
+        $match: {
+          isActive: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "documenttypes",
+          localField: "documentType",
+          foreignField: "_id",
+          as: "documentType",
+        },
+      },
+      {
+        $unwind: {
+          path: "$documentType",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "loantypes",
+          localField: "loanType",
+          foreignField: "_id",
+          as: "loanType",
+        },
+      },
+      {
+        $unwind: {
+          path: "$loanType",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "countries",
+          localField: "country",
+          foreignField: "id",
+          as: "country",
+        },
+      },
+      {
+        $unwind: {
+          path: "$country",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $match: {
+          "loanType._id": new mongoose.Types.ObjectId(req.body.loanTypeId),
+          "loanType.isActive": true,
+          "documentType.isActive": true,
+          "country.id": req.body.country,
+        },
+      },
+      {
+        $group: {
+          _id: "$documentType._id",
+          documentType: {
+            $first: "$documentType.name",
+          },
+          description: {
+            $first: "$documentType.description",
+          },
+          entity: { $first: "$documentType.entity" },
+          document: {
+            $push: {
+              _id: "$_id",
+              name: "$documentName",
+              entity: "$entity",
+            },
+          },
+        },
+      },
+    ]);
+
     res
       .status(StatusCodes.OK)
       .json({ message: "Data fetched successfully", data: list });

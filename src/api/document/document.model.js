@@ -6,7 +6,7 @@ const documentModel = new mongoose.Schema(
     documentType: mongoose.Schema.Types.ObjectId,
     loanType: [mongoose.Schema.Types.ObjectId],
     documentName: String,
-    country: [mongoose.Schema.Types.ObjectId],
+    country: [Number],
     optional: Boolean,
     isActive: Boolean,
     entity: String,

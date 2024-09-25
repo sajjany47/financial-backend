@@ -4,7 +4,7 @@ const loanTypeModel = new mongoose.Schema(
   {
     name: String,
     entity: String,
-    country: [mongoose.Schema.Types.ObjectId],
+    country: [Number],
     icon: String,
     isActive: Boolean,
     createdBy: String,
