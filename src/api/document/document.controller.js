@@ -469,6 +469,7 @@ export const getLoanTypeList = async (req, res, next) => {
           name: 1,
           entity: 1,
           icon: 1,
+          path: 1,
         },
       },
     ]);
