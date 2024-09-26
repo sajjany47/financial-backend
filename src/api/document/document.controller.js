@@ -318,6 +318,7 @@ export const loanTypeList = async (req, res, next) => {
           isActive: 1,
           createdBy: 1,
           updatedBy: 1,
+          path: 1,
           country: {
             $map: {
               input: "$country",
