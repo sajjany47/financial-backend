@@ -209,7 +209,14 @@ export const loanTypeUpdate = async (req, res) => {
 
 export const typeList = async (req, res, next) => {
   try {
-    const list = await documentType.find({});
+    let query = {};
+    if (req.body.hasOwnProperty("isActive")) {
+      query.isActive = req.body.isActive;
+    }
+
+    const list = await documentType.find(
+      Object.keys(query).length > 0 ? query : {}
+    );
     res
       .status(StatusCodes.OK)
       .json({ message: "Data fetched successfully", data: list });
@@ -220,9 +227,13 @@ export const typeList = async (req, res, next) => {
 
 export const documentList = async (req, res, next) => {
   try {
+    let query = {};
+    if (req.body.hasOwnProperty("isActive")) {
+      query.isActive = req.body.isActive;
+    }
     const list = await document.aggregate([
       {
-        $match: {},
+        $match: Object.keys(query).length > 0 ? query : {},
       },
       {
         $lookup: {
@@ -301,7 +312,14 @@ export const documentList = async (req, res, next) => {
 };
 export const loanTypeList = async (req, res, next) => {
   try {
+    let query = {};
+    if (req.body.hasOwnProperty("isActive")) {
+      query.isActive = req.body.isActive;
+    }
     const list = await loanType.aggregate([
+      {
+        $match: Object.keys(query).length > 0 ? query : {},
+      },
       {
         $lookup: {
           from: "countries",
@@ -340,16 +358,6 @@ export const loanTypeList = async (req, res, next) => {
   }
 };
 
-export const getTypeList = async (req, res, next) => {
-  try {
-    const list = await documentType.find({ isActive: true });
-    res
-      .status(StatusCodes.OK)
-      .json({ message: "Data fetched successfully", data: list });
-  } catch (error) {
-    next(error);
-  }
-};
 export const getDocumentList = async (req, res, next) => {
   try {
     const list = await document.aggregate([

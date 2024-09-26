@@ -6,7 +6,6 @@ import {
   documentUpdate,
   getDocumentList,
   getLoanTypeList,
-  getTypeList,
   loanTypeCreate,
   loanTypeList,
   loanTypeUpdate,
@@ -25,18 +24,14 @@ DocumentRoutes.route("/update").post(tokenValidation, documentUpdate);
 DocumentRoutes.route("/loan-type/create").post(tokenValidation, loanTypeCreate);
 DocumentRoutes.route("/loan-type/update").post(tokenValidation, loanTypeUpdate);
 
-DocumentRoutes.route("/list").get(tokenValidation, documentList);
-DocumentRoutes.route("/loan-type/list").get(tokenValidation, loanTypeList);
-DocumentRoutes.route("/document-type/list").get(tokenValidation, typeList);
+DocumentRoutes.route("/list").post(tokenValidation, documentList);
+DocumentRoutes.route("/loan-type/list").post(tokenValidation, loanTypeList);
+DocumentRoutes.route("/document-type/list").post(tokenValidation, typeList);
 
 DocumentRoutes.route("/loan-type/dropdown-list").post(
   tokenValidation,
   getLoanTypeList
 );
 DocumentRoutes.route("/dropdown-list").post(tokenValidation, getDocumentList);
-DocumentRoutes.route("/document-type/dropdown-list").post(
-  tokenValidation,
-  getTypeList
-);
 
 export default DocumentRoutes;
