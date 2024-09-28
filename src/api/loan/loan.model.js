@@ -68,14 +68,14 @@ const loanModel = new mongoose.Schema(
     status: {
       type: String,
       enum: LoanApplicationSteps,
-      default: "application_number_generated",
     },
     applicationStaus: {
       type: String,
-      enum: ["new", "in_progress", "approved", "rejected"],
+      enum: ["lead", "incompleted", "in_progress", "approved", "rejected"],
     },
     loanRejectedReason: String,
     createdBy: mongoose.Schema.Types.ObjectId,
+    updatedBy: mongoose.Schema.Types.ObjectId,
     addressVerifiedBy: mongoose.Schema.Types.ObjectId,
     officeOrBussinessVerifiedBy: mongoose.Schema.Types.ObjectId,
     documentVerifiedBy: mongoose.Schema.Types.ObjectId,
