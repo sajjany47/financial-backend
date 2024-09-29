@@ -4,6 +4,7 @@ import {
   ApplicationCreate,
   ApplicationUpdate,
   datatable,
+  getLoanDetail,
 } from "../api/loan/loan.controller.js";
 
 const LoanRoutes = express.Router();
@@ -16,6 +17,7 @@ LoanRoutes.route("/application-update").post(
   tokenValidation,
   ApplicationUpdate
 );
+LoanRoutes.route("/:id").get(tokenValidation, getLoanDetail);
 
 LoanRoutes.route("/datatable").post(tokenValidation, datatable);
 

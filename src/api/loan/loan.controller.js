@@ -53,9 +53,10 @@ export const ApplicationCreate = async (req, res) => {
         createdBy: req.user._id,
       });
 
-      await LeadCreate.save();
+      const applicationSave = await LeadCreate.save();
 
       res.status(StatusCodes.OK).json({
+        data: applicationSave,
         message: `${
           type === "lead" ? "Lead" : "Application"
         } created successfully`,
@@ -104,6 +105,7 @@ export const ApplicationUpdate = async (req, res) => {
         { $set: { ...data, updatedBy: req.user._id } }
       );
       res.status(StatusCodes.OK).json({
+        data: updateData,
         message: `${
           type === "lead" ? "Lead" : "Application"
         } updated successfully`,
@@ -111,6 +113,53 @@ export const ApplicationUpdate = async (req, res) => {
     }
   } catch (error) {
     res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
+  }
+};
+
+export const getLoanDetail = async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    const details = await Loan.aggregate([
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(id),
+        },
+      },
+      {
+        $lookup: {
+          from: "branches",
+          localField: "branch",
+          foreignField: "_id",
+          as: "branchDetails",
+        },
+      },
+      {
+        $unwind: {
+          path: "$branchDetails",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "loantypes",
+          localField: "loanType",
+          foreignField: "_id",
+          as: "loanDetails",
+        },
+      },
+      {
+        $unwind: {
+          path: "$loanDetails",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+    ]);
+    res.status(StatusCodes.OK).json({
+      data: details[0],
+      message: `Data fetched successfully`,
+    });
+  } catch (error) {
+    next(error);
   }
 };
 
@@ -197,7 +246,12 @@ export const datatable = async (req, res, next) => {
       },
     ];
 
-    const countData = await Loan.countDocuments([...findQuery]);
+    const countData = await Loan.aggregate([
+      ...findQuery,
+      { $count: "totalCount" },
+    ]);
+    const totalCount = countData.length > 0 ? countData[0].totalCount : 0;
+
     const data = await Loan.aggregate([
       ...findQuery,
       {
@@ -210,7 +264,7 @@ export const datatable = async (req, res, next) => {
     return res.status(StatusCodes.OK).json({
       message: "Data fetched successfully",
       data: data,
-      count: countData,
+      count: totalCount,
     });
   } catch (error) {
     next(error);

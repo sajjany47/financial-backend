@@ -29,6 +29,7 @@ export const BasicData = (data) => {
     fatherName: data.fatherName,
     motherName: data.motherName,
     applicationStaus: "incompleted",
+    activeIndex: 0,
   };
 
   return prepareData;
@@ -53,6 +54,7 @@ export const AddressData = (data) => {
     addressSame: data.addressSame,
     residenceType: data.residenceType,
     applicationStaus: "incompleted",
+    activeIndex: 1,
   };
 
   return prepareData;
@@ -73,6 +75,7 @@ export const WorkData = (data) => {
     workCountry: Number(data.workCountry),
     workCity: Number(data.workCity),
     applicationStaus: "incompleted",
+    activeIndex: 2,
   };
 
   return prepareData;
@@ -87,6 +90,7 @@ export const AccountData = (data) => {
     accountName: data.accountName,
     applicationStaus: "in_progress",
     status: "application_number_generated",
+    activeIndex: 4,
   };
 
   return prepareData;
