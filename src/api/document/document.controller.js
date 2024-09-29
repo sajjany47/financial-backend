@@ -468,9 +468,11 @@ export const getLoanTypeList = async (req, res, next) => {
         },
       },
       {
-        $match: {
-          "country.id": req.body.country,
-        },
+        $match: req.body.hasOwnProperty("country")
+          ? {
+              "country.id": req.body.country,
+            }
+          : {},
       },
       {
         $project: {

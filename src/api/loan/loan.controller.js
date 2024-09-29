@@ -117,42 +117,101 @@ export const ApplicationUpdate = async (req, res) => {
 export const datatable = async (req, res, next) => {
   try {
     const reqData = req.body;
-    const page = reqData.page;
-    const limit = reqData.limit;
+    const page = Number(reqData.page);
+    const limit = Number(reqData.limit);
     const start = page * limit - limit;
     const query = [];
     const positionWise = [];
-
+    const postion = req.user.position;
     if (reqData.searchText) {
       query.push(BuildRegexQuery("name", reqData.searchText));
       query.push(BuildRegexQuery("applicationNumber", reqData.searchText));
       query.push(BuildRegexQuery("mobile", reqData.searchText));
       query.push(BuildRegexQuery("email", reqData.searchText));
     }
-    if (req.user.position !== Position.ADMIN) {
+    if (postion === Position.SM) {
+      positionWise.push({ "branchDetails.country": req.user.country });
+      positionWise.push({ "branchDetails.state": req.user.state });
+    }
+    if (postion === Position.CM) {
+      positionWise.push({ "branchDetails.country": req.user.country });
+      positionWise.push({ "branchDetails.state": req.user.state });
+      positionWise.push({ "branchDetails.city": req.user.city });
     }
 
-    // [
-    //   {
-    //     $match: {
-    //       $or: [{ name: { $regex: "^sa" } }],
-    //     }
-    //   },
-    //   {
-    //     $lookup: {
-    //       from: "branches",
-    //       localField: "branch",
-    //       foreignField: "_id",
-    //       as: "branchDetails"
-    //     }
-    //   },
-    //   {
-    //     $unwind: {
-    //       path: "$branchDetails",
-    //       preserveNullAndEmptyArrays: true
-    //     }
-    //   }
-    // ]
+    if (
+      postion === Position.BM ||
+      postion === Position.LM ||
+      postion === Position.LD ||
+      postion === Position.VD
+    ) {
+      positionWise.push({
+        branch: new mongoose.Types.ObjectId(req.user.branch),
+      });
+    }
+
+    const queryHandel =
+      query.length > 0
+        ? {
+            applicationStaus: reqData.applicationStaus,
+            $or: query,
+          }
+        : {
+            applicationStaus: reqData.applicationStaus,
+          };
+
+    const findQuery = [
+      {
+        $match: queryHandel,
+      },
+      {
+        $lookup: {
+          from: "branches",
+          localField: "branch",
+          foreignField: "_id",
+          as: "branchDetails",
+        },
+      },
+      {
+        $unwind: {
+          path: "$branchDetails",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "loantypes",
+          localField: "loanType",
+          foreignField: "_id",
+          as: "loanDetails",
+        },
+      },
+      {
+        $unwind: {
+          path: "$loanDetails",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $match: positionWise.length > 0 ? { $and: positionWise } : {},
+      },
+    ];
+
+    const countData = await Loan.countDocuments([...findQuery]);
+    const data = await Loan.aggregate([
+      ...findQuery,
+      {
+        $sort: reqData.sort || { createdAt: 1 },
+      },
+      { $skip: start },
+      { $limit: limit },
+    ]);
+
+    return res.status(StatusCodes.OK).json({
+      message: "Data fetched successfully",
+      data: data,
+      count: countData,
+    });
   } catch (error) {
     next(error);
   }

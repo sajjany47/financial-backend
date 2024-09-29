@@ -2,13 +2,8 @@ import * as Yup from "yup";
 
 export const LeadSchema = Yup.object().shape({
   name: Yup.string().required("Name is required"),
-  country: Yup.string().required("Country is required"),
-  state: Yup.string().required("State is required"),
-  city: Yup.string().required("City is required"),
   email: Yup.string().required("Email is required"),
   mobile: Yup.string().required("Mobile number is required"),
-  address: Yup.string().required("Address is required"),
-  pincode: Yup.string().required("Pincode is required"),
   loanAmount: Yup.string().required("Loan amount is required"),
   loanTenure: Yup.string().required("Loan tenure is required"),
   loanType: Yup.string().required("Loan type is required"),

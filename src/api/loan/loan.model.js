@@ -9,7 +9,7 @@ const loanModel = new mongoose.Schema(
   {
     applicationNumber: String,
     loanAmount: Number,
-    loanType: String,
+    loanType: mongoose.Schema.Types.ObjectId,
     loanTenure: Number,
     name: String,
     mobile: String,
