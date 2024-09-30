@@ -158,7 +158,7 @@ export const loanTypeCreate = async (req, res, next) => {
           name: validateData.name,
           entity: validateData.name.toLowerCase().replace(/ /g, "_"),
           icon: validateData.icon,
-          path: validateData.path,
+
           country: validateData.country.map((item) => Number(item)),
           isActive: true,
           createdBy: req.user.username,
@@ -190,7 +190,7 @@ export const loanTypeUpdate = async (req, res) => {
             name: validateData.name,
             country: validateData.country.map((item) => Number(item)),
             icon: validateData.icon,
-            path: validateData.path,
+
             isActive: validateData.isActive,
             updatedBy: req.user.username,
           },
@@ -336,7 +336,6 @@ export const loanTypeList = async (req, res, next) => {
           isActive: 1,
           createdBy: 1,
           updatedBy: 1,
-          path: 1,
           country: {
             $map: {
               input: "$country",
@@ -479,7 +478,6 @@ export const getLoanTypeList = async (req, res, next) => {
           name: 1,
           entity: 1,
           icon: 1,
-          path: 1,
         },
       },
     ]);
