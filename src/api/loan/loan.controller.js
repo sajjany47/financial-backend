@@ -100,6 +100,7 @@ export const ApplicationUpdate = async (req, res) => {
           : type === "account"
           ? AccountData(validateData)
           : "";
+
       const updateData = await Loan.findOneAndUpdate(
         { _id: new mongoose.Types.ObjectId(validateData._id) },
         { $set: { ...data, updatedBy: req.user._id } }

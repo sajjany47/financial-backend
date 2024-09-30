@@ -434,6 +434,11 @@ export const getDocumentList = async (req, res, next) => {
           },
         },
       },
+      {
+        $sort: {
+          documentType: 1,
+        },
+      },
     ]);
 
     res
