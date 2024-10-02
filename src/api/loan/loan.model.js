@@ -52,11 +52,12 @@ const loanModel = new mongoose.Schema(
     workCountry: Number,
     workCity: Number,
 
-    IDProof: Object,
-    addressProof: Object,
-    incomeProof: Object,
-    bankStatement: Object,
-    employmentProof: Object,
+    document: Array,
+    // IDProof: Object,
+    // addressProof: Object,
+    // incomeProof: Object,
+    // bankStatement: Object,
+    // employmentProof: Object,
 
     accountNumber: String,
     bankName: String,

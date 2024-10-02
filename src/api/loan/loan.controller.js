@@ -18,8 +18,9 @@ import {
   LeadData,
   WorkData,
 } from "./PersonalLoan.js";
-import { BuildRegexQuery } from "../../utilis/utilis.js";
+import { BuildRegexQuery, GetFileName } from "../../utilis/utilis.js";
 import { Position } from "../employess/EmployeeConfig.js";
+import fs from "fs";
 
 export const ApplicationCreate = async (req, res) => {
   try {
@@ -159,6 +160,80 @@ export const getLoanDetail = async (req, res, next) => {
       data: details[0],
       message: `Data fetched successfully`,
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const documentUpload = async (req, res, next) => {
+  try {
+    let reqData = req.body;
+    let data = {
+      documentType: reqData.documentType,
+      documentNumber: reqData.documentNumber,
+    };
+
+    if (req.files) {
+      const file = req.files.documentImage;
+
+      const fileName = GetFileName(file);
+      await file.mv("./src/uploads/" + fileName);
+      data = { ...data, documentImage: fileName };
+    }
+    await Loan.updateOne(
+      { _id: new mongoose.Types.ObjectId(reqData._id) },
+      {
+        $set: { updatedBy: req.user._id },
+        $push: {
+          document: {
+            _id: new mongoose.Types.ObjectId(),
+            [reqData.entity]: data,
+          },
+        },
+      }
+    );
+
+    res
+      .status(StatusCodes.OK)
+      .json({ message: "Application updated successfully" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const documentUpdate = async (req, res, next) => {
+  try {
+    let reqData = req.body;
+    let data = {
+      documentType: reqData.documentType,
+      documentImage: reqData.documentImage,
+      documentNumber: reqData.documentNumber,
+    };
+
+    if (req.files) {
+      fs.promises.unlink("./src/uploads/" + reqData.documentImage);
+      const file = req.files.documentImage;
+      const fileName = GetFileName(file);
+      const filePath = "./src/uploads/" + fileName;
+
+      await file.mv(filePath);
+      data = { ...data, documentImage: fileName };
+    }
+    await Loan.updateOne(
+      { "document._id": new mongoose.Types.ObjectId(reqData.documentId) },
+      {
+        $set: {
+          "document.$.documentType": data.documentType,
+          "document.$.documentImage": data.documentImage,
+          "document.$.documentNumber": data.documentNumber,
+          updatedBy: req.user._id,
+        },
+      }
+    );
+
+    res
+      .status(StatusCodes.OK)
+      .json({ message: "Application updated successfully" });
   } catch (error) {
     next(error);
   }

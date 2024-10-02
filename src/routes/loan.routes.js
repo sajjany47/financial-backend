@@ -4,6 +4,7 @@ import {
   ApplicationCreate,
   ApplicationUpdate,
   datatable,
+  documentUpload,
   getLoanDetail,
 } from "../api/loan/loan.controller.js";
 
@@ -17,6 +18,7 @@ LoanRoutes.route("/application-update").post(
   tokenValidation,
   ApplicationUpdate
 );
+LoanRoutes.route("/application-document").post(tokenValidation, documentUpload);
 LoanRoutes.route("/:id").get(tokenValidation, getLoanDetail);
 
 LoanRoutes.route("/datatable").post(tokenValidation, datatable);

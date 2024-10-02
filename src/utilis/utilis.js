@@ -2,6 +2,7 @@ import { nanoid } from "nanoid";
 import nodemailer from "nodemailer";
 import jwt from "jsonwebtoken";
 import { v2 as cloudinary } from "cloudinary";
+import mongoose from "mongoose";
 
 export const url = "https://demo.com";
 
@@ -112,4 +113,11 @@ export const ImageUpload = async (folderName, image) => {
 
 export const BuildRegexQuery = (field, value) => {
   return { [field]: { $regex: `^${value}`, $options: "i" } };
+};
+
+export const GetFileName = (file) => {
+  const fileSplit = (file.name || "").split(".");
+  const fileExtension = fileSplit[fileSplit.length - 1];
+  const fileName = `${new mongoose.Types.ObjectId()}.${fileExtension}`;
+  return fileName;
 };
