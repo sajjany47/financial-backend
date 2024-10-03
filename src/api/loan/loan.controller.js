@@ -156,14 +156,22 @@ export const getLoanDetail = async (req, res, next) => {
         },
       },
     ]);
-    // let loanDetails = details[0];
-    // if (loanDetails?.document?.length > 0) {
-    //   const documentKey = loanDetails?.document.map((item) => {
-    //     const keys = Object.keys(item);
-    //     const secondKey = keys[1];
-    //     return secondKey;
-    //   });
-    // }
+
+    const baseUrl = req.protocol + "://" + req.get("host");
+
+    if (details[0].document) {
+      details[0].document = details[0].document.map((item) => {
+        const entityKey = Object.keys(item)[1];
+        item.entity = entityKey;
+        if (item[entityKey] && item[entityKey].documentImage) {
+          item[
+            entityKey
+          ].documentUrl = `${baseUrl}/uploads/${item[entityKey].documentImage}`;
+        }
+        return item;
+      });
+    }
+
     res.status(StatusCodes.OK).json({
       data: details[0],
       message: `Data fetched successfully`,
@@ -219,7 +227,20 @@ export const documentUpdate = async (req, res, next) => {
     };
 
     if (req.files) {
-      fs.promises.unlink("./src/uploads/" + reqData.documentImage);
+      const findDocument = await Loan.findOne({
+        _id: new mongoose.Types.ObjectId(reqData._id),
+        // "document._id": new mongoose.Types.ObjectId(reqData.documentId),
+      });
+
+      if (findDocument) {
+        const findDocumentImage = findDocument.document.find(
+          (item) => item._id.toString() === reqData.documentId
+        );
+        const documentImagePath =
+          findDocumentImage[reqData.entity].documentImage;
+        await fs.promises.unlink("./src/uploads/" + documentImagePath);
+      }
+
       const file = req.files.documentImage;
       const fileName = GetFileName(file);
       const filePath = "./src/uploads/" + fileName;
@@ -227,7 +248,8 @@ export const documentUpdate = async (req, res, next) => {
       await file.mv(filePath);
       data = { ...data, documentImage: fileName };
     }
-    await Loan.updateOne(
+
+    const a = await Loan.updateOne(
       { "document._id": new mongoose.Types.ObjectId(reqData.documentId) },
       {
         $set: {
