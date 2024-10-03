@@ -91,9 +91,7 @@ export const adminSignUpSchemaFirst = async (req, res) => {
       }
     }
   } catch (error) {
-    res.status(StatusCodes.BAD_GATEWAY).json({
-      message: error,
-    });
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }
 };
 
@@ -197,9 +195,7 @@ export const updateEducationAndCompanyDetails = async (req, res) => {
       message: "Data inserted successfully",
     });
   } catch (error) {
-    res.status(StatusCodes.BAD_GATEWAY).json({
-      message: error,
-    });
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }
 };
 
@@ -215,7 +211,7 @@ export const getDetails = async (req, res) => {
       .status(StatusCodes.OK)
       .json({ message: "Data fetched successfully", data: findData });
   } catch (error) {
-    res.status(StatusCodes.BAD_REQUEST).json({ message: error });
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }
 };
 
@@ -334,7 +330,7 @@ export const detailsUpdateUser = async (req, res) => {
       data: updatedData,
     });
   } catch (error) {
-    return res.status(StatusCodes.BAD_REQUEST).json({ message: error });
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }
 };
 
@@ -399,10 +395,7 @@ export const login = async (req, res) => {
         .json({ message: "User not found!" });
     }
   } catch (error) {
-    return res.status(StatusCodes.BAD_GATEWAY).json({
-      mesaage: error,
-      // details: error.message,
-    });
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }
 };
 
@@ -430,9 +423,7 @@ export const resetPassword = async (req, res) => {
         .json({ message: "Invalid user or Password" });
     }
   } catch (error) {
-    res.status(StatusCodes.BAD_REQUEST).json({
-      mesaage: error,
-    });
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }
 };
 
@@ -451,7 +442,7 @@ export const logout = async (req, res) => {
 
     return res.status(StatusCodes.OK).json({ message: "Logout successfully" });
   } catch (error) {
-    return res.status(StatusCodes.BAD_REQUEST).json({ message: error });
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }
 };
 
@@ -466,7 +457,7 @@ export const ifsc = async (req, res) => {
 
     return res.status(StatusCodes.OK).json({ data: result });
   } catch (error) {
-    return res.status(StatusCodes.BAD_REQUEST).json({ message: error });
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }
 };
 
@@ -543,6 +534,6 @@ export const dataTable = async (req, res) => {
       count: countData,
     });
   } catch (error) {
-    res.status(StatusCodes.BAD_REQUEST).json({ message: error });
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }
 };

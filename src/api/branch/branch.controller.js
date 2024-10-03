@@ -36,7 +36,7 @@ export const createBranch = async (req, res) => {
       }
     }
   } catch (error) {
-    return res.status(StatusCodes.BAD_REQUEST).json({ message: error });
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }
 };
 
@@ -71,7 +71,7 @@ export const updateBranch = async (req, res) => {
       }
     }
   } catch (error) {
-    return res.status(StatusCodes.BAD_REQUEST).json({ message: error });
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }
 };
 
@@ -87,7 +87,7 @@ export const branchList = async (req, res) => {
       .status(StatusCodes.OK)
       .json({ message: "Data fetched successfully", data: data });
   } catch (error) {
-    res.status(StatusCodes.BAD_REQUEST).json({ message: error });
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }
 };
 
@@ -198,6 +198,6 @@ export const dataTable = async (req, res) => {
       count: countData,
     });
   } catch (error) {
-    res.status(StatusCodes.BAD_REQUEST).json({ message: error });
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }
 };

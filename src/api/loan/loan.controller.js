@@ -177,7 +177,31 @@ export const getLoanDetail = async (req, res, next) => {
       message: `Data fetched successfully`,
     });
   } catch (error) {
-    next(error);
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
+  }
+};
+
+export const documentDelete = async (req, res, next) => {
+  try {
+    const deleteDocument = await Loan.updateOne(
+      {
+        _id: new mongoose.Types.ObjectId(req.body._id),
+      },
+      {
+        $pull: {
+          document: { _id: new mongoose.Types.ObjectId(req.body.documentId) },
+        },
+      }
+    );
+    if (deleteDocument) {
+      await fs.promises.unlink("./src/uploads/" + req.body.doumentImage);
+    }
+
+    res
+      .status(StatusCodes.OK)
+      .json({ message: "Document deleted successfully" });
+  } catch (error) {
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }
 };
 
@@ -213,7 +237,7 @@ export const documentUpload = async (req, res, next) => {
       .status(StatusCodes.OK)
       .json({ message: "Application updated successfully" });
   } catch (error) {
-    next(error);
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }
 };
 
@@ -265,7 +289,7 @@ export const documentUpdate = async (req, res, next) => {
       .status(StatusCodes.OK)
       .json({ message: "Application updated successfully" });
   } catch (error) {
-    next(error);
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }
 };
 
@@ -373,6 +397,6 @@ export const datatable = async (req, res, next) => {
       count: totalCount,
     });
   } catch (error) {
-    next(error);
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }
 };

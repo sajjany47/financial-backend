@@ -7,7 +7,7 @@ export const country = async (req, res) => {
 
     return res.status(StatusCodes.OK).json({ data: countryData });
   } catch (error) {
-    return res.status(StatusCodes.BAD_REQUEST).json({ message: error });
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }
 };
 
@@ -19,7 +19,7 @@ export const state = async (req, res) => {
 
     return res.status(StatusCodes.OK).json({ data: stateData });
   } catch (error) {
-    return res.status(StatusCodes.BAD_REQUEST).json({ message: error });
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }
 };
 
@@ -31,6 +31,6 @@ export const city = async (req, res) => {
 
     return res.status(StatusCodes.OK).json({ data: cityData });
   } catch (error) {
-    return res.status(StatusCodes.BAD_REQUEST).json({ message: error });
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }
 };

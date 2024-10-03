@@ -4,6 +4,7 @@ import {
   ApplicationCreate,
   ApplicationUpdate,
   datatable,
+  documentDelete,
   documentUpdate,
   documentUpload,
   getLoanDetail,
@@ -21,6 +22,7 @@ LoanRoutes.route("/application-update").post(
 );
 LoanRoutes.route("/application-document").post(tokenValidation, documentUpload);
 LoanRoutes.route("/document-update").post(tokenValidation, documentUpdate);
+LoanRoutes.route("/document-delete").post(tokenValidation, documentDelete);
 LoanRoutes.route("/:id").get(tokenValidation, getLoanDetail);
 
 LoanRoutes.route("/datatable").post(tokenValidation, datatable);

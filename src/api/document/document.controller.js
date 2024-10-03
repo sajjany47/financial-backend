@@ -32,8 +32,7 @@ export const typeCreate = async (req, res, next) => {
       }
     }
   } catch (error) {
-    next(error);
-    // res.status(StatusCodes.BAD_REQUEST).json({ message: error });
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }
 };
 
@@ -60,8 +59,7 @@ export const typeUpdate = async (req, res) => {
         .json({ message: "Document type updated successfully" });
     }
   } catch (error) {
-    next(error);
-    // res.status(StatusCodes.BAD_REQUEST).json({ message: error });
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }
 };
 
@@ -100,8 +98,7 @@ export const documentCreate = async (req, res, next) => {
       }
     }
   } catch (error) {
-    next(error);
-    // res.status(StatusCodes.BAD_REQUEST).json({ message: error });
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }
 };
 
@@ -134,7 +131,7 @@ export const documentUpdate = async (req, res) => {
         .json({ message: "Document type updated successfully" });
     }
   } catch (error) {
-    next(error);
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
     // res.status(StatusCodes.BAD_REQUEST).json({ message: error });
   }
 };
@@ -172,7 +169,7 @@ export const loanTypeCreate = async (req, res, next) => {
       }
     }
   } catch (error) {
-    next(error);
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
     // res.status(StatusCodes.BAD_REQUEST).json({ message: error });
   }
 };
@@ -202,7 +199,7 @@ export const loanTypeUpdate = async (req, res) => {
         .json({ message: "Loan type updated successfully" });
     }
   } catch (error) {
-    next(error);
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
     // res.status(StatusCodes.BAD_REQUEST).json({ message: error });
   }
 };
@@ -221,7 +218,7 @@ export const typeList = async (req, res, next) => {
       .status(StatusCodes.OK)
       .json({ message: "Data fetched successfully", data: list });
   } catch (error) {
-    next(error);
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }
 };
 
@@ -307,7 +304,7 @@ export const documentList = async (req, res, next) => {
       .status(StatusCodes.OK)
       .json({ message: "Data fetched successfully", data: list });
   } catch (error) {
-    next(error);
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }
 };
 export const loanTypeList = async (req, res, next) => {
@@ -353,7 +350,7 @@ export const loanTypeList = async (req, res, next) => {
       .status(StatusCodes.OK)
       .json({ message: "Data fetched successfully", data: list });
   } catch (error) {
-    next(error);
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }
 };
 
@@ -445,7 +442,7 @@ export const getDocumentList = async (req, res, next) => {
       .status(StatusCodes.OK)
       .json({ message: "Data fetched successfully", data: list });
   } catch (error) {
-    next(error);
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }
 };
 
@@ -491,6 +488,6 @@ export const getLoanTypeList = async (req, res, next) => {
       .status(StatusCodes.OK)
       .json({ message: "Data fetched successfully", data: list });
   } catch (error) {
-    next(error);
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }
 };
