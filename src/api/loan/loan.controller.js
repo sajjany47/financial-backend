@@ -156,6 +156,14 @@ export const getLoanDetail = async (req, res, next) => {
         },
       },
     ]);
+    // let loanDetails = details[0];
+    // if (loanDetails?.document?.length > 0) {
+    //   const documentKey = loanDetails?.document.map((item) => {
+    //     const keys = Object.keys(item);
+    //     const secondKey = keys[1];
+    //     return secondKey;
+    //   });
+    // }
     res.status(StatusCodes.OK).json({
       data: details[0],
       message: `Data fetched successfully`,
@@ -223,9 +231,9 @@ export const documentUpdate = async (req, res, next) => {
       { "document._id": new mongoose.Types.ObjectId(reqData.documentId) },
       {
         $set: {
-          "document.$.documentType": data.documentType,
-          "document.$.documentImage": data.documentImage,
-          "document.$.documentNumber": data.documentNumber,
+          [`document.$.${reqData.entity}.documentType`]: data.documentType,
+          [`document.$.${reqData.entity}.documentImage`]: data.documentImage,
+          [`document.$.${reqData.entity}.documentNumber`]: data.documentNumber,
           updatedBy: req.user._id,
         },
       }
