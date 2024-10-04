@@ -88,9 +88,9 @@ export const AccountData = (data) => {
     bankBranchName: data.bankBranchName,
     ifsc: data.ifsc,
     accountName: data.accountName,
-    applicationStaus: "in_progress",
+    applicationStaus: "progress",
     status: "application_number_generated",
-    activeIndex: 4,
+    activeIndex: -1,
   };
 
   return prepareData;

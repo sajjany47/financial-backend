@@ -67,11 +67,7 @@ export const PersonalLoanWorkSchema = Yup.object().shape({
 });
 
 export const PersonalLoanDocumentSchema = Yup.object().shape({
-  IDProof: Yup.object().required("IDProof is required"),
-  addressProof: Yup.object().required("Address proof is required"),
-  incomeProof: Yup.object().required("Income proof is required"),
-  bankStatement: Yup.object().required("Bank statement is required"),
-  employmentProof: Yup.object().required("Employment proof is required"),
+  applicationType: Yup.string().required("Application type is required"),
 });
 
 export const PersonalLoanAccountSchema = Yup.object().shape({
