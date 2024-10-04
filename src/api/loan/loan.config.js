@@ -7,7 +7,6 @@ export const LoanApplicationSteps = [
   "document_address_verification",
   "business_address_verification",
   "document_verification",
-  "loan_amount_approved_processing",
   "loan_approved",
   "rejected",
   "disbursed",
