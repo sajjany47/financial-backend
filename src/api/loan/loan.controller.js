@@ -188,6 +188,7 @@ export const documentDelete = async (req, res, next) => {
         _id: new mongoose.Types.ObjectId(req.body._id),
       },
       {
+        $set: { updatedBy: req.user._id },
         $pull: {
           document: { _id: new mongoose.Types.ObjectId(req.body.documentId) },
         },
