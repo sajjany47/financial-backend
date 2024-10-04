@@ -1,6 +1,7 @@
 export const EmployeeTypes = ["salaried", "self_employed", "business"];
 
 export const LoanApplicationSteps = [
+  "incompleted",
   "application_number_generated",
   "loan_amount_generated",
   "document_address_verification",

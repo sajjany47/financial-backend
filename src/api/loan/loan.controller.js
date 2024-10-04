@@ -97,7 +97,11 @@ export const ApplicationUpdate = async (req, res) => {
           : type === "work"
           ? WorkData(validateData)
           : type === "document"
-          ? { applicationStaus: "incompleted", activeIndex: 3 }
+          ? {
+              applicationStaus: "incompleted",
+              activeIndex: 3,
+              status: "incompleted",
+            }
           : type === "account"
           ? AccountData(validateData)
           : "";

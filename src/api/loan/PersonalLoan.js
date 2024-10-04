@@ -30,6 +30,7 @@ export const BasicData = (data) => {
     motherName: data.motherName,
     applicationStaus: "incompleted",
     activeIndex: 0,
+    status: "incompleted",
   };
 
   return prepareData;
@@ -55,6 +56,7 @@ export const AddressData = (data) => {
     residenceType: data.residenceType,
     applicationStaus: "incompleted",
     activeIndex: 1,
+    status: "incompleted",
   };
 
   return prepareData;
@@ -76,6 +78,7 @@ export const WorkData = (data) => {
     workCity: Number(data.workCity),
     applicationStaus: "incompleted",
     activeIndex: 2,
+    status: "incompleted",
   };
 
   return prepareData;
