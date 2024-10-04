@@ -10,6 +10,7 @@ export const LoanApplicationSteps = [
   "loan_amount_approved_processing",
   "loan_approved",
   "rejected",
+  "disbursed",
 ];
 
 export const ResidenceTypes = ["rented", "owned", "parent"];
