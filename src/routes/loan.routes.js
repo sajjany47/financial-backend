@@ -2,6 +2,7 @@ import express from "express";
 import { tokenValidation } from "../middleware/auth.middleware.js";
 import {
   ApplicationCreate,
+  applicationDelete,
   ApplicationUpdate,
   datatable,
   documentDelete,
@@ -23,6 +24,10 @@ LoanRoutes.route("/application-update").post(
 LoanRoutes.route("/application-document").post(tokenValidation, documentUpload);
 LoanRoutes.route("/document-update").post(tokenValidation, documentUpdate);
 LoanRoutes.route("/document-delete").post(tokenValidation, documentDelete);
+LoanRoutes.route("/application-delete").post(
+  tokenValidation,
+  applicationDelete
+);
 LoanRoutes.route("/:id").get(tokenValidation, getLoanDetail);
 
 LoanRoutes.route("/datatable").post(tokenValidation, datatable);

@@ -1,5 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import {
+  ApplicationStatusSchema,
   LeadSchema,
   PersonalLoanAccountSchema,
   PersonalLoanAddressSchema,
@@ -84,6 +85,8 @@ export const ApplicationUpdate = async (req, res) => {
         ? PersonalLoanDocumentSchema
         : type === "account"
         ? PersonalLoanAccountSchema
+        : type === "status"
+        ? ApplicationStatusSchema
         : "";
     const validateData = await validationSchema.validate(req.body);
     if (validateData) {
@@ -104,6 +107,21 @@ export const ApplicationUpdate = async (req, res) => {
             }
           : type === "account"
           ? AccountData(validateData)
+          : type === "status"
+          ? {
+              applicationStaus:
+                validateData.status === "loan_approved"
+                  ? "approved"
+                  : validateData.status === "rejected"
+                  ? "rejected"
+                  : validateData.status === "disbursed"
+                  ? "disbursed"
+                  : validateData.status === "incompleted"
+                  ? "incompleted"
+                  : "progress",
+              status: validateData.status,
+              remark: validateData.remark,
+            }
           : "";
 
       const updateData = await Loan.findOneAndUpdate(
@@ -293,6 +311,36 @@ export const documentUpdate = async (req, res, next) => {
     res
       .status(StatusCodes.OK)
       .json({ message: "Application updated successfully" });
+  } catch (error) {
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
+  }
+};
+
+export const applicationDelete = async (req, res) => {
+  try {
+    const findApplication = await Loan.findOne({
+      _id: new mongoose.Types.ObjectId(req.body._id),
+    });
+
+    if (findApplication) {
+      if (findApplication?.document.length > 0) {
+        for (let index = 0; index < findApplication?.document.length; index++) {
+          const element = findApplication?.document[index];
+          const deleteKey = Object.keys(element)[1];
+
+          await fs.promises.unlink(
+            "./src/uploads/" + element[deleteKey].documentImage
+          );
+        }
+      }
+      const deleteApplication = await Loan.findOneAndDelete({
+        _id: new mongoose.Types.ObjectId(req.body._id),
+      });
+    }
+
+    res
+      .status(StatusCodes.OK)
+      .json({ message: "Document deleted successfully" });
   } catch (error) {
     res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }

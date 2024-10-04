@@ -72,9 +72,16 @@ const loanModel = new mongoose.Schema(
     },
     applicationStaus: {
       type: String,
-      enum: ["lead", "incompleted", "progress", "approved", "rejected"],
+      enum: [
+        "lead",
+        "incompleted",
+        "progress",
+        "approved",
+        "disbursed",
+        "rejected",
+      ],
     },
-    loanRejectedReason: String,
+    remark: String,
     createdBy: mongoose.Schema.Types.ObjectId,
     updatedBy: mongoose.Schema.Types.ObjectId,
     addressVerifiedBy: mongoose.Schema.Types.ObjectId,

@@ -77,3 +77,8 @@ export const PersonalLoanAccountSchema = Yup.object().shape({
   ifsc: Yup.string().required("IFSC code is required"),
   accountName: Yup.string().required("Account name is required"),
 });
+
+export const ApplicationStatusSchema = Yup.object().shape({
+  status: Yup.string().required("Application status is required"),
+  remark: Yup.string().required("Application remark is required"),
+});
