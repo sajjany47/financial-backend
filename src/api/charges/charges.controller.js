@@ -1,0 +1,78 @@
+import { StatusCodes } from "http-status-codes";
+import { chargesSchema } from "./charges.schema.js";
+import charges from "./charges.model.js";
+import mongoose from "mongoose";
+
+export const createCharges = async (req, res) => {
+  try {
+    const validateData = await chargesSchema.validate(req.body);
+    if (validateData) {
+      const checkPreviousActive = await charges.findOne({ isActive: true });
+      if (checkPreviousActive) {
+        return res
+          .status(StatusCodes.CONFLICT)
+          .json({ message: "Previous active charge required to inactive" });
+      } else {
+        const data = new charges({
+          processingFees: validateData.processingFees,
+          processingFeesGST: validateData.processingFeesGST,
+          loginFees: validateData.loginFees,
+          loginFeesGST: validateData.loginFeesGST,
+          otherCharges: validateData.otherCharges,
+          otherChargesGST: validateData.otherChargesGST,
+          isActive: true,
+          createdBy: req.user._id,
+        });
+        await data.save();
+
+        return res
+          .status(StatusCodes.OK)
+          .json({ message: "Charges created successfully" });
+      }
+    }
+  } catch (error) {
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
+  }
+};
+
+export const statusChanges = async (req, res) => {
+  try {
+    let reqData = req.body.status;
+    if (reqData) {
+      const checkPreviousActive = await charges.findOne({ isActive: true });
+      if (checkPreviousActive) {
+        return res
+          .status(StatusCodes.CONFLICT)
+          .json({ message: "Make sure previous active charges are inactive" });
+      } else {
+        reqData = true;
+      }
+    } else {
+      reqData = false;
+    }
+
+    await charges.findOneAndUpdate(
+      {
+        _id: new mongoose.Types.ObjectId(req.body._id),
+      },
+      { $set: { isActive: reqData } }
+    );
+    return res
+      .status(StatusCodes.OK)
+      .json({ message: "Status updated successfully" });
+  } catch (error) {
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
+  }
+};
+
+export const chargesList = async (req, res) => {
+  try {
+    const list = await charges.find({}).sort({ isActive: -1 });
+
+    res
+      .status(StatusCodes.OK)
+      .json({ message: "Data fetched successfully", data: list });
+  } catch (error) {
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
+  }
+};

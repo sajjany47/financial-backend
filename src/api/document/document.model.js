@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import { LoanTypes } from "../loan/loan.config.js";
 
 const documentModel = new mongoose.Schema(
   {

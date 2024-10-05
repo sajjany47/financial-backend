@@ -10,6 +10,7 @@ import LoanRoutes from "./routes/loan.routes.js";
 import DocumentRoutes from "./routes/dcoument.routes.js";
 import path from "path";
 import { fileURLToPath } from "url";
+import ChargesRoutes from "./routes/charges.routes.js";
 
 function main() {
   const port = process.env.port;
@@ -53,5 +54,6 @@ function main() {
   app.use("/regional", RegionalRoutes);
   app.use("/loan", LoanRoutes);
   app.use("/document", DocumentRoutes);
+  app.use("/charges", ChargesRoutes);
 }
 main();
