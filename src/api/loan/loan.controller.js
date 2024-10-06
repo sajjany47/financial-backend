@@ -49,6 +49,7 @@ export const ApplicationCreate = async (req, res) => {
           : "";
       const LeadCreate = new Loan({
         ...data,
+        loanAllotAgent: req.user._id,
         applicationNumber:
           validateData.applicationType === "lead"
             ? `L-${GenerateApplicationNumber(findLoanDetails.entity)}`
@@ -99,9 +100,8 @@ export const ApplicationUpdate = async (req, res) => {
         });
         validateData = {
           ...validateData,
-          ...findCharges,
+          charges: findCharges,
           loanAmount: findLoanApplication.loanAmount,
-          interestRate: findLoanApplication.interestRate,
           loanTenure: findLoanApplication.loanTenure,
         };
       }
@@ -123,7 +123,7 @@ export const ApplicationUpdate = async (req, res) => {
           : type === "account"
           ? AccountData(validateData)
           : type === "status"
-          ? StatusData(validateData)
+          ? StatusData({ ...validateData, user: req.user._id })
           : "";
 
       const updateData = await Loan.findOneAndUpdate(

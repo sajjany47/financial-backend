@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { DisbursmentCalculate, EMICalculator } from "./loan.config.js";
 
 export const LeadData = (data) => {
   const prepareData = {
@@ -111,46 +112,43 @@ export const StatusData = (data) => {
         : data.status === "incompleted"
         ? "incompleted"
         : "progress",
+    loanAllotAgent: data.loanAllotAgent ? data.user : null,
+    addressVerifiedBy:
+      data.status === "document_address_verification" ? data.user : null,
+    officeOrBussinessVerifiedBy:
+      data.status === "business_address_verification" ? data.user : null,
+    documentVerifiedBy:
+      data.status === "document_verification" ? data.user : null,
+    loanVerifiedBy: data.status === "loan_approved" ? data.user : null,
+    disbursedBy: data.status === "disbursed" ? data.user : null,
     interestRate: data.status === "loan_approved" ? data.interestRate : null,
     status: data.status,
     remark: data.remark,
   };
+
   if (data.status === "loan_approved") {
     const EMI = EMICalculator({
       loanAmount: Number(data.loanAmount),
       interestRate: Number(data.interestRate),
       loanTenure: Number(data.loanTenure),
+      foreclosureFees: data.charges.foreclosureFees,
+      foreclosureFeesGST: data.charges.foreclosureFeesGST,
     });
-    const processingFees =
-      Number(data.loanAmount) * (Number(data.processingFees) / 100);
-    const processingFeesGST =
-      processingFees * (Number(data.processingFeesGST) / 100);
 
-    const loginFees = Number(data.loanAmount) * (Number(data.loginFees) / 100);
-    const loginFeesGST = loginFees * (Number(data.loginFeesGST) / 100);
+    const disbursment = DisbursmentCalculate({
+      processingFees: data.charges.processingFees,
+      processingFeesGST: data.charges.processingFeesGST,
+      loginFees: data.charges.loginFees,
+      loginFeesGST: data.charges.loginFeesGST,
+      otherCharges: data.charges.otherCharges,
+      otherChargesGST: data.charges.otherChargesGST,
+      loanAmount: Number(data.loanAmount),
+    });
 
-    const otherCharges = data.otherCharges;
-    const otherChargesGST = otherCharges * (Number(data.otherChargesGST) / 100);
-
-    const totalDeductions =
-      processingFees +
-      processingFeesGST +
-      loginFees +
-      loginFeesGST +
-      otherCharges +
-      otherChargesGST;
-
-    const disbursedAmount = Number(data.loanAmount) - totalDeductions;
-
-    prepareData.EMIMonthly = EMI;
-    prepareData.disbursedAmount = {
-      diburedAmount: disbursedAmount,
-      processingFees: processingFees,
-      processingFeesGST: processingFeesGST,
-      loginFees: loginFees,
-      loginFeesGST: loginFeesGST,
-      otherCharges: otherCharges,
-      otherChargesGST: otherChargesGST,
-    };
+    prepareData.EMIMonthly = EMI.emi;
+    prepareData.emiSchedule = EMI.emiSchedule;
+    prepareData.disbursment = disbursment;
   }
+
+  return prepareData;
 };

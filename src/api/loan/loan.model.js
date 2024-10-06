@@ -65,6 +65,9 @@ const loanModel = new mongoose.Schema(
     ifsc: String,
     accountName: String,
 
+    EMIMonthly: Number,
+    emiSchedule: Array,
+    disbursment: Object,
     interestRate: Number,
     status: {
       type: String,
@@ -88,6 +91,7 @@ const loanModel = new mongoose.Schema(
     officeOrBussinessVerifiedBy: mongoose.Schema.Types.ObjectId,
     documentVerifiedBy: mongoose.Schema.Types.ObjectId,
     loanVerifiedBy: mongoose.Schema.Types.ObjectId,
+    disbursedBy: mongoose.Schema.Types.ObjectId,
     loanAllotAgent: mongoose.Schema.Types.ObjectId,
     activeIndex: Number,
   },

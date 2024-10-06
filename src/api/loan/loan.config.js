@@ -1,3 +1,6 @@
+import moment from "moment";
+import mongoose from "mongoose";
+
 export const EmployeeTypes = ["salaried", "self_employed", "business"];
 
 export const LoanApplicationSteps = [
@@ -54,13 +57,80 @@ export const GenerateApplicationNumber = (loanType) => {
 };
 
 export const EMICalculator = (data) => {
-  const P = data.loanAmount;
-  const r = data.interestRate / 100;
-  const n = data.loanTenure;
+  const P = Number(data.loanAmount);
+  const r = Number(data.interestRate) / 100;
+  const n = Number(data.loanTenure);
 
   const EMI = (P * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
 
-  return EMI;
+  let outstanding = P;
+  let emiSchedule = [];
+
+  for (let index = 1; index <= n; index++) {
+    const interest = outstanding * r;
+    const principle = EMI - interest;
+    outstanding -= principle;
+
+    const date = data?.startDate ? data.startDate : new Date();
+    const emiDate = moment(date).add(index, "months").format("YYYY-MM-DD");
+
+    const foreClosureFees = outstanding * (Number(data.foreclosureFees) / 100);
+    const foreClosureGST =
+      foreClosureFees * (Number(data.foreclosureFeesGST) / 100);
+
+    emiSchedule.push({
+      _id: new mongoose.Types.ObjectId(),
+      emiDate: emiDate,
+      emiAmount: EMI.toFixed(2),
+      interestPaid: interest.toFixed(2),
+      principalPaid: principle.toFixed(2),
+      isPaid: false,
+      remainingOutstanding: outstanding.toFixed(2),
+      foreclosureAmount: (
+        outstanding +
+        interest +
+        foreClosureFees +
+        foreClosureGST
+      ).toFixed(2),
+    });
+  }
+
+  return { emi: EMI, emiSchedule: emiSchedule };
+};
+
+export const DisbursmentCalculate = (data) => {
+  const processingFees =
+    Number(data.loanAmount) * (Number(data.processingFees) / 100);
+
+  const processingFeesGST =
+    processingFees * (Number(data.processingFeesGST) / 100);
+
+  const loginFees = Number(data.loginFees);
+  const loginFeesGST = loginFees * (Number(data.loginFeesGST) / 100);
+
+  const otherCharges = Number(data.otherCharges);
+  const otherChargesGST = otherCharges * (Number(data.otherChargesGST) / 100);
+
+  const totalDeductions =
+    processingFees +
+    processingFeesGST +
+    loginFees +
+    loginFeesGST +
+    otherCharges +
+    otherChargesGST;
+
+  const disbursedAmount = Number(data.loanAmount) - totalDeductions;
+
+  return {
+    disbursedAmount: disbursedAmount.toFixed(2), // corrected typo from "diburedAmount"
+    processingFees: processingFees.toFixed(2),
+    processingFeesGST: processingFeesGST.toFixed(2),
+    loginFees: loginFees.toFixed(2),
+    loginFeesGST: loginFeesGST.toFixed(2),
+    otherCharges: otherCharges.toFixed(2),
+    otherChargesGST: otherChargesGST.toFixed(2),
+    totalDeductions: totalDeductions.toFixed(2),
+  };
 };
 
 // const myPincode = 700053;
