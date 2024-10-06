@@ -8,6 +8,8 @@ const chargesModel = new mongoose.Schema(
     loginFeesGST: String,
     otherCharges: String,
     otherChargesGST: String,
+    foreclosureFees: String,
+    foreclosureFeesGST: String,
     isActive: Boolean,
     createdBy: mongoose.Schema.Types.ObjectId,
     updatedBy: mongoose.Schema.Types.ObjectId,

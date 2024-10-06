@@ -20,6 +20,8 @@ export const createCharges = async (req, res) => {
           loginFeesGST: validateData.loginFeesGST,
           otherCharges: validateData.otherCharges,
           otherChargesGST: validateData.otherChargesGST,
+          foreclosureFees: validateData.foreclosureFees,
+          foreclosureFeesGST: validateData.foreclosureFeesGST,
           isActive: true,
           createdBy: req.user._id,
         });
@@ -55,7 +57,7 @@ export const statusChanges = async (req, res) => {
       {
         _id: new mongoose.Types.ObjectId(req.body._id),
       },
-      { $set: { isActive: reqData } }
+      { $set: { isActive: reqData, updatedBy: req.user._id } }
     );
     return res
       .status(StatusCodes.OK)
