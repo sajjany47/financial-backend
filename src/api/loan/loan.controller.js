@@ -10,18 +10,20 @@ import {
 } from "./loan.schema.js";
 import Loan from "./loan.model.js";
 import mongoose from "mongoose";
-import { GenerateApplicationNumber } from "./loan.config.js";
+import { EMICalculator, GenerateApplicationNumber } from "./loan.config.js";
 import loanType from "../document/loanType.model.js";
 import {
   AccountData,
   AddressData,
   BasicData,
   LeadData,
+  StatusData,
   WorkData,
 } from "./PersonalLoan.js";
 import { BuildRegexQuery, GetFileName } from "../../utilis/utilis.js";
 import { Position } from "../employess/EmployeeConfig.js";
 import fs from "fs";
+import charges from "../charges/charges.model.js";
 
 export const ApplicationCreate = async (req, res) => {
   try {
@@ -90,6 +92,19 @@ export const ApplicationUpdate = async (req, res) => {
         : "";
     const validateData = await validationSchema.validate(req.body);
     if (validateData) {
+      if (validateData.status === "loan_approved") {
+        const findCharges = await charges.findOne({ isActive: true });
+        const findLoanApplication = await Loan.findOne({
+          _id: new mongoose.Types.ObjectId(validateData._id),
+        });
+        validateData = {
+          ...validateData,
+          ...findCharges,
+          loanAmount: findLoanApplication.loanAmount,
+          interestRate: findLoanApplication.interestRate,
+          loanTenure: findLoanApplication.loanTenure,
+        };
+      }
       const data =
         type === "lead"
           ? LeadData(validateData)
@@ -108,20 +123,7 @@ export const ApplicationUpdate = async (req, res) => {
           : type === "account"
           ? AccountData(validateData)
           : type === "status"
-          ? {
-              applicationStaus:
-                validateData.status === "loan_approved"
-                  ? "approved"
-                  : validateData.status === "rejected"
-                  ? "rejected"
-                  : validateData.status === "disbursed"
-                  ? "disbursed"
-                  : validateData.status === "incompleted"
-                  ? "incompleted"
-                  : "progress",
-              status: validateData.status,
-              remark: validateData.remark,
-            }
+          ? StatusData(validateData)
           : "";
 
       const updateData = await Loan.findOneAndUpdate(

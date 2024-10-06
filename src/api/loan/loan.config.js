@@ -53,6 +53,16 @@ export const GenerateApplicationNumber = (loanType) => {
   return `${prefix}${year}${month}${day}${randomNumber}`;
 };
 
+export const EMICalculator = (data) => {
+  const P = data.loanAmount;
+  const r = data.interestRate / 100;
+  const n = data.loanTenure;
+
+  const EMI = (P * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+
+  return EMI;
+};
+
 // const myPincode = 700053;
 // const pincodes = [700026, 700045, 700007, 700012, 700057, 700001];
 

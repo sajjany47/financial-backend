@@ -98,3 +98,59 @@ export const AccountData = (data) => {
 
   return prepareData;
 };
+
+export const StatusData = (data) => {
+  let prepareData = {
+    applicationStaus:
+      data.status === "loan_approved"
+        ? "approved"
+        : data.status === "rejected"
+        ? "rejected"
+        : data.status === "disbursed"
+        ? "disbursed"
+        : data.status === "incompleted"
+        ? "incompleted"
+        : "progress",
+    interestRate: data.status === "loan_approved" ? data.interestRate : null,
+    status: data.status,
+    remark: data.remark,
+  };
+  if (data.status === "loan_approved") {
+    const EMI = EMICalculator({
+      loanAmount: Number(data.loanAmount),
+      interestRate: Number(data.interestRate),
+      loanTenure: Number(data.loanTenure),
+    });
+    const processingFees =
+      Number(data.loanAmount) * (Number(data.processingFees) / 100);
+    const processingFeesGST =
+      processingFees * (Number(data.processingFeesGST) / 100);
+
+    const loginFees = Number(data.loanAmount) * (Number(data.loginFees) / 100);
+    const loginFeesGST = loginFees * (Number(data.loginFeesGST) / 100);
+
+    const otherCharges = data.otherCharges;
+    const otherChargesGST = otherCharges * (Number(data.otherChargesGST) / 100);
+
+    const totalDeductions =
+      processingFees +
+      processingFeesGST +
+      loginFees +
+      loginFeesGST +
+      otherCharges +
+      otherChargesGST;
+
+    const disbursedAmount = Number(data.loanAmount) - totalDeductions;
+
+    prepareData.EMIMonthly = EMI;
+    prepareData.disbursedAmount = {
+      diburedAmount: disbursedAmount,
+      processingFees: processingFees,
+      processingFeesGST: processingFeesGST,
+      loginFees: loginFees,
+      loginFeesGST: loginFeesGST,
+      otherCharges: otherCharges,
+      otherChargesGST: otherChargesGST,
+    };
+  }
+};

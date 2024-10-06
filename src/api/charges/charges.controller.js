@@ -78,3 +78,15 @@ export const chargesList = async (req, res) => {
     res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }
 };
+
+export const getCharges = async (req, res) => {
+  try {
+    const data = await charges.findOne({ isActive: true });
+
+    res
+      .status(StatusCodes.OK)
+      .json({ message: "Data fetched successfully", data: data });
+  } catch (error) {
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
+  }
+};
