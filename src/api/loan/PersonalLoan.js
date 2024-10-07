@@ -112,21 +112,29 @@ export const StatusData = (data) => {
         : data.status === "incompleted"
         ? "incompleted"
         : "progress",
-    loanAllotAgent: data.loanAllotAgent ? data.user : null,
-    addressVerifiedBy:
-      data.status === "document_address_verification" ? data.user : null,
-    officeOrBussinessVerifiedBy:
-      data.status === "business_address_verification" ? data.user : null,
-    documentVerifiedBy:
-      data.status === "document_verification" ? data.user : null,
-    loanVerifiedBy: data.status === "loan_approved" ? data.user : null,
-    disbursedBy: data.status === "disbursed" ? data.user : null,
-    interestRate: data.status === "loan_approved" ? data.interestRate : null,
     status: data.status,
     remark: data.remark,
   };
 
+  if (data.loanAllotAgent) {
+    prepareData.loanAllotAgent = data.user;
+  }
+
+  if (data.status === "document_address_verification") {
+    prepareData.addressVerifiedBy = data.user;
+  }
+  if (data.status === "business_address_verification") {
+    prepareData.officeOrBussinessVerifiedBy = data.user;
+  }
+  if (data.status === "document_verification") {
+    prepareData.documentVerifiedBy = data.user;
+  }
   if (data.status === "loan_approved") {
+    prepareData.loanVerifiedBy = data.user;
+    prepareData.interestRate = data.interestRate;
+  }
+
+  if (data.status === "disbursed") {
     const EMI = EMICalculator({
       loanAmount: Number(data.loanAmount),
       interestRate: Number(data.interestRate),
@@ -144,7 +152,7 @@ export const StatusData = (data) => {
       otherChargesGST: data.charges.otherChargesGST,
       loanAmount: Number(data.loanAmount),
     });
-
+    prepareData.disbursedBy = data.user;
     prepareData.EMIMonthly = EMI.emi;
     prepareData.emiSchedule = EMI.emiSchedule;
     prepareData.disbursment = disbursment;

@@ -93,14 +93,24 @@ export const ApplicationUpdate = async (req, res) => {
         : "";
     const validateData = await validationSchema.validate(req.body);
     if (validateData) {
-      if (validateData.status === "loan_approved") {
+      if (validateData.status === "disbursed") {
         const findCharges = await charges.findOne({ isActive: true });
         const findLoanApplication = await Loan.findOne({
           _id: new mongoose.Types.ObjectId(validateData._id),
         });
         validateData = {
           ...validateData,
-          charges: findCharges,
+          charges: findCharges
+            ? findCharges
+            : {
+                processingFees: 0,
+                processingFeesGST: 0,
+                loginFees: 0,
+                loginFeesGST: 0,
+                otherCharges: 0,
+                otherChargesGST: 0,
+              },
+          interestRate: findLoanApplication.interestRate,
           loanAmount: findLoanApplication.loanAmount,
           loanTenure: findLoanApplication.loanTenure,
         };
@@ -343,6 +353,55 @@ export const applicationDelete = async (req, res) => {
     res
       .status(StatusCodes.OK)
       .json({ message: "Document deleted successfully" });
+  } catch (error) {
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
+  }
+};
+
+export const getEMIDetails = async (req, res) => {
+  try {
+    const findCharges = await charges.findOne({ isActive: true });
+
+    const fixedCharges = findCharges
+      ? findCharges
+      : {
+          processingFees: 0,
+          processingFeesGST: 0,
+          loginFees: 0,
+          loginFeesGST: 0,
+          otherCharges: 0,
+          otherChargesGST: 0,
+        };
+
+    const EMI = EMICalculator({
+      loanAmount: Number(req.body.loanAmount),
+      interestRate: Number(req.body.interestRate),
+      loanTenure: Number(req.body.loanTenure),
+      foreclosureFees: fixedCharges.foreclosureFees,
+      foreclosureFeesGST: fixedCharges.foreclosureFeesGST,
+    });
+
+    const disbursment = DisbursmentCalculate({
+      processingFees: fixedCharges.processingFees,
+      processingFeesGST: fixedCharges.processingFeesGST,
+      loginFees: fixedCharges.loginFees,
+      loginFeesGST: fixedCharges.loginFeesGST,
+      otherCharges: fixedCharges.otherCharges,
+      otherChargesGST: fixedCharges.otherChargesGST,
+      loanAmount: Number(req.body.loanAmount),
+    });
+
+    res.status(StatusCodes.OK).json({
+      message: "Data fetched successfully",
+      data: {
+        loanAmount: Number(req.body.loanAmount),
+        interestRate: Number(req.body.interestRate),
+        loanTenure: Number(req.body.loanTenure),
+        EMIMonthly: EMI.emi,
+        emiSchedule: EMI.emiSchedule,
+        disbursment: disbursment,
+      },
+    });
   } catch (error) {
     res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }

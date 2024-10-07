@@ -8,6 +8,7 @@ import {
   documentDelete,
   documentUpdate,
   documentUpload,
+  getEMIDetails,
   getLoanDetail,
 } from "../api/loan/loan.controller.js";
 
@@ -29,7 +30,7 @@ LoanRoutes.route("/application-delete").post(
   applicationDelete
 );
 LoanRoutes.route("/:id").get(tokenValidation, getLoanDetail);
-
+LoanRoutes.route("/emi-details").post(tokenValidation, getEMIDetails);
 LoanRoutes.route("/datatable").post(tokenValidation, datatable);
 
 export default LoanRoutes;
