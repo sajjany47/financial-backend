@@ -57,6 +57,7 @@ export const GenerateApplicationNumber = (loanType) => {
 };
 
 export const EMICalculator = (data) => {
+  // console.log(data);
   const P = Number(data.loanAmount);
   const r = Number(data.interestRate) / 100;
   const n = Number(data.loanTenure);

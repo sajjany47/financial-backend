@@ -95,7 +95,7 @@ export const ApplicationUpdate = async (req, res) => {
         : type === "status"
         ? ApplicationStatusSchema
         : "";
-    const validateData = await validationSchema.validate(req.body);
+    let validateData = await validationSchema.validate(req.body);
     if (validateData) {
       if (validateData.status === "disbursed") {
         const findCharges = await charges.findOne({ isActive: true });
@@ -114,11 +114,11 @@ export const ApplicationUpdate = async (req, res) => {
                 otherCharges: 0,
                 otherChargesGST: 0,
               },
-          interestRate: findLoanApplication.interestRate,
           loanAmount: findLoanApplication.loanAmount,
           loanTenure: findLoanApplication.loanTenure,
         };
       }
+
       const data =
         type === "lead"
           ? LeadData(validateData)
