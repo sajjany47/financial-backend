@@ -141,6 +141,7 @@ export const StatusData = (data) => {
       loanTenure: Number(data.loanTenure),
       foreclosureFees: data.charges.foreclosureFees,
       foreclosureFeesGST: data.charges.foreclosureFeesGST,
+      startDate: data.emiDate,
     });
 
     const disbursment = DisbursmentCalculate({
