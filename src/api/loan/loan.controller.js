@@ -10,7 +10,11 @@ import {
 } from "./loan.schema.js";
 import Loan from "./loan.model.js";
 import mongoose from "mongoose";
-import { EMICalculator, GenerateApplicationNumber } from "./loan.config.js";
+import {
+  DisbursmentCalculate,
+  EMICalculator,
+  GenerateApplicationNumber,
+} from "./loan.config.js";
 import loanType from "../document/loanType.model.js";
 import {
   AccountData,
@@ -371,6 +375,8 @@ export const getEMIDetails = async (req, res) => {
           loginFeesGST: 0,
           otherCharges: 0,
           otherChargesGST: 0,
+          foreclosureFees: 0,
+          foreclosureFeesGST: 0,
         };
 
     const EMI = EMICalculator({

@@ -95,7 +95,7 @@ export const EMICalculator = (data) => {
     });
   }
 
-  return { emi: EMI, emiSchedule: emiSchedule };
+  return { emi: EMI.toFixed(2), emiSchedule: emiSchedule };
 };
 
 export const DisbursmentCalculate = (data) => {
