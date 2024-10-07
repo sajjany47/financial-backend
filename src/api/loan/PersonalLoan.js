@@ -1,5 +1,10 @@
 import mongoose from "mongoose";
-import { DisbursmentCalculate, EMICalculator } from "./loan.config.js";
+import {
+  DisbursmentCalculate,
+  EMICalculator,
+  LoanApplicationStepsEnum,
+  LoanStatusEnum,
+} from "./loan.config.js";
 
 export const LeadData = (data) => {
   const prepareData = {
@@ -11,7 +16,7 @@ export const LeadData = (data) => {
     loanTenure: Number(data.loanTenure),
     monthlyIncome: Number(data.monthlyIncome),
     branch: new mongoose.Types.ObjectId(data.branch),
-    applicationStaus: "lead",
+    applicationStaus: LoanStatusEnum.LEAD,
   };
 
   return prepareData;
@@ -29,9 +34,9 @@ export const BasicData = (data) => {
     loanType: new mongoose.Types.ObjectId(data.loanType),
     fatherName: data.fatherName,
     motherName: data.motherName,
-    applicationStaus: "incompleted",
     activeIndex: 0,
-    status: "incompleted",
+    applicationStaus: LoanStatusEnum.INCOMPLETED,
+    status: LoanApplicationStepsEnum.INCOMPLETED,
   };
 
   return prepareData;
@@ -55,9 +60,9 @@ export const AddressData = (data) => {
     residenceCity: Number(data.residenceCity),
     addressSame: data.addressSame,
     residenceType: data.residenceType,
-    applicationStaus: "incompleted",
+    applicationStaus: LoanStatusEnum.INCOMPLETED,
+    status: LoanApplicationStepsEnum.INCOMPLETED,
     activeIndex: 1,
-    status: "incompleted",
   };
 
   return prepareData;
@@ -77,9 +82,9 @@ export const WorkData = (data) => {
     workState: Number(data.workState),
     workCountry: Number(data.workCountry),
     workCity: Number(data.workCity),
-    applicationStaus: "incompleted",
+    applicationStaus: LoanStatusEnum.INCOMPLETED,
+    status: LoanApplicationStepsEnum.INCOMPLETED,
     activeIndex: 2,
-    status: "incompleted",
   };
 
   return prepareData;
@@ -92,8 +97,8 @@ export const AccountData = (data) => {
     bankBranchName: data.bankBranchName,
     ifsc: data.ifsc,
     accountName: data.accountName,
-    applicationStaus: "progress",
-    status: "application_number_generated",
+    applicationStaus: LoanStatusEnum.PROGRESS,
+    status: LoanApplicationStepsEnum.APPLICATION_NUMBER_GENERATED,
     activeIndex: -1,
   };
 
@@ -103,15 +108,15 @@ export const AccountData = (data) => {
 export const StatusData = (data) => {
   let prepareData = {
     applicationStaus:
-      data.status === "loan_approved"
-        ? "approved"
-        : data.status === "rejected"
-        ? "rejected"
-        : data.status === "disbursed"
-        ? "disbursed"
-        : data.status === "incompleted"
-        ? "incompleted"
-        : "progress",
+      data.status === LoanApplicationStepsEnum.LOAN_APPROVED
+        ? LoanStatusEnum.APPROVED
+        : data.status === LoanApplicationStepsEnum.REJECTED
+        ? LoanStatusEnum.REJECTED
+        : data.status === LoanApplicationStepsEnum.DISBURSED
+        ? LoanStatusEnum.DISBURSED
+        : data.status === LoanApplicationStepsEnum.INCOMPLETED
+        ? LoanStatusEnum.INCOMPLETED
+        : LoanStatusEnum.PROGRESS,
     status: data.status,
     remark: data.remark,
   };
@@ -120,21 +125,21 @@ export const StatusData = (data) => {
     prepareData.loanAllotAgent = data.user;
   }
 
-  if (data.status === "document_address_verification") {
+  if (data.status === LoanApplicationStepsEnum.DOCUMENT_ADDRESS_VERIFICATION) {
     prepareData.addressVerifiedBy = data.user;
   }
-  if (data.status === "business_address_verification") {
+  if (data.status === LoanApplicationStepsEnum.BUSINESS_ADDRESS_VERIFICATION) {
     prepareData.officeOrBussinessVerifiedBy = data.user;
   }
-  if (data.status === "document_verification") {
+  if (data.status === LoanApplicationStepsEnum.DOCUMENT_VERIFICATION) {
     prepareData.documentVerifiedBy = data.user;
   }
-  if (data.status === "loan_approved") {
+  if (data.status === LoanApplicationStepsEnum.LOAN_APPROVED) {
     prepareData.loanVerifiedBy = data.user;
     prepareData.interestRate = data.interestRate;
   }
 
-  if (data.status === "disbursed") {
+  if (data.status === LoanApplicationStepsEnum.DISBURSED) {
     const EMI = EMICalculator({
       loanAmount: Number(data.loanAmount),
       interestRate: Number(data.interestRate),

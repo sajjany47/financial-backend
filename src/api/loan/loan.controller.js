@@ -14,6 +14,8 @@ import {
   DisbursmentCalculate,
   EMICalculator,
   GenerateApplicationNumber,
+  LoanApplicationStepsEnum,
+  LoanStatusEnum,
 } from "./loan.config.js";
 import loanType from "../document/loanType.model.js";
 import {
@@ -97,7 +99,7 @@ export const ApplicationUpdate = async (req, res) => {
         : "";
     let validateData = await validationSchema.validate(req.body);
     if (validateData) {
-      if (validateData.status === "disbursed") {
+      if (validateData.status === LoanApplicationStepsEnum.DISBURSED) {
         const findCharges = await charges.findOne({ isActive: true });
         const findLoanApplication = await Loan.findOne({
           _id: new mongoose.Types.ObjectId(validateData._id),
@@ -130,9 +132,9 @@ export const ApplicationUpdate = async (req, res) => {
           ? WorkData(validateData)
           : type === "document"
           ? {
-              applicationStaus: "incompleted",
+              applicationStaus: LoanStatusEnum.INCOMPLETED,
               activeIndex: 3,
-              status: "incompleted",
+              status: LoanApplicationStepsEnum.INCOMPLETED,
             }
           : type === "account"
           ? AccountData(validateData)
