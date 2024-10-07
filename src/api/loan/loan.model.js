@@ -65,6 +65,7 @@ const loanModel = new mongoose.Schema(
     ifsc: String,
     accountName: String,
 
+    isLoanActive: Boolean,
     transactionNumber: String,
     EMIMonthly: Number,
     emiSchedule: Array,
