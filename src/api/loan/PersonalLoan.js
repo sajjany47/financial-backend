@@ -153,6 +153,7 @@ export const StatusData = (data) => {
       otherChargesGST: data.charges.otherChargesGST,
       loanAmount: Number(data.loanAmount),
     });
+    prepareData.transactionNumber = data.transactionNumber;
     prepareData.disbursedBy = data.user;
     prepareData.EMIMonthly = EMI.emi;
     prepareData.emiSchedule = EMI.emiSchedule;
