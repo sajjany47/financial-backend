@@ -473,7 +473,7 @@ export const dataTable = async (req, res) => {
     return res.status(StatusCodes.OK).json({
       message: "Data fetched successfully",
       data: data[0].data,
-      count: data[0].count[0].total,
+      count: data[0].count[0] ? data[0].count[0].total : 0,
     });
   } catch (error) {
     res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
