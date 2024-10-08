@@ -93,6 +93,39 @@ export const branchList = async (req, res) => {
 
 export const dataTable = async (req, res) => {
   try {
+    // // Function to generate random data for 20 branches
+    // const generateBranchData = (index) => {
+    //   return {
+    //     name: `Kalighat${index}`,
+    //     country: 101,
+    //     state: 4853,
+    //     city: 142001,
+    //     email: `kalighat${index}@gmail.com`,
+    //     phone: `033123456${index.toString().padStart(2, "0")}`,
+    //     address: `kalighat, kolkata${index}`,
+    //     pincode: `7000${(26 + index).toString().padStart(2, "0")}`,
+    //     code: `KLG${(26 + index).toString().padStart(5, "0")}`,
+    //     isActive: true,
+    //     createdBy: "sajjany47",
+    //     updatedBy: "sajjany47",
+    //     createdAt: new Date("2024-08-16T05:43:58.601Z"),
+    //     updatedAt: new Date("2024-09-12T11:40:06.049Z"),
+    //   };
+    // };
+
+    // // Function to create an array of 20 branch objects
+    // const createBranchArray = () => {
+    //   const branches = [];
+    //   for (let i = 0; i < 100; i++) {
+    //     branches.push(generateBranchData(i));
+    //   }
+    //   return branches;
+    // };
+
+    // // Generate the array of branch data
+    // const branchArray = createBranchArray();
+    // await branch.insertMany(branchArray);
+
     const reqData = req.body;
     const page = reqData.page;
     const limit = reqData.limit;
