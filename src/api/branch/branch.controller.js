@@ -152,83 +152,87 @@ export const dataTable = async (req, res) => {
     if (reqData.hasOwnProperty("isActive")) {
       query.push({ isActive: reqData.isActive });
     }
-    const countData = await branch.countDocuments([
-      { $match: query.length > 0 ? { $and: query } : {} },
-    ]);
 
     const data = await branch.aggregate([
       { $match: query.length > 0 ? { $and: query } : {} },
       {
-        $lookup: {
-          from: "countries",
-          localField: "country",
-          foreignField: "id",
-          as: "countryDetails",
+        $facet: {
+          count: [{ $count: "total" }],
+          data: [
+            {
+              $lookup: {
+                from: "countries",
+                localField: "country",
+                foreignField: "id",
+                as: "countryDetails",
+              },
+            },
+            {
+              $unwind: {
+                path: "$countryDetails",
+                preserveNullAndEmptyArrays: true,
+              },
+            },
+            {
+              $lookup: {
+                from: "states",
+                localField: "state",
+                foreignField: "id",
+                as: "stateDetails",
+              },
+            },
+            {
+              $unwind: {
+                path: "$stateDetails",
+                preserveNullAndEmptyArrays: true,
+              },
+            },
+            {
+              $lookup: {
+                from: "cities",
+                localField: "city",
+                foreignField: "id",
+                as: "cityDetails",
+              },
+            },
+            {
+              $unwind: {
+                path: "$cityDetails",
+                preserveNullAndEmptyArrays: true,
+              },
+            },
+            {
+              $project: {
+                _id: 1,
+                countryName: "$countryDetails.name",
+                country: 1,
+                stateName: "$stateDetails.name",
+                state: 1,
+                cityName: "$cityDetails.name",
+                city: 1,
+                email: 1,
+                phone: 1,
+                pincode: 1,
+                address: 1,
+                code: 1,
+                isActive: 1,
+                name: 1,
+              },
+            },
+            {
+              $sort: reqData.sort || { name: 1 },
+            },
+            { $skip: start },
+            { $limit: limit },
+          ],
         },
       },
-      {
-        $unwind: {
-          path: "$countryDetails",
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
-        $lookup: {
-          from: "states",
-          localField: "state",
-          foreignField: "id",
-          as: "stateDetails",
-        },
-      },
-      {
-        $unwind: {
-          path: "$stateDetails",
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
-        $lookup: {
-          from: "cities",
-          localField: "city",
-          foreignField: "id",
-          as: "cityDetails",
-        },
-      },
-      {
-        $unwind: {
-          path: "$cityDetails",
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
-        $project: {
-          _id: 1,
-          countryName: "$countryDetails.name",
-          country: 1,
-          stateName: "$stateDetails.name",
-          state: 1,
-          cityName: "$cityDetails.name",
-          city: 1,
-          email: 1,
-          phone: 1,
-          pincode: 1,
-          address: 1,
-          code: 1,
-          isActive: 1,
-          name: 1,
-        },
-      },
-      {
-        $sort: reqData.sort || { name: 1 },
-      },
-      { $skip: start },
-      { $limit: limit },
     ]);
 
     return res.status(StatusCodes.OK).json({
       message: "Data fetched successfully",
-      data: data,
-      count: countData,
+      data: data[0].data,
+      count: data[0].count[0].total,
     });
   } catch (error) {
     res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
