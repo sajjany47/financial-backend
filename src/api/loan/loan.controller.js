@@ -424,12 +424,24 @@ export const datatable = async (req, res, next) => {
     const query = [];
     const positionWise = [];
     const postion = req.user.position;
-    if (reqData.searchText) {
-      query.push(BuildRegexQuery("name", reqData.searchText));
-      query.push(BuildRegexQuery("applicationNumber", reqData.searchText));
-      query.push(BuildRegexQuery("mobile", reqData.searchText));
-      query.push(BuildRegexQuery("email", reqData.searchText));
+    if (reqData?.name) {
+      query.push(BuildRegexQuery("name", reqData.name));
     }
+    if (reqData?.applicationNumber) {
+      query.push(
+        BuildRegexQuery("applicationNumber", reqData.applicationNumber)
+      );
+    }
+    if (reqData?.mobile) {
+      query.push(BuildRegexQuery("mobile", reqData.mobile));
+    }
+    if (reqData?.loanType) {
+      query.push({ loanType: new mongoose.Types.ObjectId(reqData.loanType) });
+    }
+    if (reqData?.branch) {
+      query.push({ branch: new mongoose.Types.ObjectId(reqData.branch) });
+    }
+
     if (postion === Position.SM) {
       positionWise.push({ "branchDetails.country": req.user.country });
       positionWise.push({ "branchDetails.state": req.user.state });
@@ -455,7 +467,7 @@ export const datatable = async (req, res, next) => {
       query.length > 0
         ? {
             applicationStaus: reqData.applicationStaus,
-            $or: query,
+            $and: query,
           }
         : {
             applicationStaus: reqData.applicationStaus,
