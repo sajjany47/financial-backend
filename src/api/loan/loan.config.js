@@ -170,7 +170,7 @@ export const DeleteLocalImageUpload = (fileName) => {
   const deletePath = path.join(__dirname, process.env.IMAGE_PATH, fileName);
   return deletePath;
 };
-
+// IMAGE_PATH=../../../../Upload/loan_document
 export const GetLocalImage = (fileName) => {
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = path.dirname(__filename);
