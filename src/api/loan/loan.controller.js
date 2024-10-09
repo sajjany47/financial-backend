@@ -11,11 +11,13 @@ import {
 import Loan from "./loan.model.js";
 import mongoose from "mongoose";
 import {
+  DeleteLocalImageUpload,
   DisbursmentCalculate,
   EMICalculator,
   GenerateApplicationNumber,
   LoanApplicationStepsEnum,
   LoanStatusEnum,
+  LocalImageUpload,
 } from "./loan.config.js";
 import loanType from "../document/loanType.model.js";
 import {
@@ -235,7 +237,8 @@ export const documentDelete = async (req, res, next) => {
       }
     );
     if (deleteDocument) {
-      await fs.promises.unlink("./src/uploads/" + req.body.doumentImage);
+      const uploadPath = DeleteLocalImageUpload(req.body.doumentImage);
+      await fs.promises.unlink(uploadPath + req.body.doumentImage);
     }
 
     res
@@ -256,9 +259,10 @@ export const documentUpload = async (req, res, next) => {
 
     if (req.files) {
       const file = req.files.documentImage;
-
       const fileName = GetFileName(file);
-      await file.mv("./src/uploads/" + fileName);
+      const uploadPath = LocalImageUpload(fileName);
+
+      await file.mv(uploadPath + fileName);
       data = { ...data, documentImage: fileName };
     }
     await Loan.updateOne(
@@ -303,14 +307,16 @@ export const documentUpdate = async (req, res, next) => {
         );
         const documentImagePath =
           findDocumentImage[reqData.entity].documentImage;
-        await fs.promises.unlink("./src/uploads/" + documentImagePath);
+        const uploadPath = DeleteLocalImageUpload(documentImagePath);
+        await fs.promises.unlink(uploadPath + documentImagePath);
       }
 
       const file = req.files.documentImage;
-      const fileName = GetFileName(file);
-      const filePath = "./src/uploads/" + fileName;
 
-      await file.mv(filePath);
+      const fileName = GetFileName(file);
+      const uploadPath = LocalImageUpload(fileName);
+
+      await file.mv(uploadPath + fileName);
       data = { ...data, documentImage: fileName };
     }
 
@@ -345,9 +351,11 @@ export const applicationDelete = async (req, res) => {
         for (let index = 0; index < findApplication?.document.length; index++) {
           const element = findApplication?.document[index];
           const deleteKey = Object.keys(element)[1];
-
+          const uploadPath = DeleteLocalImageUpload(
+            element[deleteKey].documentImage
+          );
           await fs.promises.unlink(
-            "./src/uploads/" + element[deleteKey].documentImage
+            uploadPath + element[deleteKey].documentImage
           );
         }
       }

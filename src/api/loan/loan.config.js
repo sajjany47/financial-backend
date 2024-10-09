@@ -1,5 +1,7 @@
 import moment from "moment";
 import mongoose from "mongoose";
+import path from "path";
+import { fileURLToPath } from "url";
 
 export const EmployeeTypes = ["salaried", "self_employed", "business"];
 
@@ -153,6 +155,27 @@ export const DisbursmentCalculate = (data) => {
     otherChargesGST: otherChargesGST.toFixed(2),
     totalDeductions: totalDeductions.toFixed(2),
   };
+};
+
+export const LocalImageUpload = (fileName) => {
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
+  const uploadPath = path.join(__dirname, process.env.IMAGE_PATH, fileName);
+  return uploadPath;
+};
+
+export const DeleteLocalImageUpload = (fileName) => {
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
+  const deletePath = path.join(__dirname, process.env.IMAGE_PATH, fileName);
+  return deletePath;
+};
+
+export const GetLocalImage = (fileName) => {
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
+  const uploadPath = path.join(__dirname, process.env.IMAGE_PATH, fileName);
+  return uploadPath;
 };
 
 // const myPincode = 700053;
