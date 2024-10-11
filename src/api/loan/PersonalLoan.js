@@ -136,7 +136,7 @@ export const StatusData = (data) => {
   }
   if (data.status === LoanApplicationStepsEnum.LOAN_APPROVED) {
     prepareData.loanVerifiedBy = data.user;
-    prepareData.interestRate = data.interestRate;
+    prepareData.interestRate = Number(data.interestRate);
   }
 
   if (data.status === LoanApplicationStepsEnum.DISBURSED) {
