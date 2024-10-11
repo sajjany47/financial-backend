@@ -7,22 +7,19 @@ import {
 } from "./employee.schema.js";
 import { Status } from "./EmployeeConfig.js";
 import {
-  cityList,
-  countryList,
+  BuildRegexQuery,
   generateAccessToken,
   generateEmployeeId,
   generatePassword,
   generateRefreshToken,
   ImageUpload,
   MailSend,
-  stateList,
 } from "../../utilis/utilis.js";
 import bcrypt from "bcrypt";
 import { welcome } from "../../template/wlecome.js";
 import mongoose from "mongoose";
 import { nanoid } from "nanoid";
 import employee from "./employee.model.js";
-import { json } from "express";
 
 export const adminSignUpSchemaFirst = async (req, res) => {
   try {
@@ -45,9 +42,9 @@ export const adminSignUpSchemaFirst = async (req, res) => {
           dob: validatedUser.dob,
           position: validatedUser.position,
           address: validatedUser.address,
-          state: validatedUser.state,
-          country: validatedUser.country,
-          city: validatedUser.city,
+          state: Number(validatedUser.state),
+          country: Number(validatedUser.country),
+          city: Number(validatedUser.city),
           pincode: validatedUser.pincode,
           branch: new mongoose.Types.ObjectId(validatedUser.branch),
           fresherOrExperience: validatedUser.fresherOrExperience,
@@ -94,9 +91,7 @@ export const adminSignUpSchemaFirst = async (req, res) => {
       }
     }
   } catch (error) {
-    res.status(StatusCodes.BAD_GATEWAY).json({
-      message: error,
-    });
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }
 };
 
@@ -200,9 +195,7 @@ export const updateEducationAndCompanyDetails = async (req, res) => {
       message: "Data inserted successfully",
     });
   } catch (error) {
-    res.status(StatusCodes.BAD_GATEWAY).json({
-      message: error,
-    });
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }
 };
 
@@ -218,7 +211,7 @@ export const getDetails = async (req, res) => {
       .status(StatusCodes.OK)
       .json({ message: "Data fetched successfully", data: findData });
   } catch (error) {
-    res.status(StatusCodes.BAD_REQUEST).json({ message: error });
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }
 };
 
@@ -247,9 +240,9 @@ export const detailsUpdateUser = async (req, res) => {
             dob: validatedUser.dob,
             position: validatedUser.position,
             address: validatedUser.address,
-            state: validatedUser.state,
-            country: validatedUser.country,
-            city: validatedUser.city,
+            state: Number(validatedUser.state),
+            country: Number(validatedUser.country),
+            city: Number(validatedUser.city),
             pincode: validatedUser.pincode,
             branch: new mongoose.Types.ObjectId(validatedUser.branch),
             fresherOrExperience: validatedUser.fresherOrExperience,
@@ -337,8 +330,7 @@ export const detailsUpdateUser = async (req, res) => {
       data: updatedData,
     });
   } catch (error) {
-    console.log(error);
-    return res.status(StatusCodes.BAD_REQUEST).json({ message: error });
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }
 };
 
@@ -362,6 +354,7 @@ export const login = async (req, res) => {
             position: validUser.position,
             branch: validUser.branch,
             country: validUser.country,
+            city: validUser.city,
             state: validUser.state,
             isPasswordReset: validUser.isPasswordReset,
             sessionId: sessionID,
@@ -402,10 +395,7 @@ export const login = async (req, res) => {
         .json({ message: "User not found!" });
     }
   } catch (error) {
-    return res.status(StatusCodes.BAD_GATEWAY).json({
-      mesaage: error,
-      // details: error.message,
-    });
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }
 };
 
@@ -433,9 +423,7 @@ export const resetPassword = async (req, res) => {
         .json({ message: "Invalid user or Password" });
     }
   } catch (error) {
-    res.status(StatusCodes.BAD_REQUEST).json({
-      mesaage: error,
-    });
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }
 };
 
@@ -454,41 +442,7 @@ export const logout = async (req, res) => {
 
     return res.status(StatusCodes.OK).json({ message: "Logout successfully" });
   } catch (error) {
-    return res.status(StatusCodes.BAD_REQUEST).json({ message: error });
-  }
-};
-
-export const country = async (req, res) => {
-  try {
-    const countryData = await countryList();
-
-    return res.status(StatusCodes.OK).json({ data: countryData });
-  } catch (error) {
-    return res.status(StatusCodes.BAD_REQUEST).json({ message: error });
-  }
-};
-
-export const state = async (req, res) => {
-  try {
-    const country = req.params.country;
-
-    const stateData = await stateList(country);
-
-    return res.status(StatusCodes.OK).json({ data: stateData });
-  } catch (error) {
-    return res.status(StatusCodes.BAD_REQUEST).json({ message: error });
-  }
-};
-
-export const city = async (req, res) => {
-  try {
-    const { country, state } = req.query;
-
-    const stateData = await cityList(country, state);
-
-    return res.status(StatusCodes.OK).json({ data: stateData });
-  } catch (error) {
-    return res.status(StatusCodes.BAD_REQUEST).json({ message: error });
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }
 };
 
@@ -503,7 +457,7 @@ export const ifsc = async (req, res) => {
 
     return res.status(StatusCodes.OK).json({ data: result });
   } catch (error) {
-    return res.status(StatusCodes.BAD_REQUEST).json({ message: error });
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }
 };
 
@@ -515,30 +469,22 @@ export const dataTable = async (req, res) => {
     const start = page * limit - limit;
 
     const query = [];
-    if (reqData.hasOwnProperty("name")) {
-      query.push({ name: { $regex: `^${reqData.name}`, $options: "i" } });
+    if (reqData.name) {
+      query.push(BuildRegexQuery("name", reqData.name));
     }
-    if (reqData.hasOwnProperty("position")) {
-      query.push({
-        position: { $regex: `^${reqData.position}`, $options: "i" },
-      });
+    if (reqData.position) {
+      query.push(BuildRegexQuery("position", reqData.position));
     }
-    if (reqData.hasOwnProperty("branchCode")) {
-      query.push({
-        branchCode: { $regex: `^${reqData.branchCode}`, $options: "i" },
-      });
+    if (reqData.branchCode) {
+      query.push(BuildRegexQuery("branchCode", reqData.branchCode));
     }
-    if (reqData.hasOwnProperty("employeeId")) {
-      query.push({
-        employeeId: { $regex: `^${reqData.employeeId}`, $options: "i" },
-      });
+    if (reqData.employeeId) {
+      query.push(BuildRegexQuery("employeeId", reqData.employeeId));
     }
-    if (reqData.hasOwnProperty("username")) {
-      query.push({
-        username: { $regex: `^${reqData.username}`, $options: "i" },
-      });
+    if (reqData.username) {
+      query.push(BuildRegexQuery("username", reqData.username));
     }
-    if (reqData.hasOwnProperty("isActive")) {
+    if (reqData.isActive) {
       query.push({
         isActive: reqData.isActive,
       });
@@ -575,11 +521,7 @@ export const dataTable = async (req, res) => {
     const data = await employee.aggregate([
       ...findQuery,
       {
-        $sort: reqData.hasOwnProperty("sort")
-          ? reqData.sort
-          : {
-              name: 1,
-            },
+        $sort: reqData.sort || { name: 1 },
       },
 
       { $skip: start },
@@ -592,6 +534,6 @@ export const dataTable = async (req, res) => {
       count: countData,
     });
   } catch (error) {
-    res.status(StatusCodes.BAD_REQUEST).json({ message: error });
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }
 };

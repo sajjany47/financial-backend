@@ -3,9 +3,12 @@ import mongoose from "mongoose";
 const branchModel = new mongoose.Schema(
   {
     name: String,
-    country: String,
-    state: String,
-    city: String,
+    country: Number,
+    state: Number,
+    city: Number,
+    countryName: String,
+    stateName: String,
+    cityName: String,
     email: String,
     phone: String,
     address: String,

@@ -2,8 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import { createBranchSchema } from "./branch.schema.js";
 import branch from "./branch.model.js";
 import mongoose from "mongoose";
-import { query } from "express";
-import { cityList, countryList, stateList } from "../../utilis/utilis.js";
+import { BuildRegexQuery } from "../../utilis/utilis.js";
 
 export const createBranch = async (req, res) => {
   try {
@@ -16,14 +15,17 @@ export const createBranch = async (req, res) => {
       if (!checkNameAndCode) {
         const branchData = new branch({
           name: validateData.name,
-          country: validateData.country,
-          state: validateData.state,
-          city: validateData.city,
+          country: Number(validateData.country),
+          state: Number(validateData.state),
+          city: Number(validateData.city),
           email: validateData.email,
           phone: validateData.phone,
           address: validateData.address,
           pincode: validateData.pincode,
           code: validateData.code,
+          countryName: validateData.countryName,
+          stateName: validateData.stateName,
+          cityName: validateData.cityName,
           isActive: true,
           createdBy: req.user.username,
           updatedBy: null,
@@ -37,27 +39,30 @@ export const createBranch = async (req, res) => {
       }
     }
   } catch (error) {
-    return res.status(StatusCodes.BAD_REQUEST).json({ message: error });
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }
 };
 
 export const updateBranch = async (req, res) => {
   try {
-    const validateData = req.body;
+    const validateData = await createBranchSchema.validate(req.body);
     if (validateData) {
       const checkValidBranch = await branch.findOne({
         _id: new mongoose.Types.ObjectId(validateData._id),
       });
       if (checkValidBranch) {
         const branchData = {
-          country: validateData.country,
-          state: validateData.state,
-          city: validateData.city,
+          country: Number(validateData.country),
+          state: Number(validateData.state),
+          city: Number(validateData.city),
           email: validateData.email,
           phone: validateData.phone,
           address: validateData.address,
           pincode: validateData.pincode,
           isActive: validateData.isActive,
+          countryName: validateData.countryName,
+          stateName: validateData.stateName,
+          cityName: validateData.cityName,
           updatedBy: req.user.username,
         };
 
@@ -72,7 +77,7 @@ export const updateBranch = async (req, res) => {
       }
     }
   } catch (error) {
-    return res.status(StatusCodes.BAD_REQUEST).json({ message: error });
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }
 };
 
@@ -88,7 +93,7 @@ export const branchList = async (req, res) => {
       .status(StatusCodes.OK)
       .json({ message: "Data fetched successfully", data: data });
   } catch (error) {
-    res.status(StatusCodes.BAD_REQUEST).json({ message: error });
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }
 };
 
@@ -98,90 +103,51 @@ export const dataTable = async (req, res) => {
     const page = reqData.page;
     const limit = reqData.limit;
     const start = page * limit - limit;
-
     const query = [];
-    if (reqData.hasOwnProperty("name")) {
-      query.push({ name: { $regex: `^${reqData.name}`, $options: "i" } });
+    if (reqData.name) {
+      query.push(BuildRegexQuery("name", reqData.name));
     }
-    if (reqData.hasOwnProperty("country")) {
-      query.push({ country: { $regex: `^${reqData.country}`, $options: "i" } });
+    if (reqData.country) {
+      query.push({ country: reqData.country });
     }
     if (reqData.hasOwnProperty("state")) {
-      query.push({ state: { $regex: `^${reqData.state}`, $options: "i" } });
+      query.push({ state: reqData.state });
     }
     if (reqData.hasOwnProperty("city")) {
-      query.push({ city: { $regex: `^${reqData.city}`, $options: "i" } });
+      query.push({ city: reqData.city });
     }
-    if (reqData.hasOwnProperty("pincode")) {
-      query.push({ pincode: { $regex: `^${reqData.pincode}`, $options: "i" } });
+    if (reqData.pincode) {
+      query.push(BuildRegexQuery("pincode", reqData.pincode));
     }
-    if (reqData.hasOwnProperty("code")) {
-      query.push({ code: { $regex: `^${reqData.code}`, $options: "i" } });
+    if (reqData.code) {
+      query.push(BuildRegexQuery("code", reqData.code));
     }
     if (reqData.hasOwnProperty("isActive")) {
       query.push({ isActive: reqData.isActive });
     }
 
-    const countData = await branch.countDocuments([
-      { $match: query.length > 0 ? { $and: query } : {} },
-    ]);
-
     const data = await branch.aggregate([
       { $match: query.length > 0 ? { $and: query } : {} },
       {
-        $sort: reqData.hasOwnProperty("sort")
-          ? reqData.sort
-          : {
-              name: 1,
+        $facet: {
+          count: [{ $count: "total" }],
+          data: [
+            {
+              $sort: reqData.sort || { name: 1 },
             },
+            { $skip: start },
+            { $limit: limit },
+          ],
+        },
       },
-      { $skip: start },
-      { $limit: limit },
     ]);
-
-    let finalData = [];
-
-    for (const value of data) {
-      const response = {};
-      const countryData = await countryList();
-
-      if (countryList) {
-        const filterCountry = countryData.find(
-          (item) => item.id === Number(value.country)
-        );
-
-        if (filterCountry) {
-          response.country = filterCountry.name;
-          const stateData = await stateList(filterCountry.iso2);
-
-          const filterState = stateData.find(
-            (stateItem) => stateItem.id === Number(value.state)
-          );
-
-          if (filterState) {
-            response.state = filterState.name;
-            const cityData = await cityList(
-              filterCountry.iso2,
-              filterState.iso2
-            );
-            const filterCity = cityData.find(
-              (cityItem) => cityItem.id === Number(value.city)
-            );
-            if (filterCity) {
-              response.city = filterCity.name;
-            }
-          }
-          await finalData.push({ ...value, ...response });
-        }
-      }
-    }
 
     return res.status(StatusCodes.OK).json({
       message: "Data fetched successfully",
-      data: finalData,
-      count: countData,
+      data: data[0].data,
+      count: data[0].count[0] ? data[0].count[0].total : 0,
     });
   } catch (error) {
-    res.status(StatusCodes.BAD_REQUEST).json({ message: error });
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }
 };

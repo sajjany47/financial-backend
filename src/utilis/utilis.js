@@ -2,6 +2,7 @@ import { nanoid } from "nanoid";
 import nodemailer from "nodemailer";
 import jwt from "jsonwebtoken";
 import { v2 as cloudinary } from "cloudinary";
+import mongoose from "mongoose";
 
 export const url = "https://demo.com";
 
@@ -13,6 +14,7 @@ export const generateAccessToken = (data) => {
     position: data.position,
     branch: data.branch,
     country: data.country,
+    city: data.city,
     state: data.state,
     isPasswordReset: data.isPasswordReset,
     sessionId: data.sessionId,
@@ -34,6 +36,7 @@ export const generateRefreshToken = (data) => {
     branch: data.branch,
     country: data.country,
     state: data.state,
+    city: data.city,
     isPasswordReset: data.isPasswordReset,
     sessionId: data.sessionId,
   };
@@ -108,112 +111,13 @@ export const ImageUpload = async (folderName, image) => {
   return a.url;
 };
 
-export const countryList = async () => {
-  var headers = new Headers();
-  headers.append(
-    "X-CSCAPI-KEY",
-    "OU5ycmZrek91NnpXVjdUTVJoUVZ1N3ZWWWJGM3lnQVB0N0djYngzMA=="
-  );
-
-  var requestOptions = {
-    method: "GET",
-    headers: headers,
-    redirect: "follow",
-  };
-
-  try {
-    const response = await fetch(
-      "https://api.countrystatecity.in/v1/countries",
-      requestOptions
-    );
-    const result = await response.json();
-    return result;
-  } catch (error) {
-    throw error;
-  }
+export const BuildRegexQuery = (field, value) => {
+  return { [field]: { $regex: `^${value}`, $options: "i" } };
 };
 
-export const stateList = async (country) => {
-  var headers = new Headers();
-  headers.append(
-    "X-CSCAPI-KEY",
-    "OU5ycmZrek91NnpXVjdUTVJoUVZ1N3ZWWWJGM3lnQVB0N0djYngzMA=="
-  );
-
-  var requestOptions = {
-    method: "GET",
-    headers: headers,
-    redirect: "follow",
-  };
-
-  try {
-    const response = await fetch(
-      `https://api.countrystatecity.in/v1/countries/${country}/states`,
-      requestOptions
-    );
-    const result = await response.json();
-    return result;
-  } catch (error) {
-    throw error;
-  }
-};
-
-export const cityList = async (country, state) => {
-  var headers = new Headers();
-  headers.append(
-    "X-CSCAPI-KEY",
-    "OU5ycmZrek91NnpXVjdUTVJoUVZ1N3ZWWWJGM3lnQVB0N0djYngzMA=="
-  );
-
-  var requestOptions = {
-    method: "GET",
-    headers: headers,
-    redirect: "follow",
-  };
-
-  try {
-    const response = await fetch(
-      `https://api.countrystatecity.in/v1/countries/${country}/states/${state}/cities`,
-      requestOptions
-    );
-    const result = await response.json();
-    return result;
-  } catch (error) {
-    throw error;
-  }
-};
-
-export const fetchCountryStateCityData = async (data) => {
-  const response = {};
-  const countryData = await countryList();
-
-  if (countryList) {
-    const filterCountry = countryData.find(
-      (item) => item.id === Number(value.country)
-    );
-
-    if (filterCountry) {
-      const stateData = await stateList(filterCountry.iso2);
-
-      response.state = stateData.map((item) => ({
-        label: item.name,
-        value: item.id,
-      }));
-
-      const filterState = stateData.find(
-        (stateItem) => stateItem.id === Number(value.state)
-      );
-
-      if (filterState) {
-        const cityData = await cityList(filterCountry.iso2, filterState.iso2);
-
-        response.city = cityData.map((item) => ({
-          label: item.name,
-          value: item.id,
-        }));
-      }
-    }
-
-    return response;
-  }
+export const GetFileName = (file) => {
+  const fileSplit = (file.name || "").split(".");
+  const fileExtension = fileSplit[fileSplit.length - 1];
+  const fileName = `${new mongoose.Types.ObjectId()}.${fileExtension}`;
+  return fileName;
 };
