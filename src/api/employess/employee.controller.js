@@ -51,10 +51,17 @@ export const adminSignUpSchemaFirst = async (req, res) => {
           email: validatedUser.email,
           dob: validatedUser.dob,
           position: validatedUser.position,
-          state: Number(validatedUser.state),
-          country: Number(validatedUser.country),
-          city: Number(validatedUser.city),
-          branch: new mongoose.Types.ObjectId(validatedUser.branch),
+          state:
+            validatedUser.state === null ? null : Number(validatedUser.state),
+          country:
+            validatedUser.country === null
+              ? null
+              : Number(validatedUser.country),
+          city: validatedUser.city === null ? null : Number(validatedUser.city),
+          branch:
+            validatedUser.branch === null
+              ? null
+              : new mongoose.Types.ObjectId(validatedUser.branch),
           fresherOrExperience: validatedUser.fresherOrExperience,
           password: await bcrypt.hash(password, 10),
           employeeId: employeeId,
@@ -69,6 +76,7 @@ export const adminSignUpSchemaFirst = async (req, res) => {
         };
 
         if (req.files) {
+          const file = req.files.userImage;
           const fileName = GetFileName(req.files.userImage);
           const uploadPath = GLocalImage(fileName, process.env.EMPLOYEE_PATH);
 
@@ -267,9 +275,13 @@ export const detailsUpdateUser = async (req, res) => {
       });
       if (req.files.userImage) {
         if (findUser.userImage) {
-          const deletePath = GLocalImage(findUser.userImage);
-          await fs.promises.unlink(deletePath + documentImagePath);
+          const deletePath = GLocalImage(
+            findUser.userImage,
+            process.env.EMPLOYEE_PATH
+          );
+          await fs.promises.unlink(deletePath + findUser.userImage);
         }
+        const file = req.files.userImage;
         const fileName = GetFileName(req.files.userImage);
         const uploadPath = GLocalImage(fileName, process.env.EMPLOYEE_PATH);
 
@@ -279,76 +291,100 @@ export const detailsUpdateUser = async (req, res) => {
       }
       if (req.files.passportImage) {
         if (findUser.passportImage) {
-          const deletePath = GLocalImage(findUser.passportImage);
-          await fs.promises.unlink(deletePath + documentImagePath);
+          const deletePath = GLocalImage(
+            findUser.passportImage,
+            process.env.EMPLOYEE_PATH
+          );
+          await fs.promises.unlink(deletePath + findUser.passportImage);
         }
-        const file = GetFileName(req.files.passportImage);
-        const uploadPath = GLocalImage(file, process.env.EMPLOYEE_PATH);
+        const file = req.files.passportImage;
+        const fileName = GetFileName(req.files.passportImage);
+        const uploadPath = GLocalImage(fileName, process.env.EMPLOYEE_PATH);
 
-        await file.mv(uploadPath + file);
+        await file.mv(uploadPath + fileName);
         // const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
-        reqData.passportImage = file;
+        reqData.passportImage = fileName;
       }
       if (req.files.voterImage) {
         if (findUser.voterImage) {
-          const deletePath = GLocalImage(findUser.voterImage);
-          await fs.promises.unlink(deletePath + documentImagePath);
+          const deletePath = GLocalImage(
+            findUser.voterImage,
+            process.env.EMPLOYEE_PATH
+          );
+          await fs.promises.unlink(deletePath + findUser.voterImage);
         }
-        const file = GetFileName(req.files.voterImage);
-        const uploadPath = GLocalImage(file, process.env.EMPLOYEE_PATH);
+        const file = req.files.voterImage;
+        const fileName = GetFileName(req.files.voterImage);
+        const uploadPath = GLocalImage(fileName, process.env.EMPLOYEE_PATH);
 
-        await file.mv(uploadPath + file);
+        await file.mv(uploadPath + fileName);
 
-        reqData.voterImage = file;
+        reqData.voterImage = fileName;
       }
       if (req.files.panImage) {
         if (findUser.panImage) {
-          const deletePath = GLocalImage(findUser.panImage);
-          await fs.promises.unlink(deletePath + documentImagePath);
+          const deletePath = GLocalImage(
+            findUser.panImage,
+            process.env.EMPLOYEE_PATH
+          );
+          await fs.promises.unlink(deletePath + findUser.panImage);
         }
-        const file = GetFileName(req.files.panImage);
-        const uploadPath = GLocalImage(file, process.env.EMPLOYEE_PATH);
+        const file = req.files.panImage;
+        const fileName = GetFileName(req.files.panImage);
+        const uploadPath = GLocalImage(fileName, process.env.EMPLOYEE_PATH);
 
-        await file.mv(uploadPath + file);
+        await file.mv(uploadPath + fileName);
 
-        reqData.panImage = file;
+        reqData.panImage = fileName;
       }
       if (req.files.aadharImage) {
         if (findUser.aadharImage) {
-          const deletePath = GLocalImage(findUser.aadharImage);
-          await fs.promises.unlink(deletePath + documentImagePath);
+          const deletePath = GLocalImage(
+            findUser.aadharImage,
+            process.env.EMPLOYEE_PATH
+          );
+          await fs.promises.unlink(deletePath + findUser.aadharImage);
         }
-        const file = GetFileName(req.files.aadharImage);
-        const uploadPath = GLocalImage(file, process.env.EMPLOYEE_PATH);
+        const file = req.files.aadharImage;
+        const fileName = GetFileName(req.files.aadharImage);
+        const uploadPath = GLocalImage(fileName, process.env.EMPLOYEE_PATH);
 
-        await file.mv(uploadPath + file);
+        await file.mv(uploadPath + fileName);
 
-        reqData.aadharImage = file;
+        reqData.aadharImage = fileName;
       }
 
       if (req.files.passbookImage) {
         if (findUser.passbookImage) {
-          const deletePath = GLocalImage(findUser.passbookImage);
-          await fs.promises.unlink(deletePath + documentImagePath);
+          const deletePath = GLocalImage(
+            findUser.passbookImage,
+            process.env.EMPLOYEE_PATH
+          );
+          await fs.promises.unlink(deletePath + findUser.passbookImage);
         }
-        const file = GetFileName(req.files.passbookImage);
-        const uploadPath = GLocalImage(file, process.env.EMPLOYEE_PATH);
+        const file = req.files.passbookImage;
+        const fileName = GetFileName(req.files.passbookImage);
+        const uploadPath = GLocalImage(fileName, process.env.EMPLOYEE_PATH);
 
-        await file.mv(uploadPath + file);
+        await file.mv(uploadPath + fileName);
 
-        reqData.passbookImage = file;
+        reqData.passbookImage = fileName;
       }
       if (req.files.uanImage) {
         if (findUser.uanImage) {
-          const deletePath = GLocalImage(findUser.uanImage);
-          await fs.promises.unlink(deletePath + documentImagePath);
+          const deletePath = GLocalImage(
+            findUser.uanImage,
+            process.env.EMPLOYEE_PATH
+          );
+          await fs.promises.unlink(deletePath + findUser.uanImage);
         }
-        const file = GetFileName(req.files.uanImage);
-        const uploadPath = GLocalImage(file, process.env.EMPLOYEE_PATH);
+        const file = req.files.uanImage;
+        const fileName = GetFileName(req.files.uanImage);
+        const uploadPath = GLocalImage(fileName, process.env.EMPLOYEE_PATH);
 
-        await file.mv(uploadPath + file);
+        await file.mv(uploadPath + fileName);
 
-        reqData.uanImage = file;
+        reqData.uanImage = fileName;
       }
     }
 

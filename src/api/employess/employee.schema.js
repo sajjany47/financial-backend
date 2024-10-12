@@ -33,13 +33,29 @@ export const adminSignUpSchema30 = Yup.object().shape({
 
   branch: Yup.string().when("position", {
     is: (val) =>
-      val !== Position.ADMIN || val !== Position.SM || val !== Position.CM,
+      val !== Position.ADMIN && val !== Position.SM && val !== Position.CM,
     then: () => Yup.string().required("Branch is required"),
     otherwise: () => Yup.string().notRequired(),
   }),
-  state: Yup.string().required("State is required"),
-  country: Yup.string().required("Country is required"),
-  city: Yup.string().required("City is required"),
+
+  state: Yup.string().when("position", {
+    is: (val) =>
+      val !== Position.ADMIN && val !== Position.SM && val !== Position.CM,
+    then: () => Yup.string().required("State is required"),
+    otherwise: () => Yup.string().notRequired(),
+  }),
+  country: Yup.string().when("position", {
+    is: (val) =>
+      val !== Position.ADMIN && val !== Position.SM && val !== Position.CM,
+    then: () => Yup.string().required("Country is required"),
+    otherwise: () => Yup.string().notRequired(),
+  }),
+  city: Yup.string().when("position", {
+    is: (val) =>
+      val !== Position.ADMIN && val !== Position.SM && val !== Position.CM,
+    then: () => Yup.string().required("City is required"),
+    otherwise: () => Yup.string().notRequired(),
+  }),
 });
 
 export const educationOrCompanyDetailSchema30 = Yup.object().shape({

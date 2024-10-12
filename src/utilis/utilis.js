@@ -116,6 +116,7 @@ export const GLocalImage = (fileName, folderName) => {
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = path.dirname(__filename);
   const uploadPath = path.join(__dirname, folderName, fileName);
+
   return uploadPath;
 };
 
