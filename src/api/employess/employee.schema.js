@@ -32,13 +32,9 @@ export const adminSignUpSchema30 = Yup.object().shape({
     .required("Position is required"),
 
   branch: Yup.string().required("Branch is required"),
-  address: Yup.string().required("Address is required"),
   state: Yup.string().required("State is required"),
   country: Yup.string().required("Country is required"),
   city: Yup.string().required("City is required"),
-  pincode: Yup.string()
-    .matches(/^\d{6}$/, "Enter valid pincode")
-    .required("Pincode is required"),
 });
 
 export const educationOrCompanyDetailSchema30 = Yup.object().shape({

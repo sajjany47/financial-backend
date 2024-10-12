@@ -3,6 +3,8 @@ import nodemailer from "nodemailer";
 import jwt from "jsonwebtoken";
 import { v2 as cloudinary } from "cloudinary";
 import mongoose from "mongoose";
+import path from "path";
+import { fileURLToPath } from "url";
 
 export const url = "https://demo.com";
 
@@ -109,6 +111,12 @@ export const ImageUpload = async (folderName, image) => {
   });
 
   return a.url;
+};
+export const GLocalImage = (fileName, folderName) => {
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
+  const uploadPath = path.join(__dirname, folderName, fileName);
+  return uploadPath;
 };
 
 export const BuildRegexQuery = (field, value) => {

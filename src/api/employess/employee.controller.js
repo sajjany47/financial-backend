@@ -12,6 +12,8 @@ import {
   generateEmployeeId,
   generatePassword,
   generateRefreshToken,
+  GetFileName,
+  GLocalImage,
   ImageUpload,
   MailSend,
 } from "../../utilis/utilis.js";
@@ -20,6 +22,14 @@ import { welcome } from "../../template/wlecome.js";
 import mongoose from "mongoose";
 import { nanoid } from "nanoid";
 import employee from "./employee.model.js";
+import { PersonalLoanAddressSchema } from "../loan/loan.schema.js";
+import {
+  EmployeeAccountData,
+  EmployeeAddressData,
+  EmployeeBasicData,
+  EmployeeDocumentData,
+} from "./EmployeeData.js";
+import fs from "fs";
 
 export const adminSignUpSchemaFirst = async (req, res) => {
   try {
@@ -41,17 +51,15 @@ export const adminSignUpSchemaFirst = async (req, res) => {
           email: validatedUser.email,
           dob: validatedUser.dob,
           position: validatedUser.position,
-          address: validatedUser.address,
           state: Number(validatedUser.state),
           country: Number(validatedUser.country),
           city: Number(validatedUser.city),
-          pincode: validatedUser.pincode,
           branch: new mongoose.Types.ObjectId(validatedUser.branch),
           fresherOrExperience: validatedUser.fresherOrExperience,
           password: await bcrypt.hash(password, 10),
           employeeId: employeeId,
           isProfileVerified: Status.PENDING,
-          profileRatio: 30,
+          profileRatio: 20,
           approvedBy: req.user._id,
           isActive: true,
           createdBy: req.user._id,
@@ -61,9 +69,13 @@ export const adminSignUpSchemaFirst = async (req, res) => {
         };
 
         if (req.files) {
-          const file = req.files.userImage;
-          const imageUrl = await ImageUpload("user", file);
-          userData.userImage = imageUrl;
+          const fileName = GetFileName(req.files.userImage);
+          const uploadPath = GLocalImage(fileName, process.env.EMPLOYEE_PATH);
+
+          await file.mv(uploadPath + fileName);
+          // const file = req.files.userImage;
+          // const imageUrl = await ImageUpload("user", file);
+          userData.userImage = fileName;
         }
 
         const createUser = new employee(userData);
@@ -226,89 +238,117 @@ export const detailsUpdateUser = async (req, res) => {
         ? documentsSchema20
         : req.body.dataType === "account"
         ? accountDetailSchema20
+        : req.body.dataType === "address"
+        ? PersonalLoanAddressSchema
         : "";
     // console.log(req.body);
     const validatedUser = await selectValodation.validate(req.body);
 
     const reqData =
       validatedUser.dataType === "basic"
-        ? {
-            name: validatedUser.name,
-            username: validatedUser.username,
-            mobile: validatedUser.mobile,
-            email: validatedUser.email,
-            dob: validatedUser.dob,
-            position: validatedUser.position,
-            address: validatedUser.address,
-            state: Number(validatedUser.state),
-            country: Number(validatedUser.country),
-            city: Number(validatedUser.city),
-            pincode: validatedUser.pincode,
-            branch: new mongoose.Types.ObjectId(validatedUser.branch),
-            fresherOrExperience: validatedUser.fresherOrExperience,
-            pageIndex: 0,
-          }
+        ? EmployeeBasicData(validatedUser)
+        : validatedUser.dataType === "address"
+        ? EmployeeAddressData(validatedUser)
         : validatedUser.dataType === "educationAndWork"
         ? {
             education: validatedUser.education,
 
             workDetail: validatedUser.workDetail,
-            pageIndex: 1,
-          }
-        : validatedUser.dataType === "document"
-        ? {
-            aadharNumber: validatedUser.aadharNumber,
-            voterNumber: validatedUser.voterNumber,
-            panNumber: validatedUser.panNumber,
-            passportNumber: validatedUser.passportNumber,
             pageIndex: 2,
           }
+        : validatedUser.dataType === "document"
+        ? EmployeeDocumentData(validatedUser)
         : validatedUser.dataType === "account"
-        ? {
-            bankName: validatedUser.bankName,
-            accountNumber: validatedUser.accountNumber,
-            bankBranchName: validatedUser.bankBranchName,
-            ifsc: validatedUser.ifsc,
-            uan: validatedUser.uan,
-            pageIndex: 0,
-          }
+        ? EmployeeAccountData(validatedUser)
         : null;
     if (req.files) {
+      const findUser = await employee.findOne({
+        _id: new mongoose.Types.ObjectId(validatedUser.id),
+      });
       if (req.files.userImage) {
-        const file = req.files.userImage;
-        const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
-        reqData.userImage = imageUrl;
+        if (findUser.userImage) {
+          const deletePath = GLocalImage(findUser.userImage);
+          await fs.promises.unlink(deletePath + documentImagePath);
+        }
+        const fileName = GetFileName(req.files.userImage);
+        const uploadPath = GLocalImage(fileName, process.env.EMPLOYEE_PATH);
+
+        await file.mv(uploadPath + fileName);
+
+        reqData.userImage = fileName;
       }
       if (req.files.passportImage) {
-        const file = req.files.passportImage;
-        const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
-        reqData.passportImage = imageUrl;
+        if (findUser.passportImage) {
+          const deletePath = GLocalImage(findUser.passportImage);
+          await fs.promises.unlink(deletePath + documentImagePath);
+        }
+        const file = GetFileName(req.files.passportImage);
+        const uploadPath = GLocalImage(file, process.env.EMPLOYEE_PATH);
+
+        await file.mv(uploadPath + file);
+        // const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
+        reqData.passportImage = file;
       }
       if (req.files.voterImage) {
-        const file = req.files.voterImage;
-        const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
-        reqData.voterImage = imageUrl;
+        if (findUser.voterImage) {
+          const deletePath = GLocalImage(findUser.voterImage);
+          await fs.promises.unlink(deletePath + documentImagePath);
+        }
+        const file = GetFileName(req.files.voterImage);
+        const uploadPath = GLocalImage(file, process.env.EMPLOYEE_PATH);
+
+        await file.mv(uploadPath + file);
+
+        reqData.voterImage = file;
       }
       if (req.files.panImage) {
-        const file = req.files.panImage;
-        const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
-        reqData.panImage = imageUrl;
+        if (findUser.panImage) {
+          const deletePath = GLocalImage(findUser.panImage);
+          await fs.promises.unlink(deletePath + documentImagePath);
+        }
+        const file = GetFileName(req.files.panImage);
+        const uploadPath = GLocalImage(file, process.env.EMPLOYEE_PATH);
+
+        await file.mv(uploadPath + file);
+
+        reqData.panImage = file;
       }
       if (req.files.aadharImage) {
-        const file = req.files.aadharImage;
-        const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
-        reqData.aadharImage = imageUrl;
+        if (findUser.aadharImage) {
+          const deletePath = GLocalImage(findUser.aadharImage);
+          await fs.promises.unlink(deletePath + documentImagePath);
+        }
+        const file = GetFileName(req.files.aadharImage);
+        const uploadPath = GLocalImage(file, process.env.EMPLOYEE_PATH);
+
+        await file.mv(uploadPath + file);
+
+        reqData.aadharImage = file;
       }
 
       if (req.files.passbookImage) {
-        const file = req.files.passbookImage;
-        const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
-        reqData.passbookImage = imageUrl;
+        if (findUser.passbookImage) {
+          const deletePath = GLocalImage(findUser.passbookImage);
+          await fs.promises.unlink(deletePath + documentImagePath);
+        }
+        const file = GetFileName(req.files.passbookImage);
+        const uploadPath = GLocalImage(file, process.env.EMPLOYEE_PATH);
+
+        await file.mv(uploadPath + file);
+
+        reqData.passbookImage = file;
       }
       if (req.files.uanImage) {
-        const file = req.files.uanImage;
-        const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
-        reqData.uanImage = imageUrl;
+        if (findUser.uanImage) {
+          const deletePath = GLocalImage(findUser.uanImage);
+          await fs.promises.unlink(deletePath + documentImagePath);
+        }
+        const file = GetFileName(req.files.uanImage);
+        const uploadPath = GLocalImage(file, process.env.EMPLOYEE_PATH);
+
+        await file.mv(uploadPath + file);
+
+        reqData.uanImage = file;
       }
     }
 
