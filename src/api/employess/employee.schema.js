@@ -31,7 +31,12 @@ export const adminSignUpSchema30 = Yup.object().shape({
     ])
     .required("Position is required"),
 
-  branch: Yup.string().required("Branch is required"),
+  branch: Yup.string().when("position", {
+    is: (val) =>
+      val !== Position.ADMIN || val !== Position.SM || val !== Position.CM,
+    then: () => Yup.string().required("Branch is required"),
+    otherwise: () => Yup.string().notRequired(),
+  }),
   state: Yup.string().required("State is required"),
   country: Yup.string().required("Country is required"),
   city: Yup.string().required("City is required"),
