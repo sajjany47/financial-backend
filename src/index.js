@@ -22,7 +22,7 @@ function main() {
   const app = express();
   app.use(
     fileUpload({
-      useTempFiles: true,
+      useTempFiles: false,
     })
   );
   const server = createServer(app);

@@ -5,7 +5,7 @@ import {
   documentsSchema20,
   educationOrCompanyDetailSchema30,
 } from "./employee.schema.js";
-import { Status } from "./EmployeeConfig.js";
+import { Position, Status } from "./EmployeeConfig.js";
 import {
   BuildRegexQuery,
   generateAccessToken,
@@ -51,21 +51,10 @@ export const adminSignUpSchemaFirst = async (req, res) => {
           email: validatedUser.email,
           dob: validatedUser.dob,
           position: validatedUser.position,
-          state:
-            validatedUser.state === null ? null : Number(validatedUser.state),
-          country:
-            validatedUser.country === null
-              ? null
-              : Number(validatedUser.country),
-          city: validatedUser.city === null ? null : Number(validatedUser.city),
-          branch:
-            validatedUser.branch === null
-              ? null
-              : new mongoose.Types.ObjectId(validatedUser.branch),
+
           fresherOrExperience: validatedUser.fresherOrExperience,
           password: await bcrypt.hash(password, 10),
           employeeId: employeeId,
-          isProfileVerified: Status.PENDING,
           profileRatio: 20,
           approvedBy: req.user._id,
           isActive: true,
@@ -74,6 +63,36 @@ export const adminSignUpSchemaFirst = async (req, res) => {
           isPasswordReset: false,
           pageIndex: 0,
         };
+
+        if (
+          validatedUser.position === Position.ADMIN ||
+          validatedUser.position === Position.SM ||
+          validatedUser.position === Position.CM
+        ) {
+          if (validatedUser.position === Position.ADMIN) {
+            userData.country = null;
+            userData.state = null;
+            userData.city = null;
+            userData.branch = null;
+          }
+          if (validatedUser.position === Position.SM) {
+            userData.country = validatedUser.country;
+            userData.state = validatedUser.state;
+            userData.city = null;
+            userData.branch = null;
+          }
+          if (validatedUser.position === Position.CM) {
+            userData.country = validatedUser.country;
+            userData.state = validatedUser.state;
+            userData.city = validatedUser.city;
+            userData.branch = null;
+          }
+        } else {
+          userData.country = validatedUser.country;
+          userData.state = validatedUser.state;
+          userData.city = validatedUser.city;
+          userData.branch = validatedUser.branch;
+        }
 
         if (req.files) {
           const file = req.files.userImage;
@@ -138,30 +157,111 @@ export const updateEducationAndCompanyDetails = async (req, res) => {
             salarySlip: validData.salarySlip,
           };
     if (req.files) {
-      if (req.files.resultImage) {
-        const file = req.files.resultImage;
-        const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
-        reqData.resultImage = imageUrl;
-      }
-      if (req.files.experienceLetter) {
-        const file = req.files.experienceLetter;
-        const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
-        reqData.experienceLetter = imageUrl;
-      }
-      if (req.files.relievingLetter) {
-        const file = req.files.relievingLetter;
-        const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
-        reqData.relievingLetter = imageUrl;
-      }
-      if (req.files.appointmentLetter) {
-        const file = req.files.appointmentLetter;
-        const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
-        reqData.appointmentLetter = imageUrl;
-      }
-      if (req.files.salarySlip) {
-        const file = req.files.salarySlip;
-        const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
-        reqData.salarySlip = imageUrl;
+      const findUser = await employee.findOne({
+        _id: new mongoose.Types.ObjectId(validData.id),
+      });
+      if (req.body.dataType === "education") {
+        if (req.files.resultImage) {
+          if (validData.actionType !== "add") {
+            const findEducationImage = findUser?.education.find(
+              (item) => item.id.toString() === validData.productId
+            );
+            const deletePath = GLocalImage(
+              findEducationImage.resultImage,
+              process.env.EMPLOYEE_PATH
+            );
+            await fs.promises.unlink(
+              deletePath + findEducationImage.resultImage
+            );
+          }
+          const file = req.files.resultImage;
+          const fileName = GetFileName(req.files.resultImage);
+          const uploadPath = GLocalImage(fileName, process.env.EMPLOYEE_PATH);
+
+          await file.mv(uploadPath + fileName);
+          reqData.resultImage = fileName;
+        }
+      } else {
+        if (req.files.experienceLetter) {
+          if (validData.actionType !== "add") {
+            const findWorkImage = findUser.workDetail.find(
+              (item) => item.id.toString() === validData.productId
+            );
+            const deletePath = GLocalImage(
+              findWorkImage.experienceLetter,
+              process.env.EMPLOYEE_PATH
+            );
+            await fs.promises.unlink(
+              deletePath + findEducationImage.experienceLetter
+            );
+          }
+          const file = req.files.experienceLetter;
+          const fileName = GetFileName(req.files.experienceLetter);
+          const uploadPath = GLocalImage(fileName, process.env.EMPLOYEE_PATH);
+
+          await file.mv(uploadPath + fileName);
+          reqData.experienceLetter = fileName;
+        }
+        if (req.files.relievingLetter) {
+          if (validData.actionType !== "add") {
+            const findWorkImage = findUser.workDetail.find(
+              (item) => item.id.toString() === validData.productId
+            );
+            const deletePath = GLocalImage(
+              findWorkImage.relievingLetter,
+              process.env.EMPLOYEE_PATH
+            );
+            await fs.promises.unlink(
+              deletePath + findEducationImage.relievingLetter
+            );
+          }
+          const file = req.files.relievingLetter;
+          const fileName = GetFileName(req.files.relievingLetter);
+          const uploadPath = GLocalImage(fileName, process.env.EMPLOYEE_PATH);
+
+          await file.mv(uploadPath + fileName);
+          reqData.relievingLetter = fileName;
+        }
+        if (req.files.appointmentLetter) {
+          if (validData.actionType !== "add") {
+            const findWorkImage = findUser.workDetail.find(
+              (item) => item.id.toString() === validData.productId
+            );
+            const deletePath = GLocalImage(
+              findWorkImage.appointmentLetter,
+              process.env.EMPLOYEE_PATH
+            );
+            await fs.promises.unlink(
+              deletePath + findEducationImage.appointmentLetter
+            );
+          }
+          const file = req.files.appointmentLetter;
+          const fileName = GetFileName(req.files.appointmentLetter);
+          const uploadPath = GLocalImage(fileName, process.env.EMPLOYEE_PATH);
+
+          await file.mv(uploadPath + fileName);
+          reqData.appointmentLetter = fileName;
+        }
+        if (req.files.salarySlip) {
+          if (validData.actionType !== "add") {
+            const findWorkImage = findUser.workDetail.find(
+              (item) => item.id.toString() === validData.productId
+            );
+            const deletePath = GLocalImage(
+              findWorkImage.salarySlip,
+              process.env.EMPLOYEE_PATH
+            );
+            await fs.promises.unlink(
+              deletePath + findEducationImage.salarySlip
+            );
+          }
+          const file = req.files.salarySlip;
+          const fileName = GetFileName(req.files.salarySlip);
+          const uploadPath = GLocalImage(fileName, process.env.EMPLOYEE_PATH);
+
+          await file.mv(uploadPath + fileName);
+          reqData.salarySlip = fileName;
+        }
       }
     }
 

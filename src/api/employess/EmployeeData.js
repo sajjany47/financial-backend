@@ -1,20 +1,48 @@
+import mongoose from "mongoose";
+import { Position } from "./EmployeeConfig.js";
+
 export const EmployeeBasicData = (data) => {
-  const prepareData = {
+  let prepareData = {
     name: data.name,
     username: data.username,
     mobile: data.mobile,
     email: data.email,
     dob: data.dob,
     position: data.position,
-    address: data.address,
-    state: Number(data.state),
-    country: Number(data.country),
-    city: Number(data.city),
     pincode: data.pincode,
-    branch: new mongoose.Types.ObjectId(data.branch),
     fresherOrExperience: data.fresherOrExperience,
     pageIndex: 0,
   };
+
+  if (
+    data.position === Position.ADMIN ||
+    data.position === Position.SM ||
+    data.position === Position.CM
+  ) {
+    if (data.position === Position.ADMIN) {
+      prepareData.country = null;
+      prepareData.state = null;
+      prepareData.city = null;
+      prepareData.branch = null;
+    }
+    if (data.position === Position.SM) {
+      prepareData.country = data.country;
+      prepareData.state = data.state;
+      prepareData.city = null;
+      prepareData.branch = null;
+    }
+    if (data.position === Position.CM) {
+      prepareData.country = data.country;
+      prepareData.state = data.state;
+      prepareData.city = data.city;
+      prepareData.branch = null;
+    }
+  } else {
+    prepareData.country = data.country;
+    prepareData.state = data.state;
+    prepareData.city = data.city;
+    prepareData.branch = new mongoose.Types.ObjectId(data.branch);
+  }
 
   return prepareData;
 };
@@ -37,8 +65,6 @@ export const EmployeeAddressData = (data) => {
     residenceCity: Number(data.residenceCity),
     addressSame: data.addressSame,
     residenceType: data.residenceType,
-    applicationStaus: LoanStatusEnum.INCOMPLETED,
-    status: LoanApplicationStepsEnum.INCOMPLETED,
     activeIndex: 1,
   };
 
