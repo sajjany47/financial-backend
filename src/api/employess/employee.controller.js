@@ -5,7 +5,11 @@ import {
   documentsSchema20,
   educationOrCompanyDetailSchema30,
 } from "./employee.schema.js";
-import { Position, Status } from "./EmployeeConfig.js";
+import {
+  EmployeeDocumentImageUpload,
+  Position,
+  Status,
+} from "./EmployeeConfig.js";
 import {
   BuildRegexQuery,
   generateAccessToken,
@@ -138,7 +142,7 @@ export const updateEducationAndCompanyDetails = async (req, res) => {
   try {
     const validData = req.body;
 
-    const reqData =
+    let reqData =
       req.body.dataType === "education"
         ? {
             boardName: validData.boardName,
@@ -162,105 +166,146 @@ export const updateEducationAndCompanyDetails = async (req, res) => {
       });
       if (req.body.dataType === "education") {
         if (req.files.resultImage) {
-          if (validData.actionType !== "add") {
-            const findEducationImage = findUser?.education.find(
-              (item) => item.id.toString() === validData.productId
-            );
-            const deletePath = GLocalImage(
-              findEducationImage.resultImage,
-              process.env.EMPLOYEE_PATH
-            );
-            await fs.promises.unlink(
-              deletePath + findEducationImage.resultImage
-            );
-          }
-          const file = req.files.resultImage;
-          const fileName = GetFileName(req.files.resultImage);
-          const uploadPath = GLocalImage(fileName, process.env.EMPLOYEE_PATH);
+          // if (validData.actionType !== "add") {
+          //   const findEducationImage = findUser?.education.find(
+          //     (item) => item.id.toString() === validData.productId
+          //   );
+          //   const deletePath = GLocalImage(
+          //     findEducationImage.resultImage,
+          //     process.env.EMPLOYEE_PATH
+          //   );
+          //   await fs.promises.unlink(
+          //     deletePath + findEducationImage.resultImage
+          //   );
+          // }
+          // const file = req.files.resultImage;
+          // const fileName = GetFileName(req.files.resultImage);
+          // const uploadPath = GLocalImage(fileName, process.env.EMPLOYEE_PATH);
 
-          await file.mv(uploadPath + fileName);
-          reqData.resultImage = fileName;
+          // await file.mv(uploadPath + fileName);
+          const a = await EmployeeDocumentImageUpload(
+            validData.actionType,
+            validData.actionType !== "add" ? findUser?.education : [],
+            validData.productId,
+            validData.actionType !== "add" ? "resultImage" : "",
+            req.files.resultImage
+          );
+
+          reqData.resultImage = a;
         }
       } else {
         if (req.files.experienceLetter) {
-          if (validData.actionType !== "add") {
-            const findWorkImage = findUser.workDetail.find(
-              (item) => item.id.toString() === validData.productId
-            );
-            const deletePath = GLocalImage(
-              findWorkImage.experienceLetter,
-              process.env.EMPLOYEE_PATH
-            );
-            await fs.promises.unlink(
-              deletePath + findEducationImage.experienceLetter
-            );
-          }
-          const file = req.files.experienceLetter;
-          const fileName = GetFileName(req.files.experienceLetter);
-          const uploadPath = GLocalImage(fileName, process.env.EMPLOYEE_PATH);
+          // if (validData.actionType !== "add") {
+          //   const findWorkImage = findUser.workDetail.find(
+          //     (item) => item.id.toString() === validData.productId
+          //   );
+          //   const deletePath = GLocalImage(
+          //     findWorkImage.experienceLetter,
+          //     process.env.EMPLOYEE_PATH
+          //   );
+          //   await fs.promises.unlink(
+          //     deletePath + findEducationImage.experienceLetter
+          //   );
+          // }
+          // const file = req.files.experienceLetter;
+          // const fileName = GetFileName(req.files.experienceLetter);
+          // const uploadPath = GLocalImage(fileName, process.env.EMPLOYEE_PATH);
 
-          await file.mv(uploadPath + fileName);
-          reqData.experienceLetter = fileName;
+          // await file.mv(uploadPath + fileName);
+
+          const a = await EmployeeDocumentImageUpload(
+            validData.actionType,
+            validData.actionType !== "add" ? findUser?.workDetail : [],
+            validData.productId,
+            validData.actionType !== "add" ? "experienceLetter" : "",
+            req.files.experienceLetter
+          );
+
+          reqData.experienceLetter = a;
         }
         if (req.files.relievingLetter) {
-          if (validData.actionType !== "add") {
-            const findWorkImage = findUser.workDetail.find(
-              (item) => item.id.toString() === validData.productId
-            );
-            const deletePath = GLocalImage(
-              findWorkImage.relievingLetter,
-              process.env.EMPLOYEE_PATH
-            );
-            await fs.promises.unlink(
-              deletePath + findEducationImage.relievingLetter
-            );
-          }
-          const file = req.files.relievingLetter;
-          const fileName = GetFileName(req.files.relievingLetter);
-          const uploadPath = GLocalImage(fileName, process.env.EMPLOYEE_PATH);
+          // if (validData.actionType !== "add") {
+          //   const findWorkImage = findUser.workDetail.find(
+          //     (item) => item.id.toString() === validData.productId
+          //   );
+          //   const deletePath = GLocalImage(
+          //     findWorkImage.relievingLetter,
+          //     process.env.EMPLOYEE_PATH
+          //   );
+          //   await fs.promises.unlink(
+          //     deletePath + findEducationImage.relievingLetter
+          //   );
+          // }
+          // const file = req.files.relievingLetter;
+          // const fileName = GetFileName(req.files.relievingLetter);
+          // const uploadPath = GLocalImage(fileName, process.env.EMPLOYEE_PATH);
 
-          await file.mv(uploadPath + fileName);
-          reqData.relievingLetter = fileName;
+          // await file.mv(uploadPath + fileName);
+
+          const a = await EmployeeDocumentImageUpload(
+            validData.actionType,
+            validData.actionType !== "add" ? findUser?.workDetail : [],
+            validData.productId,
+            validData.actionType !== "add" ? "relievingLetter" : "",
+            req.files.relievingLetter
+          );
+          reqData.relievingLetter = a;
         }
         if (req.files.appointmentLetter) {
-          if (validData.actionType !== "add") {
-            const findWorkImage = findUser.workDetail.find(
-              (item) => item.id.toString() === validData.productId
-            );
-            const deletePath = GLocalImage(
-              findWorkImage.appointmentLetter,
-              process.env.EMPLOYEE_PATH
-            );
-            await fs.promises.unlink(
-              deletePath + findEducationImage.appointmentLetter
-            );
-          }
-          const file = req.files.appointmentLetter;
-          const fileName = GetFileName(req.files.appointmentLetter);
-          const uploadPath = GLocalImage(fileName, process.env.EMPLOYEE_PATH);
+          // if (validData.actionType !== "add") {
+          //   const findWorkImage = findUser.workDetail.find(
+          //     (item) => item.id.toString() === validData.productId
+          //   );
+          //   const deletePath = GLocalImage(
+          //     findWorkImage.appointmentLetter,
+          //     process.env.EMPLOYEE_PATH
+          //   );
+          //   await fs.promises.unlink(
+          //     deletePath + findEducationImage.appointmentLetter
+          //   );
+          // }
+          // const file = req.files.appointmentLetter;
+          // const fileName = GetFileName(req.files.appointmentLetter);
+          // const uploadPath = GLocalImage(fileName, process.env.EMPLOYEE_PATH);
 
-          await file.mv(uploadPath + fileName);
-          reqData.appointmentLetter = fileName;
+          // await file.mv(uploadPath + fileName);
+          const a = await EmployeeDocumentImageUpload(
+            validData.actionType,
+            validData.actionType !== "add" ? findUser?.workDetail : [],
+            validData.productId,
+            validData.actionType !== "add" ? "appointmentLetter" : "",
+            req.files.appointmentLetter
+          );
+
+          reqData.appointmentLetter = a;
         }
         if (req.files.salarySlip) {
-          if (validData.actionType !== "add") {
-            const findWorkImage = findUser.workDetail.find(
-              (item) => item.id.toString() === validData.productId
-            );
-            const deletePath = GLocalImage(
-              findWorkImage.salarySlip,
-              process.env.EMPLOYEE_PATH
-            );
-            await fs.promises.unlink(
-              deletePath + findEducationImage.salarySlip
-            );
-          }
-          const file = req.files.salarySlip;
-          const fileName = GetFileName(req.files.salarySlip);
-          const uploadPath = GLocalImage(fileName, process.env.EMPLOYEE_PATH);
+          // if (validData.actionType !== "add") {
+          //   const findWorkImage = findUser.workDetail.find(
+          //     (item) => item.id.toString() === validData.productId
+          //   );
+          //   const deletePath = GLocalImage(
+          //     findWorkImage.salarySlip,
+          //     process.env.EMPLOYEE_PATH
+          //   );
+          //   await fs.promises.unlink(
+          //     deletePath + findEducationImage.salarySlip
+          //   );
+          // }
+          // const file = req.files.salarySlip;
+          // const fileName = GetFileName(req.files.salarySlip);
+          // const uploadPath = GLocalImage(fileName, process.env.EMPLOYEE_PATH);
 
-          await file.mv(uploadPath + fileName);
-          reqData.salarySlip = fileName;
+          // await file.mv(uploadPath + fileName);
+
+          const a = await EmployeeDocumentImageUpload(
+            validData.actionType,
+            validData.actionType !== "add" ? findUser?.workDetail : [],
+            validData.productId,
+            validData.actionType !== "add" ? "salarySlip" : "",
+            req.files.salarySlip
+          );
+          reqData.salarySlip = a;
         }
       }
     }
@@ -291,21 +336,21 @@ export const updateEducationAndCompanyDetails = async (req, res) => {
       const updateQuery =
         req.body.dataType === "education"
           ? {
-              "education.$.boardName": validData.boardName,
-              "education.$.passingYear": validData.passingYear,
-              "education.$.marksPercentage": validData.marksPercentage,
-              "education.$.resultImage": validData.resultImage,
+              "education.$.boardName": reqData.boardName,
+              "education.$.passingYear": reqData.passingYear,
+              "education.$.marksPercentage": reqData.marksPercentage,
+              "education.$.resultImage": reqData.resultImage,
               updatedBy: req.user._id,
             }
           : {
-              "workDetail.$.companyName": validData.companyName,
-              "workDetail.$.position": validData.position,
-              "workDetail.$.startingYear": validData.startingYear,
-              "workDetail.$.endingYear": validData.endingYear,
-              "workDetail.$.experienceLetter": validData.experienceLetter,
-              "workDetail.$.relievingLetter": validData.relievingLetter,
-              "workDetail.$.appointmentLetter": validData.appointmentLetter,
-              "workDetail.$.salarySlip": validData.salarySlip,
+              "workDetail.$.companyName": reqData.companyName,
+              "workDetail.$.position": reqData.position,
+              "workDetail.$.startingYear": reqData.startingYear,
+              "workDetail.$.endingYear": reqData.endingYear,
+              "workDetail.$.experienceLetter": reqData.experienceLetter,
+              "workDetail.$.relievingLetter": reqData.relievingLetter,
+              "workDetail.$.appointmentLetter": reqData.appointmentLetter,
+              "workDetail.$.salarySlip": reqData.salarySlip,
               updatedBy: req.user._id,
             };
       await employee.updateOne(findQuery, { $set: updateQuery });
