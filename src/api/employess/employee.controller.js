@@ -7,6 +7,7 @@ import {
 } from "./employee.schema.js";
 import {
   EmployeeDocumentImageUpload,
+  EmployeeImageUpload,
   Position,
   Status,
 } from "./EmployeeConfig.js";
@@ -103,7 +104,7 @@ export const adminSignUpSchemaFirst = async (req, res) => {
           const fileName = GetFileName(req.files.userImage);
           const uploadPath = GLocalImage(fileName, process.env.EMPLOYEE_PATH);
 
-          await file.mv(uploadPath + fileName);
+          await file.mv(uploadPath);
           // const file = req.files.userImage;
           // const imageUrl = await ImageUpload("user", file);
           userData.userImage = fileName;
@@ -166,23 +167,6 @@ export const updateEducationAndCompanyDetails = async (req, res) => {
       });
       if (req.body.dataType === "education") {
         if (req.files.resultImage) {
-          // if (validData.actionType !== "add") {
-          //   const findEducationImage = findUser?.education.find(
-          //     (item) => item.id.toString() === validData.productId
-          //   );
-          //   const deletePath = GLocalImage(
-          //     findEducationImage.resultImage,
-          //     process.env.EMPLOYEE_PATH
-          //   );
-          //   await fs.promises.unlink(
-          //     deletePath + findEducationImage.resultImage
-          //   );
-          // }
-          // const file = req.files.resultImage;
-          // const fileName = GetFileName(req.files.resultImage);
-          // const uploadPath = GLocalImage(fileName, process.env.EMPLOYEE_PATH);
-
-          // await file.mv(uploadPath + fileName);
           const a = await EmployeeDocumentImageUpload(
             validData.actionType,
             validData.actionType !== "add" ? findUser?.education : [],
@@ -195,24 +179,6 @@ export const updateEducationAndCompanyDetails = async (req, res) => {
         }
       } else {
         if (req.files.experienceLetter) {
-          // if (validData.actionType !== "add") {
-          //   const findWorkImage = findUser.workDetail.find(
-          //     (item) => item.id.toString() === validData.productId
-          //   );
-          //   const deletePath = GLocalImage(
-          //     findWorkImage.experienceLetter,
-          //     process.env.EMPLOYEE_PATH
-          //   );
-          //   await fs.promises.unlink(
-          //     deletePath + findEducationImage.experienceLetter
-          //   );
-          // }
-          // const file = req.files.experienceLetter;
-          // const fileName = GetFileName(req.files.experienceLetter);
-          // const uploadPath = GLocalImage(fileName, process.env.EMPLOYEE_PATH);
-
-          // await file.mv(uploadPath + fileName);
-
           const a = await EmployeeDocumentImageUpload(
             validData.actionType,
             validData.actionType !== "add" ? findUser?.workDetail : [],
@@ -224,24 +190,6 @@ export const updateEducationAndCompanyDetails = async (req, res) => {
           reqData.experienceLetter = a;
         }
         if (req.files.relievingLetter) {
-          // if (validData.actionType !== "add") {
-          //   const findWorkImage = findUser.workDetail.find(
-          //     (item) => item.id.toString() === validData.productId
-          //   );
-          //   const deletePath = GLocalImage(
-          //     findWorkImage.relievingLetter,
-          //     process.env.EMPLOYEE_PATH
-          //   );
-          //   await fs.promises.unlink(
-          //     deletePath + findEducationImage.relievingLetter
-          //   );
-          // }
-          // const file = req.files.relievingLetter;
-          // const fileName = GetFileName(req.files.relievingLetter);
-          // const uploadPath = GLocalImage(fileName, process.env.EMPLOYEE_PATH);
-
-          // await file.mv(uploadPath + fileName);
-
           const a = await EmployeeDocumentImageUpload(
             validData.actionType,
             validData.actionType !== "add" ? findUser?.workDetail : [],
@@ -252,23 +200,6 @@ export const updateEducationAndCompanyDetails = async (req, res) => {
           reqData.relievingLetter = a;
         }
         if (req.files.appointmentLetter) {
-          // if (validData.actionType !== "add") {
-          //   const findWorkImage = findUser.workDetail.find(
-          //     (item) => item.id.toString() === validData.productId
-          //   );
-          //   const deletePath = GLocalImage(
-          //     findWorkImage.appointmentLetter,
-          //     process.env.EMPLOYEE_PATH
-          //   );
-          //   await fs.promises.unlink(
-          //     deletePath + findEducationImage.appointmentLetter
-          //   );
-          // }
-          // const file = req.files.appointmentLetter;
-          // const fileName = GetFileName(req.files.appointmentLetter);
-          // const uploadPath = GLocalImage(fileName, process.env.EMPLOYEE_PATH);
-
-          // await file.mv(uploadPath + fileName);
           const a = await EmployeeDocumentImageUpload(
             validData.actionType,
             validData.actionType !== "add" ? findUser?.workDetail : [],
@@ -280,24 +211,6 @@ export const updateEducationAndCompanyDetails = async (req, res) => {
           reqData.appointmentLetter = a;
         }
         if (req.files.salarySlip) {
-          // if (validData.actionType !== "add") {
-          //   const findWorkImage = findUser.workDetail.find(
-          //     (item) => item.id.toString() === validData.productId
-          //   );
-          //   const deletePath = GLocalImage(
-          //     findWorkImage.salarySlip,
-          //     process.env.EMPLOYEE_PATH
-          //   );
-          //   await fs.promises.unlink(
-          //     deletePath + findEducationImage.salarySlip
-          //   );
-          // }
-          // const file = req.files.salarySlip;
-          // const fileName = GetFileName(req.files.salarySlip);
-          // const uploadPath = GLocalImage(fileName, process.env.EMPLOYEE_PATH);
-
-          // await file.mv(uploadPath + fileName);
-
           const a = await EmployeeDocumentImageUpload(
             validData.actionType,
             validData.actionType !== "add" ? findUser?.workDetail : [],
@@ -419,117 +332,61 @@ export const detailsUpdateUser = async (req, res) => {
         _id: new mongoose.Types.ObjectId(validatedUser.id),
       });
       if (req.files.userImage) {
-        if (findUser.userImage) {
-          const deletePath = GLocalImage(
-            findUser.userImage,
-            process.env.EMPLOYEE_PATH
-          );
-          await fs.promises.unlink(deletePath + findUser.userImage);
-        }
-        const file = req.files.userImage;
-        const fileName = GetFileName(req.files.userImage);
-        const uploadPath = GLocalImage(fileName, process.env.EMPLOYEE_PATH);
+        const a = await EmployeeImageUpload(
+          findUser.userImage,
+          req.files.userImage
+        );
 
-        await file.mv(uploadPath + fileName);
-
-        reqData.userImage = fileName;
+        reqData.userImage = a;
       }
       if (req.files.passportImage) {
-        if (findUser.passportImage) {
-          const deletePath = GLocalImage(
-            findUser.passportImage,
-            process.env.EMPLOYEE_PATH
-          );
-          await fs.promises.unlink(deletePath + findUser.passportImage);
-        }
-        const file = req.files.passportImage;
-        const fileName = GetFileName(req.files.passportImage);
-        const uploadPath = GLocalImage(fileName, process.env.EMPLOYEE_PATH);
+        const a = await EmployeeImageUpload(
+          findUser.passportImage,
+          req.files.passportImage
+        );
 
-        await file.mv(uploadPath + fileName);
-        // const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
-        reqData.passportImage = fileName;
+        reqData.passportImage = a;
       }
       if (req.files.voterImage) {
-        if (findUser.voterImage) {
-          const deletePath = GLocalImage(
-            findUser.voterImage,
-            process.env.EMPLOYEE_PATH
-          );
-          await fs.promises.unlink(deletePath + findUser.voterImage);
-        }
-        const file = req.files.voterImage;
-        const fileName = GetFileName(req.files.voterImage);
-        const uploadPath = GLocalImage(fileName, process.env.EMPLOYEE_PATH);
+        const a = await EmployeeImageUpload(
+          findUser.voterImage,
+          req.files.voterImage
+        );
 
-        await file.mv(uploadPath + fileName);
-
-        reqData.voterImage = fileName;
+        reqData.voterImage = a;
       }
       if (req.files.panImage) {
-        if (findUser.panImage) {
-          const deletePath = GLocalImage(
-            findUser.panImage,
-            process.env.EMPLOYEE_PATH
-          );
-          await fs.promises.unlink(deletePath + findUser.panImage);
-        }
-        const file = req.files.panImage;
-        const fileName = GetFileName(req.files.panImage);
-        const uploadPath = GLocalImage(fileName, process.env.EMPLOYEE_PATH);
+        const a = await EmployeeImageUpload(
+          findUser.panImage,
+          req.files.panImage
+        );
 
-        await file.mv(uploadPath + fileName);
-
-        reqData.panImage = fileName;
+        reqData.panImage = a;
       }
       if (req.files.aadharImage) {
-        if (findUser.aadharImage) {
-          const deletePath = GLocalImage(
-            findUser.aadharImage,
-            process.env.EMPLOYEE_PATH
-          );
-          await fs.promises.unlink(deletePath + findUser.aadharImage);
-        }
-        const file = req.files.aadharImage;
-        const fileName = GetFileName(req.files.aadharImage);
-        const uploadPath = GLocalImage(fileName, process.env.EMPLOYEE_PATH);
+        const a = await EmployeeImageUpload(
+          findUser.aadharImage,
+          req.files.aadharImage
+        );
 
-        await file.mv(uploadPath + fileName);
-
-        reqData.aadharImage = fileName;
+        reqData.aadharImage = a;
       }
 
       if (req.files.passbookImage) {
-        if (findUser.passbookImage) {
-          const deletePath = GLocalImage(
-            findUser.passbookImage,
-            process.env.EMPLOYEE_PATH
-          );
-          await fs.promises.unlink(deletePath + findUser.passbookImage);
-        }
-        const file = req.files.passbookImage;
-        const fileName = GetFileName(req.files.passbookImage);
-        const uploadPath = GLocalImage(fileName, process.env.EMPLOYEE_PATH);
+        const a = await EmployeeImageUpload(
+          findUser.passbookImage,
+          req.files.passbookImage
+        );
 
-        await file.mv(uploadPath + fileName);
-
-        reqData.passbookImage = fileName;
+        reqData.passbookImage = a;
       }
       if (req.files.uanImage) {
-        if (findUser.uanImage) {
-          const deletePath = GLocalImage(
-            findUser.uanImage,
-            process.env.EMPLOYEE_PATH
-          );
-          await fs.promises.unlink(deletePath + findUser.uanImage);
-        }
-        const file = req.files.uanImage;
-        const fileName = GetFileName(req.files.uanImage);
-        const uploadPath = GLocalImage(fileName, process.env.EMPLOYEE_PATH);
+        const a = await EmployeeImageUpload(
+          findUser.uanImage,
+          req.files.uanImage
+        );
 
-        await file.mv(uploadPath + fileName);
-
-        reqData.uanImage = fileName;
+        reqData.uanImage = a;
       }
     }
 

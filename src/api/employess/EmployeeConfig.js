@@ -53,3 +53,17 @@ export const EmployeeDocumentImageUpload = async (
 
   return fileName;
 };
+
+export const EmployeeImageUpload = async (imageName, uploadFile) => {
+  if (imageName) {
+    const deletePath = GLocalImage(imageName, process.env.EMPLOYEE_PATH);
+    await fs.promises.unlink(deletePath);
+  }
+  const file = uploadFile;
+  const fileName = GetFileName(uploadFile);
+  const uploadPath = GLocalImage(fileName, process.env.EMPLOYEE_PATH);
+
+  await file.mv(uploadPath);
+
+  return fileName;
+};
