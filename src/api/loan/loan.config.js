@@ -1,7 +1,7 @@
 import moment from "moment";
 import mongoose from "mongoose";
-import path from "path";
-import { fileURLToPath } from "url";
+import { GetFileName, GLocalImage } from "../../utilis/utilis.js";
+import fs from "fs";
 
 export const EmployeeTypes = ["salaried", "self_employed", "business"];
 
@@ -157,25 +157,18 @@ export const DisbursmentCalculate = (data) => {
   };
 };
 
-export const LocalImageUpload = (fileName) => {
-  const __filename = fileURLToPath(import.meta.url);
-  const __dirname = path.dirname(__filename);
-  const uploadPath = path.join(__dirname, process.env.IMAGE_PATH, fileName);
-  return uploadPath;
-};
+export const LoanImageUpload = async (imageName, uploadFile) => {
+  if (imageName) {
+    const deletePath = GLocalImage(imageName, process.env.LOAN_PATH);
+    await fs.promises.unlink(deletePath);
+  }
+  const file = uploadFile;
+  const fileName = GetFileName(uploadFile);
+  const uploadPath = GLocalImage(fileName, process.env.LOAN_PATH);
 
-export const DeleteLocalImageUpload = (fileName) => {
-  const __filename = fileURLToPath(import.meta.url);
-  const __dirname = path.dirname(__filename);
-  const deletePath = path.join(__dirname, process.env.IMAGE_PATH, fileName);
-  return deletePath;
-};
-// IMAGE_PATH=../../../../Upload/loan_document
-export const GetLocalImage = (fileName) => {
-  const __filename = fileURLToPath(import.meta.url);
-  const __dirname = path.dirname(__filename);
-  const uploadPath = path.join(__dirname, process.env.IMAGE_PATH, fileName);
-  return uploadPath;
+  await file.mv(uploadPath);
+
+  return fileName;
 };
 
 // const myPincode = 700053;
