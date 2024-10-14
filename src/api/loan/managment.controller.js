@@ -66,6 +66,57 @@ export const LoanManagList = async (req, res) => {
             : { $ne: "" },
         },
       },
+      {
+        $addFields: {
+          paidEmi: {
+            $size: {
+              $filter: {
+                input: "$emiSchedule",
+                as: "emi",
+                cond: { $eq: ["$$emi.isPaid", true] },
+              },
+            },
+          },
+          unpaidEmi: {
+            $size: {
+              $filter: {
+                input: "$emiSchedule",
+                as: "emi",
+                cond: { $eq: ["$$emi.isPaid", false] },
+              },
+            },
+          },
+          overDueEmi: {
+            $size: {
+              $filter: {
+                input: "$emiSchedule",
+                as: "emi",
+                cond: {
+                  $and: [
+                    { $eq: ["$$emi.isPaid", false] },
+                    { $lt: ["$$emi.emiDate", new Date()] },
+                  ],
+                },
+              },
+            },
+          },
+        },
+      },
+      {
+        $project: {
+          applicationNumber: 1,
+          loanAmount: 1,
+          paidEmi: 1,
+          unpaidEmi: 1,
+          overDueEmi: 1,
+          emiDetails: "$emiSchedule",
+          branchDetails: 1,
+          mobile: 1,
+          name: 1,
+          EMIMonthly: 1,
+          loanType: 1,
+        },
+      },
     ];
     const countData = await Loan.aggregate([
       ...query,
@@ -83,10 +134,18 @@ export const LoanManagList = async (req, res) => {
       { $limit: limit },
     ]);
 
+    let modifyCount = countData.length > 0 ? countData[0].count : 0;
+    let modifyData = data;
+    if (reqData.applicationStaus === "delinquentLoan") {
+      const filterData = data.filter((item) => item.overDueEmi !== 0);
+      modifyCount = filterData.length;
+      modifyData = filterData;
+    }
+
     res.status(StatusCodes.OK).json({
       message: "Data fetched successfully",
-      data: data,
-      total: countData.length > 0 ? countData[0].count : 0,
+      data: modifyData,
+      total: modifyCount,
     });
   } catch (error) {
     res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });

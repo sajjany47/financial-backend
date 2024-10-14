@@ -104,7 +104,7 @@ export const EMICalculator = (data) => {
 
     emiSchedule.push({
       _id: new mongoose.Types.ObjectId(),
-      emiDate: emiDate,
+      emiDate: new Date(emiDate),
       emiAmount: EMI.toFixed(2),
       interestPaid: interest.toFixed(2),
       principalPaid: principle.toFixed(2),
