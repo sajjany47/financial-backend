@@ -26,22 +26,22 @@ const employeeSchema = new mongoose.Schema(
       ],
     },
     branch: {
-      type: [mongoose.Schema.Types.ObjectId, null],
+      type: mongoose.Schema.Types.ObjectId,
       default: null,
     },
     mobile: { type: String, trim: true },
     email: { type: String, trim: true, lowercase: true },
     dob: Date,
     state: {
-      type: [Number, null],
+      type: Number,
       default: null,
     },
     country: {
-      type: [Number, null],
+      type: Number,
       default: null,
     },
     city: {
-      type: [Number, null],
+      type: Number,
       default: null,
     },
     password: String,

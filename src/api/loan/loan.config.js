@@ -171,6 +171,24 @@ export const LoanImageUpload = async (imageName, uploadFile) => {
   return fileName;
 };
 
+export const AcccessPositionWise = (user) => {
+  let query = [];
+  if (user.country !== null) {
+    query.push({ country: Number(user.country) });
+  }
+  if (user.state !== null) {
+    query.push({ state: Number(user.state) });
+  }
+  if (user.city !== null) {
+    query.push({ city: Number(user.city) });
+  }
+  if (user.branch !== null) {
+    query.push({ branch: new mongoose.Types.ObjectId(user.branch) });
+  }
+
+  return query;
+};
+
 // const myPincode = 700053;
 // const pincodes = [700026, 700045, 700007, 700012, 700057, 700001];
 
