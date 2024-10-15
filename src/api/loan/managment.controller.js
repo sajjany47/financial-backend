@@ -2,6 +2,8 @@ import { StatusCodes } from "http-status-codes";
 
 import mongoose from "mongoose";
 import Loan from "./loan.model.js";
+import employee from "../employess/employee.model.js";
+import { Position } from "../employess/EmployeeConfig.js";
 
 export const LoanManagList = async (req, res) => {
   try {
@@ -146,6 +148,23 @@ export const LoanManagList = async (req, res) => {
       message: "Data fetched successfully",
       data: modifyData,
       total: modifyCount,
+    });
+  } catch (error) {
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
+  }
+};
+
+export const AgentList = async (req, res) => {
+  try {
+    const id = req.params.id;
+
+    const list = await employee.find({
+      branch: new mongoose.Types.ObjectId(id),
+    });
+
+    res.status(StatusCodes.OK).json({
+      message: "Data fetched successfully",
+      data: list,
     });
   } catch (error) {
     res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });

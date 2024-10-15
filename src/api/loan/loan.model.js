@@ -64,6 +64,8 @@ const loanModel = new mongoose.Schema(
     transactionNumber: String,
     EMIMonthly: Number,
     emiSchedule: Array,
+    agentRemark: Array,
+    assignAgent: mongoose.Schema.Types.ObjectId,
     disbursment: Object,
     interestRate: Number,
     status: {

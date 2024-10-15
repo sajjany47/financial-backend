@@ -11,7 +11,7 @@ import {
   getEMIDetails,
   getLoanDetail,
 } from "../api/loan/loan.controller.js";
-import { LoanManagList } from "../api/loan/managment.controller.js";
+import { AgentList, LoanManagList } from "../api/loan/managment.controller.js";
 
 const LoanRoutes = express.Router();
 
@@ -33,6 +33,7 @@ LoanRoutes.route("/application-delete").post(
 LoanRoutes.route("/:id").get(tokenValidation, getLoanDetail);
 LoanRoutes.route("/emi-details").post(tokenValidation, getEMIDetails);
 LoanRoutes.route("/manage/list").post(tokenValidation, LoanManagList);
+LoanRoutes.route("/manage/branch-agent/:id").get(tokenValidation, AgentList);
 LoanRoutes.route("/datatable").post(tokenValidation, datatable);
 
 export default LoanRoutes;
