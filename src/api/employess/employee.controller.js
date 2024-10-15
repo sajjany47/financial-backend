@@ -481,24 +481,43 @@ export const resetPassword = async (req, res) => {
   try {
     const reqData = req.body;
 
-    const updatedPassword = await employee.updateOne(
-      { _id: new mongoose.Types.ObjectId(reqData.id) },
-
-      {
-        $set: {
-          password: await bcrypt.hash(reqData.password, 10),
-          isPasswordReset: true,
-        },
+    const findUser = await employee.findOne({
+      _id: new mongoose.Types.ObjectId(reqData.id),
+    });
+    if (findUser) {
+      let password = "";
+      if (reqData.type === "user") {
+        const verifyPassword = await bcrypt.compare(
+          reqData.oldPassword,
+          findUser.password
+        );
+        if (verifyPassword) {
+          password = await bcrypt.hash(reqData.password, 10);
+        } else {
+          return res
+            .status(StatusCodes.UNAUTHORIZED)
+            .json({ message: "Invalid old password" });
+        }
+      } else {
+        password = await bcrypt.hash(reqData.password, 10);
       }
-    );
-    if (updatedPassword) {
+      await employee.updateOne(
+        { _id: new mongoose.Types.ObjectId(reqData.id) },
+
+        {
+          $set: {
+            password: password,
+            isPasswordReset: true,
+          },
+        }
+      );
       return res
         .status(StatusCodes.OK)
         .json({ message: "Password updated successfully" });
     } else {
       return res
-        .status(StatusCodes.BAD_REQUEST)
-        .json({ message: "Invalid user or Password" });
+        .status(StatusCodes.NOT_FOUND)
+        .json({ message: "User not found!" });
     }
   } catch (error) {
     res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
