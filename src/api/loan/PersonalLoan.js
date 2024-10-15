@@ -147,6 +147,8 @@ export const StatusData = (data) => {
       foreclosureFees: data.charges.foreclosureFees,
       foreclosureFeesGST: data.charges.foreclosureFeesGST,
       startDate: data.emiDate,
+      foreclosureApply: data.foreclosureApply,
+      overdue: data.overdue,
     });
 
     const disbursment = DisbursmentCalculate({

@@ -10,6 +10,8 @@ const chargesModel = new mongoose.Schema(
     otherChargesGST: String,
     foreclosureFees: String,
     foreclosureFeesGST: String,
+    foreclosureApply: String,
+    overdue: String,
     isActive: Boolean,
     createdBy: mongoose.Schema.Types.ObjectId,
     updatedBy: mongoose.Schema.Types.ObjectId,

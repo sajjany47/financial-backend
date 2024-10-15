@@ -102,6 +102,14 @@ export const EMICalculator = (data) => {
     const foreClosureGST =
       foreClosureFees * (Number(data.foreclosureFeesGST) / 100);
 
+    let foreclosureAmount = (
+      principle +
+      outstanding +
+      interest +
+      foreClosureFees +
+      foreClosureGST
+    ).toFixed(2);
+
     emiSchedule.push({
       _id: new mongoose.Types.ObjectId(),
       emiDate: new Date(emiDate),
@@ -110,12 +118,10 @@ export const EMICalculator = (data) => {
       principalPaid: principle.toFixed(2),
       isPaid: false,
       remainingOutstanding: outstanding.toFixed(2),
-      foreclosureAmount: (
-        outstanding +
-        interest +
-        foreClosureFees +
-        foreClosureGST
-      ).toFixed(2),
+      foreclosureAmount:
+        index > Number(data.foreclosureApply)
+          ? foreclosureAmount
+          : "Not applicable",
     });
   }
 

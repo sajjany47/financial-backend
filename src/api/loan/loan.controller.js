@@ -120,6 +120,8 @@ export const ApplicationUpdate = async (req, res) => {
                 loginFeesGST: 0,
                 otherCharges: 0,
                 otherChargesGST: 0,
+                foreclosureApply: 0,
+                overdue: 0,
               },
           loanAmount: findLoanApplication.loanAmount,
           loanTenure: findLoanApplication.loanTenure,
@@ -382,6 +384,8 @@ export const getEMIDetails = async (req, res) => {
           otherChargesGST: 0,
           foreclosureFees: 0,
           foreclosureFeesGST: 0,
+          foreclosureApply: 0,
+          overdue: 0,
         };
 
     const EMI = EMICalculator({
@@ -390,6 +394,8 @@ export const getEMIDetails = async (req, res) => {
       loanTenure: Number(req.body.loanTenure),
       foreclosureFees: fixedCharges.foreclosureFees,
       foreclosureFeesGST: fixedCharges.foreclosureFeesGST,
+      foreclosureApply: fixedCharges.foreclosureApply,
+      overdue: fixedCharges.overdue,
     });
 
     const disbursment = DisbursmentCalculate({
