@@ -221,7 +221,7 @@ export const AddRemarkAgent = async (req, res) => {
         {
           $set: {
             assignAgent: new mongoose.Types.ObjectId(reqData.assignAgent),
-            updatedBy: req.user._id,
+            updatedBy: new mongoose.Types.ObjectId(req.user._id),
           },
         }
       );
@@ -232,7 +232,7 @@ export const AddRemarkAgent = async (req, res) => {
           $push: {
             agentRemark: {
               _id: new mongoose.Types.ObjectId(),
-              createdBy: req.user._id,
+              updatedBy: new mongoose.Types.ObjectId(req.user._id),
               updatedBy: null,
               date: new Date(),
               remark: reqData.agentRemark,
@@ -249,6 +249,69 @@ export const AddRemarkAgent = async (req, res) => {
       message: `${
         reqData.type === "agent" ? "Agent assign " : "Remark add"
       } successfully`,
+    });
+  } catch (error) {
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
+  }
+};
+
+export const RemarkDetails = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const data = await Loan.aggregate([
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(id),
+        },
+      },
+      {
+        $project: {
+          agentRemark: 1,
+          loanId: "$_id",
+          _id: 0,
+        },
+      },
+      {
+        $unwind: {
+          path: "$agentRemark",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+
+      {
+        $lookup: {
+          from: "employees",
+          localField: "agentRemark.createdBy",
+          foreignField: "_id",
+          as: "employeeDetails",
+        },
+      },
+      {
+        $unwind: {
+          path: "$employeeDetails",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $project: {
+          loanId: 1,
+          id: "$agentRemark._id",
+          updatedBy: "$agentRemark.updatedBy",
+          date: "$agentRemark.date",
+          remark: "$agentRemark.remark",
+          createdBy_name: "$employeeDetails.name",
+          createdBy_username: "$employeeDetails.username",
+        },
+      },
+      {
+        $sort: {
+          date: -1,
+        },
+      },
+    ]);
+    res.status(StatusCodes.OK).json({
+      message: "Data fetched successfully",
+      data: data,
     });
   } catch (error) {
     res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });

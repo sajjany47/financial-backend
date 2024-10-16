@@ -15,6 +15,7 @@ import {
   AddRemarkAgent,
   AgentList,
   LoanManagList,
+  RemarkDetails,
 } from "../api/loan/managment.controller.js";
 
 const LoanRoutes = express.Router();
@@ -38,6 +39,7 @@ LoanRoutes.route("/:id").get(tokenValidation, getLoanDetail);
 LoanRoutes.route("/emi-details").post(tokenValidation, getEMIDetails);
 LoanRoutes.route("/manage/list").post(tokenValidation, LoanManagList);
 LoanRoutes.route("/manage/branch-agent/:id").get(tokenValidation, AgentList);
+LoanRoutes.route("/manage/remark/:id").get(tokenValidation, RemarkDetails);
 LoanRoutes.route("/manage/remark-agent-update").post(
   tokenValidation,
   AddRemarkAgent
