@@ -104,6 +104,21 @@ export const LoanManagList = async (req, res) => {
           },
         },
       },
+
+      {
+        $lookup: {
+          from: "employees",
+          localField: "assignAgent",
+          foreignField: "_id",
+          as: "employeeDetails",
+        },
+      },
+      {
+        $unwind: {
+          path: "$employeeDetails",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
       {
         $project: {
           applicationNumber: 1,
@@ -117,6 +132,8 @@ export const LoanManagList = async (req, res) => {
           name: 1,
           EMIMonthly: 1,
           loanType: 1,
+          assignAgent: "$employeeDetails.username",
+          agentRemark: 1,
         },
       },
     ];
@@ -157,14 +174,81 @@ export const LoanManagList = async (req, res) => {
 export const AgentList = async (req, res) => {
   try {
     const id = req.params.id;
+    const position = req.user;
 
-    const list = await employee.find({
-      branch: new mongoose.Types.ObjectId(id),
-    });
+    const list = await employee.aggregate([
+      { $match: { branch: new mongoose.Types.ObjectId(id) } },
+      {
+        $lookup: {
+          from: "branches",
+          localField: "branch",
+          foreignField: "_id",
+          as: "branchDetails",
+        },
+      },
+      {
+        $unwind: {
+          path: "$branchDetails",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $match: {
+          "branchDetails.country": position?.country
+            ? position?.country
+            : { $ne: "" },
+          "branchDetails.state": position.state ? position.state : { $ne: "" },
+          "branchDetails.city": position.city ? position.city : { $ne: "" },
+        },
+      },
+    ]);
 
     res.status(StatusCodes.OK).json({
       message: "Data fetched successfully",
       data: list,
+    });
+  } catch (error) {
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
+  }
+};
+
+export const AddRemarkAgent = async (req, res) => {
+  try {
+    const reqData = req.body;
+    if (reqData.type === "agent") {
+      await Loan.updateOne(
+        { _id: new mongoose.Types.ObjectId(reqData.loanId) },
+        {
+          $set: {
+            assignAgent: new mongoose.Types.ObjectId(reqData.assignAgent),
+            updatedBy: req.user._id,
+          },
+        }
+      );
+    } else {
+      await Loan.updateOne(
+        { _id: new mongoose.Types.ObjectId(reqData.loanId) },
+        {
+          $push: {
+            agentRemark: {
+              _id: new mongoose.Types.ObjectId(),
+              createdBy: req.user._id,
+              updatedBy: null,
+              date: new Date(),
+              remark: reqData.agentRemark,
+            },
+          },
+          $set: {
+            updatedBy: req.user._id,
+          },
+        }
+      );
+    }
+
+    res.status(StatusCodes.OK).json({
+      message: `${
+        reqData.type === "agent" ? "Agent assign " : "Remark add"
+      } successfully`,
     });
   } catch (error) {
     res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
