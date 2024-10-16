@@ -111,18 +111,34 @@ export const ApplicationUpdate = async (req, res) => {
         });
         validateData = {
           ...validateData,
-          charges: findCharges
-            ? findCharges
-            : {
-                processingFees: 0,
-                processingFeesGST: 0,
-                loginFees: 0,
-                loginFeesGST: 0,
-                otherCharges: 0,
-                otherChargesGST: 0,
-                foreclosureApply: 0,
-                overdue: 0,
-              },
+          charges: {
+            foreclosureFees: findCharges?.foreclosureFees
+              ? findCharges?.foreclosureFees
+              : 0,
+            foreclosureFeesGST: findCharges?.foreclosureFeesGST
+              ? findCharges?.foreclosureFeesGST
+              : 0,
+            foreclosureApply: findCharges?.foreclosureApply
+              ? findCharges?.foreclosureApply
+              : 0,
+            overdue: findCharges?.overdue ? findCharges.overdue : 0,
+            processingFees: findCharges?.processingFees
+              ? findCharges?.processingFees
+              : 0,
+            processingFeesGST: findCharges?.processingFeesGST
+              ? findCharges?.processingFeesGST
+              : 0,
+            loginFees: findCharges?.loginFees ? findCharges?.loginFees : 0,
+            loginFeesGST: findCharges?.loginFeesGST
+              ? findCharges.loginFeesGST
+              : 0,
+            otherCharges: findCharges?.otherCharges
+              ? findCharges?.otherCharges
+              : 0,
+            otherChargesGST: findCharges?.otherChargesGST
+              ? findCharges?.otherChargesGST
+              : 0,
+          },
           loanAmount: findLoanApplication.loanAmount,
           loanTenure: findLoanApplication.loanTenure,
         };
@@ -373,38 +389,37 @@ export const getEMIDetails = async (req, res) => {
   try {
     const findCharges = await charges.findOne({ isActive: true });
 
-    const fixedCharges = findCharges
-      ? findCharges
-      : {
-          processingFees: 0,
-          processingFeesGST: 0,
-          loginFees: 0,
-          loginFeesGST: 0,
-          otherCharges: 0,
-          otherChargesGST: 0,
-          foreclosureFees: 0,
-          foreclosureFeesGST: 0,
-          foreclosureApply: 0,
-          overdue: 0,
-        };
+    const fixedCharges = findCharges;
 
     const EMI = EMICalculator({
       loanAmount: Number(req.body.loanAmount),
       interestRate: Number(req.body.interestRate),
       loanTenure: Number(req.body.loanTenure),
-      foreclosureFees: fixedCharges.foreclosureFees,
-      foreclosureFeesGST: fixedCharges.foreclosureFeesGST,
-      foreclosureApply: fixedCharges.foreclosureApply,
-      overdue: fixedCharges.overdue,
+      foreclosureFees: fixedCharges?.foreclosureFees
+        ? fixedCharges?.foreclosureFees
+        : 0,
+      foreclosureFeesGST: fixedCharges?.foreclosureFeesGST
+        ? fixedCharges?.foreclosureFeesGST
+        : 0,
+      foreclosureApply: fixedCharges?.foreclosureApply
+        ? fixedCharges?.foreclosureApply
+        : 0,
+      overdue: fixedCharges?.overdue ? fixedCharges.overdue : 0,
     });
 
     const disbursment = DisbursmentCalculate({
-      processingFees: fixedCharges.processingFees,
-      processingFeesGST: fixedCharges.processingFeesGST,
-      loginFees: fixedCharges.loginFees,
-      loginFeesGST: fixedCharges.loginFeesGST,
-      otherCharges: fixedCharges.otherCharges,
-      otherChargesGST: fixedCharges.otherChargesGST,
+      processingFees: fixedCharges?.processingFees
+        ? fixedCharges?.processingFees
+        : 0,
+      processingFeesGST: fixedCharges?.processingFeesGST
+        ? fixedCharges?.processingFeesGST
+        : 0,
+      loginFees: fixedCharges?.loginFees ? fixedCharges?.loginFees : 0,
+      loginFeesGST: fixedCharges?.loginFeesGST ? fixedCharges.loginFeesGST : 0,
+      otherCharges: fixedCharges?.otherCharges ? fixedCharges?.otherCharges : 0,
+      otherChargesGST: fixedCharges?.otherChargesGST
+        ? fixedCharges?.otherChargesGST
+        : 0,
       loanAmount: Number(req.body.loanAmount),
     });
 

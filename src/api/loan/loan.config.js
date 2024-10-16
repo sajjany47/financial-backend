@@ -98,7 +98,8 @@ export const EMICalculator = (data) => {
     const date = data?.startDate ? data.startDate : new Date();
     const emiDate = moment(date).add(index, "months").format("YYYY-MM-DD");
 
-    const foreClosureFees = outstanding * (Number(data.foreclosureFees) / 100);
+    const foreClosureFees =
+      (principle + outstanding) * (Number(data.foreclosureFees) / 100);
     const foreClosureGST =
       foreClosureFees * (Number(data.foreclosureFeesGST) / 100);
 
@@ -120,7 +121,9 @@ export const EMICalculator = (data) => {
       remainingOutstanding: outstanding.toFixed(2),
       foreclosureAmount:
         index > Number(data.foreclosureApply)
-          ? foreclosureAmount
+          ? index === n
+            ? EMI.toFixed(2)
+            : foreclosureAmount
           : "Not applicable",
     });
   }
