@@ -232,7 +232,7 @@ export const AddRemarkAgent = async (req, res) => {
           $push: {
             agentRemark: {
               _id: new mongoose.Types.ObjectId(),
-              updatedBy: new mongoose.Types.ObjectId(req.user._id),
+              createdBy: new mongoose.Types.ObjectId(req.user._id),
               updatedBy: null,
               date: new Date(),
               remark: reqData.agentRemark,
@@ -312,6 +312,160 @@ export const RemarkDetails = async (req, res) => {
     res.status(StatusCodes.OK).json({
       message: "Data fetched successfully",
       data: data,
+    });
+  } catch (error) {
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
+  }
+};
+
+export const PaymentDetails = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const details = await Loan.aggregate([
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(id),
+        },
+      },
+      {
+        $project: {
+          emiSchedule: 1,
+          loanId: "$_id",
+          _id: 0,
+        },
+      },
+      {
+        $unwind: {
+          path: "$emiSchedule",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $addFields: {
+          today: {
+            $dateFromParts: {
+              year: { $year: "$$NOW" },
+              month: { $month: "$$NOW" },
+              day: { $dayOfMonth: "$$NOW" },
+            },
+          },
+        },
+      },
+      {
+        $addFields: {
+          overdueDays: {
+            $cond: {
+              if: {
+                $and: [
+                  {
+                    $eq: ["$emiSchedule.isPaid", false],
+                  },
+                  {
+                    $lt: ["$emiSchedule.emiDate", "$$NOW"],
+                  },
+                ],
+              },
+              then: {
+                $dateDiff: {
+                  startDate: "$emiSchedule.emiDate",
+                  endDate: "$$NOW",
+                  unit: "day",
+                },
+              },
+              else: 0,
+            },
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "charges",
+          pipeline: [{ $match: { isActive: true } }],
+          as: "charges",
+        },
+      },
+      {
+        $unwind: {
+          path: "$charges",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $addFields: {
+          overdueAmount: {
+            $cond: {
+              if: {
+                $and: [
+                  {
+                    $eq: ["$emiSchedule.isPaid", false],
+                  },
+                  {
+                    $lt: ["$emiSchedule.emiDate", "$$NOW"],
+                  },
+                ],
+              },
+              then: {
+                $multiply: [
+                  {
+                    $multiply: [
+                      {
+                        $toDouble: "$emiSchedule.emiAmount",
+                      },
+                      {
+                        $divide: [
+                          {
+                            $toDouble: "$charges.overdue",
+                          },
+                          100,
+                        ],
+                      },
+                    ],
+                  },
+                  "$overdueDays",
+                ],
+              },
+              else: 0,
+            },
+          },
+        },
+      },
+      {
+        $addFields: {
+          payableAmount: {
+            $add: [
+              { $toDouble: "$emiSchedule.emiAmount" },
+              { $toDouble: "$overdueAmount" },
+            ],
+          },
+        },
+      },
+
+      {
+        $project: {
+          loanId: 1,
+          _id: "$emiSchedule._id",
+          emiDate: "$emiSchedule.emiDate",
+          emiAmount: "$emiSchedule.emiAmount",
+          interestPaid: "$emiSchedule.interestPaid",
+          principalPaid: "$emiSchedule.principalPaid",
+          isPaid: "$emiSchedule.isPaid",
+          remainingOutstanding: "$emiSchedule.remainingOutstanding",
+          foreclosureAmount: "$emiSchedule.foreclosureAmount",
+          overdueDays: 1,
+          overdueAmount: 1,
+          payableAmount: 1,
+        },
+      },
+      {
+        $sort: {
+          isPaid: 1,
+        },
+      },
+    ]);
+
+    res.status(StatusCodes.OK).json({
+      message: "Data fetched successfully",
+      data: details,
     });
   } catch (error) {
     res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });

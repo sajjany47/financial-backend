@@ -160,6 +160,7 @@ export const StatusData = (data) => {
       otherChargesGST: data.charges.otherChargesGST,
       loanAmount: Number(data.loanAmount),
     });
+    prepareData.loanCharges = data.loanCharges;
     prepareData.interestRate = data.interestRate;
     prepareData.transactionNumber = data.transactionNumber;
     prepareData.disbursedBy = data.user;

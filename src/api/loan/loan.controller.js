@@ -111,6 +111,7 @@ export const ApplicationUpdate = async (req, res) => {
         });
         validateData = {
           ...validateData,
+          loanCharges: findCharges._id,
           charges: {
             foreclosureFees: findCharges?.foreclosureFees
               ? findCharges?.foreclosureFees

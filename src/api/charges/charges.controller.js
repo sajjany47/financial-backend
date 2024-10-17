@@ -14,16 +14,16 @@ export const createCharges = async (req, res) => {
           .json({ message: "Previous active charge required to inactive" });
       } else {
         const data = new charges({
-          processingFees: validateData.processingFees,
-          processingFeesGST: validateData.processingFeesGST,
-          loginFees: validateData.loginFees,
-          loginFeesGST: validateData.loginFeesGST,
-          otherCharges: validateData.otherCharges,
-          otherChargesGST: validateData.otherChargesGST,
-          foreclosureFees: validateData.foreclosureFees,
-          foreclosureFeesGST: validateData.foreclosureFeesGST,
-          foreclosureApply: validateData.foreclosureApply,
-          overdue: validateData.overdue,
+          processingFees: Number(validateData.processingFees),
+          processingFeesGST: Number(validateData.processingFeesGST),
+          loginFees: Number(validateData.loginFees),
+          loginFeesGST: Number(validateData.loginFeesGST),
+          otherCharges: Number(validateData.otherCharges),
+          otherChargesGST: Number(validateData.otherChargesGST),
+          foreclosureFees: Number(validateData.foreclosureFees),
+          foreclosureFeesGST: Number(validateData.foreclosureFeesGST),
+          foreclosureApply: Number(validateData.foreclosureApply),
+          overdue: Number(validateData.overdue),
           isActive: true,
           createdBy: req.user._id,
         });
