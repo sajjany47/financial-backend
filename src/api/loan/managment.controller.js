@@ -471,3 +471,11 @@ export const PaymentDetails = async (req, res) => {
     res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }
 };
+
+export const LoanPay = async (req, res) => {
+  try {
+    const reqData = req.body;
+  } catch (error) {
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
+  }
+};
