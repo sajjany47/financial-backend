@@ -15,6 +15,7 @@ import {
   AddRemarkAgent,
   AgentList,
   LoanManagList,
+  LoanPay,
   PaymentDetails,
   RemarkDetails,
 } from "../api/loan/managment.controller.js";
@@ -45,6 +46,7 @@ LoanRoutes.route("/manage/remark-agent-update").post(
   tokenValidation,
   AddRemarkAgent
 );
+LoanRoutes.route("/manage/pay").post(tokenValidation, LoanPay);
 LoanRoutes.route("/manage/payment/:id").get(tokenValidation, PaymentDetails);
 LoanRoutes.route("/datatable").post(tokenValidation, datatable);
 

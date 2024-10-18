@@ -475,6 +475,61 @@ export const PaymentDetails = async (req, res) => {
 export const LoanPay = async (req, res) => {
   try {
     const reqData = req.body;
+    const findLoan = await Loan.findOne({
+      _id: new mongoose.Types.ObjectId(reqData.loanId),
+    });
+
+    if (findLoan) {
+      const prepareData =
+        reqData.type === "emi_pay" || reqData.type === "emi_settlement"
+          ? {
+              "emiSchedule.$.payableAmount": Number(reqData.amount),
+              "emiSchedule.$.waiverAmount": Number(reqData.waiverAmount),
+              "emiSchedule.$.isPaid": true,
+              "emiSchedule.$.loanPayType": reqData.type,
+              "emiSchedule.$.overdueAmount": Number(reqData.overdueAmount),
+              "emiSchedule.$.overdueDays": Number(reqData.overdueDays),
+              "emiSchedule.$.transactionNumber": reqData.transactionNumber,
+              "emiSchedule.$.updatedBy": new mongoose.Types.ObjectId(
+                req.user._id
+              ),
+            }
+          : reqData.type === "foreclosure" || reqData.type === "loan_settlement"
+          ? {
+              "emiSchedule.$[].payableAmount":
+                Number(reqData.amount) / findLoan.emiSchedule.length,
+              "emiSchedule.$[].waiverAmount":
+                Number(reqData.waiverAmount) / findLoan.emiSchedule.length,
+              "emiSchedule.$[].isPaid": true,
+              "emiSchedule.$[].loanPayType": reqData.type,
+              "emiSchedule.$[].waiverAmount": Number(reqData.waiverAmount),
+              "emiSchedule.$[].transactionNumber": reqData.transactionNumber,
+              "emiSchedule.$[].updatedBy": new mongoose.Types.ObjectId(
+                req.user._id
+              ),
+              isLoanActive: false,
+              updatedBy: new mongoose.Types.ObjectId(req.user._id),
+            }
+          : {};
+
+      await Loan.updateOne(
+        {
+          _id: new mongoose.Types.ObjectId(reqData.loanId),
+          "emiSchedule._id": new mongoose.Types.ObjectId(reqData._id),
+        },
+        {
+          $set: { ...prepareData },
+        }
+      );
+
+      return res
+        .status(StatusCodes.OK)
+        .json({ message: "Loan payment successfully" });
+    } else {
+      res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ message: "Loan details not available" });
+    }
   } catch (error) {
     res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }
