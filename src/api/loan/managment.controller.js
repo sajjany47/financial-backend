@@ -3,6 +3,7 @@ import { StatusCodes } from "http-status-codes";
 import mongoose from "mongoose";
 import Loan from "./loan.model.js";
 import employee from "../employess/employee.model.js";
+import { BuildRegexQuery } from "../../utilis/utilis.js";
 
 export const LoanManagList = async (req, res) => {
   try {
