@@ -3,7 +3,6 @@ import { StatusCodes } from "http-status-codes";
 import mongoose from "mongoose";
 import Loan from "./loan.model.js";
 import employee from "../employess/employee.model.js";
-import { Position } from "../employess/EmployeeConfig.js";
 
 export const LoanManagList = async (req, res) => {
   try {
@@ -320,6 +319,7 @@ export const RemarkDetails = async (req, res) => {
 
 export const PaymentDetails = async (req, res) => {
   try {
+    const position = req.user;
     const query = [{ "emiSchedule.isPaid": false }];
     if (req.body.startDate && req.body.endDate) {
       query.push({
@@ -338,6 +338,29 @@ export const PaymentDetails = async (req, res) => {
           : {},
       },
       {
+        $lookup: {
+          from: "branches",
+          localField: "branch",
+          foreignField: "_id",
+          as: "branchDetails",
+        },
+      },
+      {
+        $unwind: {
+          path: "$branchDetails",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $match: {
+          "branchDetails.country": position?.country
+            ? position?.country
+            : { $ne: "" },
+          "branchDetails.state": position.state ? position.state : { $ne: "" },
+          "branchDetails.city": position.city ? position.city : { $ne: "" },
+        },
+      },
+      {
         $project: {
           emiSchedule: 1,
           loanId: "$_id",
@@ -347,6 +370,8 @@ export const PaymentDetails = async (req, res) => {
           mobile: "$mobile",
           isLoanActive: "$isLoanActive",
           name: "$name",
+          branchName: "$branchDetails.name",
+          branchCode: "$branchDetails.code",
         },
       },
       {
@@ -480,6 +505,8 @@ export const PaymentDetails = async (req, res) => {
           mobile: 1,
           isLoanActive: 1,
           name: 1,
+          branchName: 1,
+          branchCode: 1,
         },
       },
       {
@@ -565,6 +592,7 @@ export const LoanPay = async (req, res) => {
 
 export const PaidLoanList = async (req, res) => {
   try {
+    const position = req.user;
     const query = [{ "emiSchedule.isPaid": true }];
     if (req.body.startDate && req.body.endDate) {
       query.push({
@@ -583,6 +611,29 @@ export const PaidLoanList = async (req, res) => {
           : {},
       },
       {
+        $lookup: {
+          from: "branches",
+          localField: "branch",
+          foreignField: "_id",
+          as: "branchDetails",
+        },
+      },
+      {
+        $unwind: {
+          path: "$branchDetails",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $match: {
+          "branchDetails.country": position?.country
+            ? position?.country
+            : { $ne: "" },
+          "branchDetails.state": position.state ? position.state : { $ne: "" },
+          "branchDetails.city": position.city ? position.city : { $ne: "" },
+        },
+      },
+      {
         $project: {
           emiSchedule: 1,
           loanId: "$_id",
@@ -592,6 +643,8 @@ export const PaidLoanList = async (req, res) => {
           mobile: "$mobile",
           isLoanActive: "$isLoanActive",
           name: "$name",
+          branchName: "$branchDetails.name",
+          branchCode: "$branchDetails.code",
         },
       },
       {
@@ -628,6 +681,8 @@ export const PaidLoanList = async (req, res) => {
             transactionNumber: "$emiSchedule.transactionNumber",
             updatedBy: "$emiSchedule.updatedBy",
             waiverAmount: "$emiSchedule.waiverAmount",
+            branchName: "$branchName",
+            branchCode: "$branchCode",
           },
         },
       },
