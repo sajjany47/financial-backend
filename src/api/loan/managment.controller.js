@@ -585,6 +585,11 @@ export const PaidLoanList = async (req, res) => {
           },
         },
       },
+      {
+        $sort: {
+          emiDate: 1,
+        },
+      },
     ]);
     res.status(StatusCodes.OK).json({
       message: "Data fetched successfully",
