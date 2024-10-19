@@ -341,6 +341,11 @@ export const PaymentDetails = async (req, res) => {
         },
       },
       {
+        $match: {
+          "emiSchedule.isPaid": false,
+        },
+      },
+      {
         $addFields: {
           today: {
             $dateFromParts: {
@@ -380,7 +385,8 @@ export const PaymentDetails = async (req, res) => {
       {
         $lookup: {
           from: "charges",
-          pipeline: [{ $match: { isActive: true } }],
+          localField: "charges",
+          foreignField: "_id",
           as: "charges",
         },
       },
@@ -595,6 +601,13 @@ export const PaidLoanList = async (req, res) => {
       message: "Data fetched successfully",
       data: findLoan,
     });
+  } catch (error) {
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
+  }
+};
+
+export const PaymentHistory = async (req, res) => {
+  try {
   } catch (error) {
     res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }
