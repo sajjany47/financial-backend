@@ -490,6 +490,7 @@ export const LoanPay = async (req, res) => {
               "emiSchedule.$.overdueAmount": Number(reqData.overdueAmount),
               "emiSchedule.$.overdueDays": Number(reqData.overdueDays),
               "emiSchedule.$.transactionNumber": reqData.transactionNumber,
+              "emiSchedule.$.paidOn": new Date(),
               "emiSchedule.$.updatedBy": new mongoose.Types.ObjectId(
                 req.user._id
               ),
@@ -501,6 +502,7 @@ export const LoanPay = async (req, res) => {
               "emiSchedule.$[].waiverAmount":
                 Number(reqData.waiverAmount) / findLoan.emiSchedule.length,
               "emiSchedule.$[].isPaid": true,
+              "emiSchedule.$[].paidOn": new Date(),
               "emiSchedule.$[].loanPayType": reqData.type,
               "emiSchedule.$[].waiverAmount": Number(reqData.waiverAmount),
               "emiSchedule.$[].transactionNumber": reqData.transactionNumber,
@@ -530,6 +532,64 @@ export const LoanPay = async (req, res) => {
         .status(StatusCodes.NOT_FOUND)
         .json({ message: "Loan details not available" });
     }
+  } catch (error) {
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
+  }
+};
+
+export const PaidLoanList = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const findLoan = await Loan.aggregate([
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(id),
+        },
+      },
+      {
+        $project: {
+          emiSchedule: 1,
+          loanId: "$_id",
+          _id: 0,
+        },
+      },
+      {
+        $unwind: {
+          path: "$emiSchedule",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $match: {
+          "emiSchedule.isPaid": true,
+        },
+      },
+      {
+        $replaceRoot: {
+          newRoot: {
+            loanId: "$loanId",
+            emiDate: "$emiSchedule.emiDate",
+            emiAmount: "$emiSchedule.emiAmount",
+            interestPaid: "$emiSchedule.interestPaid",
+            principalPaid: "$emiSchedule.principalPaid",
+            isPaid: "$emiSchedule.isPaid",
+            remainingOutstanding: "$emiSchedule.remainingOutstanding",
+            foreclosureAmount: "$emiSchedule.foreclosureAmount",
+            loanPayType: "$emiSchedule.loanPayType",
+            overdueAmount: "$emiSchedule.overdueAmount",
+            overdueDays: "$emiSchedule.overdueDays",
+            payableAmount: "$emiSchedule.payableAmount",
+            transactionNumber: "$emiSchedule.transactionNumber",
+            updatedBy: "$emiSchedule.updatedBy",
+            waiverAmount: "$emiSchedule.waiverAmount",
+          },
+        },
+      },
+    ]);
+    res.status(StatusCodes.OK).json({
+      message: "Data fetched successfully",
+      data: findLoan,
+    });
   } catch (error) {
     res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }
