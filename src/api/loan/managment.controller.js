@@ -342,6 +342,11 @@ export const PaymentDetails = async (req, res) => {
           emiSchedule: 1,
           loanId: "$_id",
           _id: 0,
+          applicationNumber: "$applicationNumber",
+          loanAmount: "$loanAmount",
+          mobile: "$mobile",
+          isLoanActive: "$isLoanActive",
+          name: "$name",
         },
       },
       {
@@ -470,6 +475,11 @@ export const PaymentDetails = async (req, res) => {
           overdueDays: 1,
           overdueAmount: 1,
           payableAmount: 1,
+          applicationNumber: 1,
+          loanAmount: 1,
+          mobile: 1,
+          isLoanActive: 1,
+          name: 1,
         },
       },
       {
@@ -577,6 +587,11 @@ export const PaidLoanList = async (req, res) => {
           emiSchedule: 1,
           loanId: "$_id",
           _id: 0,
+          applicationNumber: "$applicationNumber",
+          loanAmount: "$loanAmount",
+          mobile: "$mobile",
+          isLoanActive: "$isLoanActive",
+          name: "$name",
         },
       },
       {
@@ -594,6 +609,11 @@ export const PaidLoanList = async (req, res) => {
         $replaceRoot: {
           newRoot: {
             loanId: "$loanId",
+            applicationNumber: "$applicationNumber",
+            loanAmount: "$loanAmount",
+            mobile: "$mobile",
+            isLoanActive: "$isLoanActive",
+            name: "$name",
             emiDate: "$emiSchedule.emiDate",
             emiAmount: "$emiSchedule.emiAmount",
             interestPaid: "$emiSchedule.interestPaid",
