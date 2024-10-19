@@ -48,8 +48,8 @@ LoanRoutes.route("/manage/remark-agent-update").post(
   AddRemarkAgent
 );
 LoanRoutes.route("/manage/pay").post(tokenValidation, LoanPay);
-LoanRoutes.route("/manage/payment/:id").get(tokenValidation, PaymentDetails);
-LoanRoutes.route("/manage/paid-list/:id").get(tokenValidation, PaidLoanList);
+LoanRoutes.route("/manage/payment").post(tokenValidation, PaymentDetails);
+LoanRoutes.route("/manage/paid-list").post(tokenValidation, PaidLoanList);
 LoanRoutes.route("/datatable").post(tokenValidation, datatable);
 
 export default LoanRoutes;

@@ -320,12 +320,22 @@ export const RemarkDetails = async (req, res) => {
 
 export const PaymentDetails = async (req, res) => {
   try {
-    const id = req.params.id;
+    const query = [{ "emiSchedule.isPaid": false }];
+    if (req.body.startDate && req.body.endDate) {
+      query.push({
+        "emiSchedule.emiDate": {
+          $gte: new Date(req.body.startDate),
+          $lte: new Date(req.body.endDate),
+        },
+      });
+    }
     const details = await Loan.aggregate([
       {
-        $match: {
-          _id: new mongoose.Types.ObjectId(id),
-        },
+        $match: req.body.loanId
+          ? {
+              _id: new mongoose.Types.ObjectId(req.body.loanId),
+            }
+          : {},
       },
       {
         $project: {
@@ -342,7 +352,7 @@ export const PaymentDetails = async (req, res) => {
       },
       {
         $match: {
-          "emiSchedule.isPaid": false,
+          $and: query,
         },
       },
       {
@@ -545,12 +555,22 @@ export const LoanPay = async (req, res) => {
 
 export const PaidLoanList = async (req, res) => {
   try {
-    const id = req.params.id;
+    const query = [{ "emiSchedule.isPaid": true }];
+    if (req.body.startDate && req.body.endDate) {
+      query.push({
+        "emiSchedule.emiDate": {
+          $gte: new Date(req.body.startDate),
+          $lte: new Date(req.body.endDate),
+        },
+      });
+    }
     const findLoan = await Loan.aggregate([
       {
-        $match: {
-          _id: new mongoose.Types.ObjectId(id),
-        },
+        $match: req.body.loanId
+          ? {
+              _id: new mongoose.Types.ObjectId(req.body.loanId),
+            }
+          : {},
       },
       {
         $project: {
@@ -567,7 +587,7 @@ export const PaidLoanList = async (req, res) => {
       },
       {
         $match: {
-          "emiSchedule.isPaid": true,
+          $and: query,
         },
       },
       {
@@ -601,13 +621,6 @@ export const PaidLoanList = async (req, res) => {
       message: "Data fetched successfully",
       data: findLoan,
     });
-  } catch (error) {
-    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
-  }
-};
-
-export const PaymentHistory = async (req, res) => {
-  try {
   } catch (error) {
     res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }
