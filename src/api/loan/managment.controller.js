@@ -292,6 +292,7 @@ export const RemarkDetails = async (req, res) => {
           preserveNullAndEmptyArrays: true,
         },
       },
+
       {
         $project: {
           loanId: 1,
@@ -362,6 +363,20 @@ export const PaymentDetails = async (req, res) => {
         },
       },
       {
+        $lookup: {
+          from: "employees",
+          localField: "assignAgent",
+          foreignField: "_id",
+          as: "employeeDetails",
+        },
+      },
+      {
+        $unwind: {
+          path: "$employeeDetails",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
         $project: {
           emiSchedule: 1,
           loanId: "$_id",
@@ -373,6 +388,9 @@ export const PaymentDetails = async (req, res) => {
           name: "$name",
           branchName: "$branchDetails.name",
           branchCode: "$branchDetails.code",
+          branchId: "$branchDetails._id",
+          agentRemark: "$agentRemark",
+          assignAgentUsername: "$employeeDetails.username",
         },
       },
       {
@@ -508,6 +526,9 @@ export const PaymentDetails = async (req, res) => {
           name: 1,
           branchName: 1,
           branchCode: 1,
+          branchId: 1,
+          agentRemark: 1,
+          assignAgentUsername: 1,
         },
       },
       {
