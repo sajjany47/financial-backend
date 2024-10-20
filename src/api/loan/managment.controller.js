@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 import Loan from "./loan.model.js";
 import employee from "../employess/employee.model.js";
 import { BuildRegexQuery } from "../../utilis/utilis.js";
+import { DataWithEmployeeName } from "./loan.config.js";
 
 export const LoanManagList = async (req, res) => {
   try {
@@ -718,6 +719,91 @@ export const PaidLoanList = async (req, res) => {
       message: "Data fetched successfully",
       data: findLoan,
     });
+  } catch (error) {
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
+  }
+};
+
+export const ApplicationView = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const loanDetails = await Loan.aggregate([
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(id),
+        },
+      },
+      {
+        $lookup: {
+          from: "loantypes",
+          localField: "loanType",
+          foreignField: "_id",
+          as: "loanType",
+        },
+      },
+      {
+        $unwind: {
+          path: "$loanType",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "branches",
+          localField: "branch",
+          foreignField: "_id",
+          as: "branch",
+        },
+      },
+      {
+        $unwind: {
+          path: "$branch",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+
+      {
+        $lookup: {
+          from: "charges",
+          localField: "loanCharges",
+          foreignField: "_id",
+          as: "loanCharges",
+        },
+      },
+      {
+        $unwind: {
+          path: "$loanCharges",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+    ]);
+    const a = loanDetails[0];
+
+    const prepareData = {
+      ...a,
+      createdBy: await DataWithEmployeeName(a.createdBy),
+      loanAllotAgent: a?.loanAllotAgent
+        ? DataWithEmployeeName(a.loanAllotAgent)
+        : null,
+      updatedBy: a.updatedBy ? await DataWithEmployeeName(a.updatedBy) : null,
+      disbursedBy: await DataWithEmployeeName(a.disbursedBy),
+      loanVerifiedBy: a?.loanVerifiedBy
+        ? await DataWithEmployeeName(a.loanVerifiedBy)
+        : null,
+      addressVerifiedBy: a?.addressVerifiedBy
+        ? await DataWithEmployeeName(a.addressVerifiedBy)
+        : null,
+      officeOrBussinessVerifiedBy: a?.officeOrBussinessVerifiedBy
+        ? await DataWithEmployeeName(a.officeOrBussinessVerifiedBy)
+        : null,
+      documentVerifiedBy: (await a?.documentVerifiedBy)
+        ? DataWithEmployeeName(a.documentVerifiedBy)
+        : null,
+    };
+
+    res
+      .status(StatusCodes.OK)
+      .json({ message: "Data fetched successfully", data: prepareData });
   } catch (error) {
     res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }

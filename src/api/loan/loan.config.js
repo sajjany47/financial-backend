@@ -2,6 +2,7 @@ import moment from "moment";
 import mongoose from "mongoose";
 import { GetFileName, GLocalImage } from "../../utilis/utilis.js";
 import fs from "fs";
+import employee from "../employess/employee.model.js";
 
 export const EmployeeTypes = ["salaried", "self_employed", "business"];
 
@@ -196,6 +197,16 @@ export const AcccessPositionWise = (user) => {
   }
 
   return query;
+};
+
+export const DataWithEmployeeName = async (id) => {
+  const employeeArray = await employee.find({});
+  const findEmployee = employeeArray.find(
+    (item) => item._id.toString() === id.toString()
+  );
+  const data = { name: findEmployee.name, username: findEmployee.username };
+
+  return data;
 };
 
 // const myPincode = 700053;

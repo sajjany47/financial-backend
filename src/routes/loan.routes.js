@@ -14,6 +14,7 @@ import {
 import {
   AddRemarkAgent,
   AgentList,
+  ApplicationView,
   LoanManagList,
   LoanPay,
   PaidLoanList,
@@ -50,6 +51,7 @@ LoanRoutes.route("/manage/remark-agent-update").post(
 LoanRoutes.route("/manage/pay").post(tokenValidation, LoanPay);
 LoanRoutes.route("/manage/payment").post(tokenValidation, PaymentDetails);
 LoanRoutes.route("/manage/paid-list").post(tokenValidation, PaidLoanList);
+LoanRoutes.route("/application-view/:id").get(tokenValidation, ApplicationView);
 LoanRoutes.route("/datatable").post(tokenValidation, datatable);
 
 export default LoanRoutes;
