@@ -285,9 +285,53 @@ export const getDetails = async (req, res) => {
       { password: 0 }
     );
 
+    const baseUrl = req.protocol + "://" + req.get("host");
+
+    const finalData = {
+      ...findData,
+      education:
+        findData.education.length > 0
+          ? findData?.education?.map((item) => ({
+              ...item,
+              resultImage: `${baseUrl}/uploads/employee/${item.resultImage}`,
+            }))
+          : [],
+      workDetail:
+        findData.workDetail.length > 0
+          ? findData?.workDetail?.map((item) => ({
+              ...item,
+              experienceLetter: `${baseUrl}/uploads/employee/${item.experienceLetter}`,
+              relievingLetter: `${baseUrl}/uploads/employee/${item.relievingLetter}`,
+              appointmentLetter: `${baseUrl}/uploads/employee/${item.appointmentLetter}`,
+              salarySlip: `${baseUrl}/uploads/employee/${item.salarySlip}`,
+            }))
+          : [],
+      userImage: findData.userImage
+        ? `${baseUrl}/uploads/employee/${findData.userImage}`
+        : null,
+      aadharImage: findData.aadharImage
+        ? `${baseUrl}/uploads/employee/${findData.aadharImage}`
+        : null,
+      panImage: findData.panImage
+        ? `${baseUrl}/uploads/employee/${findData.panImage}`
+        : null,
+      passportImage: findData.passportImage
+        ? `${baseUrl}/uploads/employee/${findData.passportImage}`
+        : null,
+      voterImage: findData.voterImage
+        ? `${baseUrl}/uploads/employee/${findData.voterImage}`
+        : null,
+      uanImage: findData.uanImage
+        ? `${baseUrl}/uploads/employee/${findData.uanImage}`
+        : null,
+      passbookImage: findData.passbookImage
+        ? `${baseUrl}/uploads/employee/${findData.passbookImage}`
+        : null,
+    };
+
     return res
       .status(StatusCodes.OK)
-      .json({ message: "Data fetched successfully", data: findData });
+      .json({ message: "Data fetched successfully", data: finalData });
   } catch (error) {
     res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }
