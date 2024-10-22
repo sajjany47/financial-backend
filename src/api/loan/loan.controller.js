@@ -230,7 +230,7 @@ export const getLoanDetail = async (req, res, next) => {
         if (item[entityKey] && item[entityKey].documentImage) {
           item[
             entityKey
-          ].documentUrl = `${baseUrl}/uploads/${item[entityKey].documentImage}`;
+          ].documentUrl = `${baseUrl}/uploads/loan_document/${item[entityKey].documentImage}`;
         }
         return item;
       });

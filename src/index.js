@@ -28,7 +28,7 @@ function main() {
   const server = createServer(app);
   app.use(express.json());
   // Serve static files (like images) from the './src/uploads' directory
-  app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+  app.use("/uploads", express.static(path.join(__dirname, "../../Upload/")));
 
   app.use(express.urlencoded({ limit: "30 mb", extended: true }));
   mongoose
