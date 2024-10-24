@@ -280,13 +280,21 @@ export const updateEducationAndCompanyDetails = async (req, res) => {
 export const getDetails = async (req, res) => {
   try {
     const id = req.params.id;
-    const findData = await employee.findOne(
-      { _id: new mongoose.Types.ObjectId(id) },
-      { password: 0 }
-    );
+    const data = await employee.aggregate([
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(id),
+        },
+      },
+      {
+        $project: {
+          password: 0,
+        },
+      },
+    ]);
 
     const baseUrl = req.protocol + "://" + req.get("host");
-
+    const findData = data[0];
     const finalData = {
       ...findData,
       education:
