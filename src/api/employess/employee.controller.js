@@ -34,7 +34,6 @@ import {
   EmployeeBasicData,
   EmployeeDocumentData,
 } from "./EmployeeData.js";
-import fs from "fs";
 
 export const adminSignUpSchemaFirst = async (req, res) => {
   try {
@@ -476,6 +475,7 @@ export const login = async (req, res) => {
           validUser.password
         );
         if (verifyPassword) {
+          const baseUrl = req.protocol + "://" + req.get("host");
           const sessionID = nanoid();
           const data = {
             _id: validUser._id,
@@ -488,6 +488,7 @@ export const login = async (req, res) => {
             state: validUser.state,
             isPasswordReset: validUser.isPasswordReset,
             sessionId: sessionID,
+            userImage: `${baseUrl}/uploads/employee/${validUser.userImage}`,
           };
           const accessToken = generateAccessToken(data);
           const refreshToken = generateRefreshToken(data);
