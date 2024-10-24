@@ -4,7 +4,15 @@ import mongoose from "mongoose";
 import Loan from "./loan.model.js";
 import employee from "../employess/employee.model.js";
 import { BuildRegexQuery } from "../../utilis/utilis.js";
-import { DataWithEmployeeName } from "./loan.config.js";
+import {
+  CityName,
+  CountryName,
+  DataWithEmployeeName,
+  FormatType,
+  StateName,
+} from "./loan.config.js";
+import documentType from "../document/documentType.model.js";
+import document from "../document/document.model.js";
 
 export const LoanManagList = async (req, res) => {
   try {
@@ -779,6 +787,32 @@ export const ApplicationView = async (req, res) => {
     ]);
     const a = loanDetails[0];
 
+    const modifyDocument = a.document.map((item) => {
+      const key = Object.keys(item).find((k) => k !== "_id");
+      const doc = item[key];
+      return {
+        type: FormatType(key),
+        documentType: doc.documentType,
+        documentNumber: doc.documentNumber,
+      };
+    });
+
+    const documentFullList = await document.find({});
+    const documentNameList = [];
+    for (let index = 0; index < documentFullList.length; index++) {
+      const element = documentFullList[index];
+      for (let index = 0; index < modifyDocument.length; index++) {
+        const item = modifyDocument[index];
+
+        if (element._id.toString() === item.documentType) {
+          documentNameList.push({
+            ...item,
+            documentType: element.documentName,
+          });
+        }
+      }
+    }
+
     const prepareData = {
       ...a,
       createdBy: await DataWithEmployeeName(a.createdBy),
@@ -799,6 +833,26 @@ export const ApplicationView = async (req, res) => {
       documentVerifiedBy: (await a?.documentVerifiedBy)
         ? DataWithEmployeeName(a.documentVerifiedBy)
         : null,
+      document: documentNameList,
+      permanentCountry: a.permanentCountry
+        ? await CountryName(a.permanentCountry)
+        : null,
+      permanentState: a.permanentState
+        ? await StateName(a.permanentState)
+        : null,
+      permanentCity: a.permanentCity ? await CityName(a.permanentCity) : null,
+
+      residenceCountry: a.residenceCountry
+        ? await CountryName(a.residenceCountry)
+        : null,
+      residenceState: a.residenceState
+        ? await StateName(a.residenceState)
+        : null,
+      residenceCity: a.residenceCity ? await CityName(a.residenceCity) : null,
+
+      workCountry: a.workCountry ? await CountryName(a.workCountry) : null,
+      workState: a.workState ? await StateName(a.workState) : null,
+      workCity: a.workCity ? await CityName(a.workCity) : null,
     };
 
     res

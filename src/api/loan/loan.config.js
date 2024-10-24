@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import { GetFileName, GLocalImage } from "../../utilis/utilis.js";
 import fs from "fs";
 import employee from "../employess/employee.model.js";
+import { City, Country, State } from "../Regional/Regional.model.js";
 
 export const EmployeeTypes = ["salaried", "self_employed", "business"];
 
@@ -207,6 +208,28 @@ export const DataWithEmployeeName = async (id) => {
   const data = { name: findEmployee.name, username: findEmployee.username };
 
   return data;
+};
+
+export const CountryName = async (id) => {
+  const countryData = await Country.findOne({ id: Number(id) });
+
+  return countryData.name;
+};
+
+export const StateName = async (id) => {
+  const stateData = await State.findOne({ id: Number(id) });
+
+  return stateData.name;
+};
+export const CityName = async (id) => {
+  const cityData = await City.findOne({ id: Number(id) });
+
+  return cityData.name;
+};
+
+export const FormatType = (str) => {
+  // Replace underscores with spaces and capitalize each word
+  return str.replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
 };
 
 // const myPincode = 700053;
