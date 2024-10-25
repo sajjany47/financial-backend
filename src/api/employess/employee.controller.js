@@ -34,6 +34,7 @@ import {
   EmployeeBasicData,
   EmployeeDocumentData,
 } from "./EmployeeData.js";
+import { CityName, CountryName, StateName } from "../loan/loan.config.js";
 
 export const adminSignUpSchemaFirst = async (req, res) => {
   try {
@@ -606,6 +607,71 @@ export const ifsc = async (req, res) => {
     const result = await response.json();
 
     return res.status(StatusCodes.OK).json({ data: result });
+  } catch (error) {
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
+  }
+};
+
+export const EmployeeView = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const findEmployee = await employee.aggregate([
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(id),
+        },
+      },
+      {
+        $lookup: {
+          from: "branches",
+          localField: "branch",
+          foreignField: "_id",
+          as: "branch",
+        },
+      },
+      {
+        $unwind: {
+          path: "$branch",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $project: {
+          isPasswordReset: 0,
+          password: 0,
+        },
+      },
+    ]);
+    const data = findEmployee[0];
+    const modifyData = {
+      ...data,
+      country: data.country ? await CountryName(data.country) : null,
+      state: data.state ? await StateName(data.state) : null,
+      city: data.city ? await CityName(data.city) : null,
+      permanentCountry: data.permanentCountry
+        ? await CountryName(data.permanentCountry)
+        : null,
+      permanentState: data.permanentState
+        ? await StateName(data.permanentState)
+        : null,
+      permanentCity: data.permanentCity
+        ? await CityName(data.permanentCity)
+        : null,
+
+      residenceCountry: data.residenceCountry
+        ? await CountryName(data.residenceCountry)
+        : null,
+      residenceState: data.residenceState
+        ? await StateName(data.residenceState)
+        : null,
+      residenceCity: data.residenceCity
+        ? await CityName(data.residenceCity)
+        : null,
+    };
+
+    return res
+      .status(StatusCodes.OK)
+      .json({ message: "Data fetched successfully", data: modifyData });
   } catch (error) {
     res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }

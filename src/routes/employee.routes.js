@@ -3,6 +3,7 @@ import {
   adminSignUpSchemaFirst,
   dataTable,
   detailsUpdateUser,
+  EmployeeView,
   getDetails,
   ifsc,
   login,
@@ -32,6 +33,7 @@ EmployeeRoutes.route("/logout").get(tokenValidation, logout);
 EmployeeRoutes.route("/ifsc/:code").get(tokenValidation, ifsc);
 EmployeeRoutes.route("/update").post(tokenValidation, detailsUpdateUser);
 EmployeeRoutes.route("/:id").get(tokenValidation, getDetails);
+EmployeeRoutes.route("/view/:id").get(tokenValidation, EmployeeView);
 EmployeeRoutes.route("/datatable").post(tokenValidation, dataTable);
 EmployeeRoutes.route("/update-password").post(tokenValidation, resetPassword);
 
