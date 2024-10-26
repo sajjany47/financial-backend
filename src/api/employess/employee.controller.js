@@ -34,7 +34,12 @@ import {
   EmployeeBasicData,
   EmployeeDocumentData,
 } from "./EmployeeData.js";
-import { CityName, CountryName, StateName } from "../loan/loan.config.js";
+import {
+  CityName,
+  CountryName,
+  DataWithEmployeeName,
+  StateName,
+} from "../loan/loan.config.js";
 
 export const adminSignUpSchemaFirst = async (req, res) => {
   try {
@@ -645,6 +650,7 @@ export const EmployeeView = async (req, res) => {
     const data = findEmployee[0];
     const modifyData = {
       ...data,
+      createdBy: await DataWithEmployeeName(data.createdBy),
       country: data.country ? await CountryName(data.country) : null,
       state: data.state ? await StateName(data.state) : null,
       city: data.city ? await CityName(data.city) : null,
