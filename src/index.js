@@ -11,6 +11,7 @@ import DocumentRoutes from "./routes/dcoument.routes.js";
 import path from "path";
 import { fileURLToPath } from "url";
 import ChargesRoutes from "./routes/charges.routes.js";
+import FinaceRoutes from "./routes/finance.routes.js";
 
 function main() {
   const port = process.env.port;
@@ -55,5 +56,6 @@ function main() {
   app.use("/loan", LoanRoutes);
   app.use("/document", DocumentRoutes);
   app.use("/charges", ChargesRoutes);
+  app.use("/finance", FinaceRoutes);
 }
 main();
