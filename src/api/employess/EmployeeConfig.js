@@ -37,13 +37,14 @@ export const EmployeeDocumentImageUpload = async (
     const findEducationImage = findArray.find(
       (item) => item.id.toString() === productId
     );
+    if (findEducationImage[imageKey]) {
+      const deletePath = GLocalImage(
+        findEducationImage[imageKey],
+        process.env.EMPLOYEE_PATH
+      );
 
-    const deletePath = GLocalImage(
-      findEducationImage[imageKey],
-      process.env.EMPLOYEE_PATH
-    );
-
-    await fs.promises.unlink(deletePath);
+      await fs.promises.unlink(deletePath);
+    }
   }
   const file = uploadFile;
   const fileName = GetFileName(uploadFile);

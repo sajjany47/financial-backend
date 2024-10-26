@@ -301,38 +301,38 @@ export const getDetails = async (req, res) => {
         findData.education.length > 0
           ? findData?.education?.map((item) => ({
               ...item,
-              resultImage: `${baseUrl}/uploads/employee/${item.resultImage}`,
+              resultImageUrl: `${baseUrl}/uploads/employee/${item.resultImage}`,
             }))
           : [],
       workDetail:
         findData.workDetail.length > 0
           ? findData?.workDetail?.map((item) => ({
               ...item,
-              experienceLetter: `${baseUrl}/uploads/employee/${item.experienceLetter}`,
-              relievingLetter: `${baseUrl}/uploads/employee/${item.relievingLetter}`,
-              appointmentLetter: `${baseUrl}/uploads/employee/${item.appointmentLetter}`,
-              salarySlip: `${baseUrl}/uploads/employee/${item.salarySlip}`,
+              experienceLetterUrl: `${baseUrl}/uploads/employee/${item.experienceLetter}`,
+              relievingLetterUrl: `${baseUrl}/uploads/employee/${item.relievingLetter}`,
+              appointmentLetterUrl: `${baseUrl}/uploads/employee/${item.appointmentLetter}`,
+              salarySlipUrl: `${baseUrl}/uploads/employee/${item.salarySlip}`,
             }))
           : [],
-      userImage: findData.userImage
+      userImageUrl: findData.userImage
         ? `${baseUrl}/uploads/employee/${findData.userImage}`
         : null,
-      aadharImage: findData.aadharImage
+      aadharImageUrl: findData.aadharImage
         ? `${baseUrl}/uploads/employee/${findData.aadharImage}`
         : null,
-      panImage: findData.panImage
+      panImageUrl: findData.panImage
         ? `${baseUrl}/uploads/employee/${findData.panImage}`
         : null,
-      passportImage: findData.passportImage
+      passportImageUrl: findData.passportImage
         ? `${baseUrl}/uploads/employee/${findData.passportImage}`
         : null,
-      voterImage: findData.voterImage
+      voterImageUrl: findData.voterImage
         ? `${baseUrl}/uploads/employee/${findData.voterImage}`
         : null,
-      uanImage: findData.uanImage
+      uanImageUrl: findData.uanImage
         ? `${baseUrl}/uploads/employee/${findData.uanImage}`
         : null,
-      passbookImage: findData.passbookImage
+      passbookImageUrl: findData.passbookImage
         ? `${baseUrl}/uploads/employee/${findData.passbookImage}`
         : null,
     };
