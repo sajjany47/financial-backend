@@ -20,4 +20,6 @@ export const financeSchema = Yup.object().shape({
   interestRate: Yup.string().required("Interest Rate is required"),
   payoutFrequency: Yup.string().required("Payout frequency is required"),
   payoutDate: Yup.string().required("Payout date is required"),
+  aadharNumber: Yup.string().required("Aadhar Number is required"),
+  panNumber: Yup.string().required("Pan number is required"),
 });

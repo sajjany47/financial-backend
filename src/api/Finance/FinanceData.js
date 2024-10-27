@@ -1,5 +1,41 @@
+import mongoose from "mongoose";
+import { InvestmentTypes, PayoutFrequencies } from "./Finance.Config.js";
+import moment from "moment";
+
+export const GeneratePayout = (data) => {
+  const payoutSchedule = [];
+  let currentAmount = Number(data.investmentAmount);
+  const interest =
+    (Number(data.interestRate) / 100) * Number(data.payoutFrequency);
+  let payoutMoment = moment().date(data.payoutDate);
+  for (
+    let index = 1;
+    index <= Number(data.duration) / Number(data.payoutFrequency);
+    index++
+  ) {
+    const payoutAmount = currentAmount * interest;
+
+    payoutSchedule.push({
+      payoutDate: new Date(
+        moment(data.payoutDate).add(
+          Number(data.payoutFrequency) * index,
+          "months"
+        )
+      ),
+      payoutAmount: payoutAmount.toFixed(2),
+      _id: new mongoose.Types.ObjectId(),
+      isPaid: false,
+      TransactionNumber: null,
+      paidBy: null,
+      paidOn: null,
+    });
+  }
+
+  return payoutSchedule;
+};
+
 export const DataManage = (data) => {
-  const prepareData = {
+  let prepareData = {
     name: data.name,
     mobile: data.mobile,
     email: data.email,
@@ -15,6 +51,28 @@ export const DataManage = (data) => {
     bankBranchName: data.bankBranchName,
     ifsc: data.ifsc,
     accountName: data.accountName,
+    panNumber: data.panNumber,
+    aadharNumber: data.aadharNumber,
   };
+  if (data.investmentType === InvestmentTypes.BONDS) {
+    prepareData.payoutSchedule = GeneratePayout({
+      investmentAmount: data.investmentAmount,
+      duration: data.duration,
+      interestRate: data.interestRate,
+      payoutFrequency:
+        data.payoutFrequency === PayoutFrequencies.MONTHLY
+          ? 1
+          : data.payoutFrequency === PayoutFrequencies.QUARTERLY
+          ? 3
+          : data.payoutFrequency === PayoutFrequencies.SEMI_ANNUALLY
+          ? 6
+          : data.payoutFrequency === PayoutFrequencies.ANNUALLY
+          ? 12
+          : data.payoutFrequency === PayoutFrequencies.AT_MATURITY
+          ? data.duration
+          : 1,
+      payoutDate: data.payoutDate,
+    });
+  }
   return prepareData;
 };
