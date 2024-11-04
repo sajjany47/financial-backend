@@ -7,7 +7,6 @@ export const GeneratePayout = (data) => {
   let currentAmount = Number(data.investmentAmount);
   const interest =
     (Number(data.interestRate) / 100) * Number(data.payoutFrequency);
-  let payoutMoment = moment().date(data.payoutDate);
   for (
     let index = 1;
     index <= Number(data.duration) / Number(data.payoutFrequency);

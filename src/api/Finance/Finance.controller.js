@@ -29,10 +29,19 @@ export const financeUpdate = async (req, res) => {
         _id: new mongoose.Types.ObjectId(validData._id),
       });
       if (findInvestor) {
+        const filterPayout = findInvestor.payoutSchedule.filter(
+          (item) => item.isPaid === true
+        );
         const data = DataManage(validData);
         await finance.updateOne(
           { _id: new mongoose.Types.ObjectId(validData._id) },
-          { $set: { ...data, updatedBy: req.user._id } }
+          {
+            $set: {
+              ...data,
+              payoutSchedule: [...data.payoutSchedule, ...filterPayout],
+              updatedBy: req.user._id,
+            },
+          }
         );
         return res
           .status(StatusCodes.OK)
