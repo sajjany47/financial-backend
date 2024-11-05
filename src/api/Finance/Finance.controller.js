@@ -72,7 +72,7 @@ export const financeGetDetails = async (req, res) => {
   }
 };
 
-export const financeDatatable = async (req, res) => {
+export const InvestorDatatable = async (req, res) => {
   try {
     const reqData = req.body;
     const page = reqData.page;
@@ -109,6 +109,62 @@ export const financeDatatable = async (req, res) => {
       message: "Data fetched successfully",
       data: data[0].data,
       count: data[0].count[0] ? data[0].count[0].total : 0,
+    });
+  } catch (error) {
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
+  }
+};
+
+export const PayoutDatable = async (req, res) => {
+  try {
+    const reqData = req.body;
+    const page = reqData.page;
+    const limit = reqData.limit;
+    const start = page * limit - limit;
+    const query = [
+      { "payoutSchedule.isPaid": false },
+      {
+        "payoutSchedule.payoutDate": {
+          $gte: new Date(req.body.startDate),
+          $lte: new Date(req.body.endDate),
+        },
+      },
+    ];
+
+    if (reqData.name) {
+      query.push(BuildRegexQuery("name", reqData.name));
+    }
+
+    const findQuery = [
+      {
+        $unwind: {
+          path: "$payoutSchedule",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      { $match: query.length > 0 ? { $and: query } : {} },
+    ];
+    const countData = await finance.aggregate([
+      ...findQuery,
+      {
+        $count: "count",
+      },
+    ]);
+
+    const data = await finance.aggregate([
+      ...findQuery,
+      {
+        $sort: reqData.sort || { name: 1 },
+      },
+
+      { $skip: start },
+      { $limit: limit },
+    ]);
+
+    return res.status(StatusCodes.OK).json({
+      message: "Data fetched successfully",
+      data: data,
+      count: countData.length > 0 ? countData[0].count : 0,
     });
   } catch (error) {
     res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
