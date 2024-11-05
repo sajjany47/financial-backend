@@ -23,3 +23,25 @@ export const financeSchema = Yup.object().shape({
   aadharNumber: Yup.string().required("Aadhar Number is required"),
   panNumber: Yup.string().required("Pan number is required"),
 });
+
+export const payNowSchema = Yup.object({
+  accountNumber: Yup.string().required("Account number is required"),
+  amount: Yup.string().required("Amount is required"),
+  accountName: Yup.string().required("Account name is required"),
+  bankName: Yup.string().required("Bank name is required"),
+  ifsc: Yup.string().required("IFSC is required"),
+  transactionNumber: Yup.string().required("Transaction Number is required"),
+});
+
+export const reedemApplySchema = Yup.object({
+  investmentAmount: Yup.string().required("Investment Amount is required"),
+  reedemAmount: Yup.string().required("Reedem amount is required"),
+  reedemDate: Yup.date().required("Reedem date is required"),
+  remainingInvestAmount: Yup.string().required(
+    "Remaining invested amount is required"
+  ),
+  duration: Yup.string().required("Duration is required"),
+  interestRate: Yup.string().required("Interest Rate is required"),
+  payoutFrequency: Yup.string().required("Payout frequency is required"),
+  payoutDate: Yup.string().required("Payout date is required"),
+});

@@ -1,12 +1,18 @@
 import { StatusCodes } from "http-status-codes";
 import finance from "./finance.model.js";
-import { DataManage } from "./FinanceData.js";
+import { DataManage, GeneratePayout } from "./FinanceData.js";
 import mongoose from "mongoose";
 import { BuildRegexQuery } from "../../utilis/utilis.js";
+import {
+  financeSchema,
+  payNowSchema,
+  reedemApplySchema,
+} from "./finance.schema.js";
+import { PayoutFrequencies } from "./Finance.Config.js";
 
 export const financeCreate = async (req, res) => {
   try {
-    const validData = await finance.validate(req.body);
+    const validData = await financeSchema.validate(req.body);
     if (validData) {
       const prepareData = DataManage(validData);
       const data = new finance({ ...prepareData, createdBy: req.user._id });
@@ -23,7 +29,7 @@ export const financeCreate = async (req, res) => {
 
 export const financeUpdate = async (req, res) => {
   try {
-    const validData = await finance.validate(req.body);
+    const validData = await financeSchema.validate(req.body);
     if (validData) {
       const findInvestor = await finance.findOne({
         _id: new mongoose.Types.ObjectId(validData._id),
@@ -67,6 +73,134 @@ export const financeGetDetails = async (req, res) => {
     return res
       .status(StatusCodes.OK)
       .json({ message: "Data fetched successfully", data: findData });
+  } catch (error) {
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
+  }
+};
+
+export const financePayNow = async (req, res) => {
+  try {
+    const validData = await payNowSchema.validate(req.body);
+    if (validData) {
+      await finance.updateOne(
+        {
+          "payoutSchedule._id": new mongoose.Types.ObjectId(validData.payoutId),
+        },
+        {
+          $set: {
+            "payoutSchedule.$.isPaid": true,
+            "payoutSchedule.$.transactionNumber": validData.transactionNumber,
+            "payoutSchedule.$.paidBy": new mongoose.Types.ObjectId(
+              req.user._id
+            ),
+            "payoutSchedule.$.paidOn": new Date(),
+            updatedBy: new mongoose.Types.ObjectId(req.user._id),
+          },
+        }
+      );
+    }
+    return res
+      .status(StatusCodes.OK)
+      .json({ message: "Payment updated successfully" });
+  } catch (error) {
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
+  }
+};
+
+export const financeReedemPayNow = async (req, res) => {
+  try {
+    const validData = await payNowSchema.validate(req.body);
+    if (validData) {
+      await finance.updateOne(
+        {
+          "payoutReedem._id": new mongoose.Types.ObjectId(validData.reedemId),
+        },
+        {
+          $set: {
+            "payoutReedem.$.isPaid": true,
+            "payoutReedem.$.transactionNumber": validData.transactionNumber,
+            "payoutReedem.$.paidBy": new mongoose.Types.ObjectId(req.user._id),
+            "payoutReedem.$.paidOn": new Date(),
+            updatedBy: new mongoose.Types.ObjectId(req.user._id),
+          },
+        }
+      );
+    }
+    return res
+      .status(StatusCodes.OK)
+      .json({ message: "Payment updated successfully" });
+  } catch (error) {
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
+  }
+};
+
+export const financeReedemApply = async (req, res) => {
+  try {
+    const validData = await reedemApplySchema.validate(req.body);
+    if (validData) {
+      const findInvestor = await finance.findOne({
+        _id: new mongoose.Types.ObjectId(validData._id),
+      });
+
+      if (findInvestor) {
+        const filterPayoutSchedule = findInvestor.payoutSchedule.filter(
+          (item) => item.isPaid === true
+        );
+        const payoutSchedule = GeneratePayout({
+          investmentAmount: validData.remainingInvestAmount,
+          duration: validData.duration,
+          interestRate: validData.interestRate,
+          payoutFrequency:
+            validData.payoutFrequency === PayoutFrequencies.MONTHLY
+              ? 1
+              : validData.payoutFrequency === PayoutFrequencies.QUARTERLY
+              ? 3
+              : validData.payoutFrequency === PayoutFrequencies.SEMI_ANNUALLY
+              ? 6
+              : validData.payoutFrequency === PayoutFrequencies.ANNUALLY
+              ? 12
+              : validData.payoutFrequency === PayoutFrequencies.AT_MATURITY
+              ? Number(validData.duration)
+              : 1,
+          payoutDate: validData.payoutDate,
+        });
+        await finance.updateOne(
+          { _id: new mongoose.Types.ObjectId(validData._id) },
+          {
+            $push: {
+              payoutReedem: {
+                _id: new mongoose.Types.ObjectId(),
+                reedemAmount: validData.reedemAmount,
+                reedemDate: new Date(validData.reedemDate),
+                remainingInvestAmount: validData.remainingInvestAmount,
+                isPaid: false,
+                paidOn: null,
+                transactionNumber: null,
+                createdBy: new mongoose.Types.ObjectId(req.user._id),
+                createdOn: new Date(),
+              },
+            },
+            $set: {
+              investmentAmount: validData.remainingInvestAmount,
+              duration: validData.duration,
+              interestRate: validData.interestRate,
+              payoutDate: new Date(validData.payoutDate),
+              payoutFrequency: validData.payoutFrequency,
+              updatedBy: new mongoose.Types.ObjectId(req.user._id),
+              payoutSchedule: [...filterPayoutSchedule, ...payoutSchedule],
+            },
+          }
+        );
+
+        return res
+          .status(StatusCodes.OK)
+          .json({ message: "Reedem apply successfully" });
+      } else {
+        res
+          .status(StatusCodes.NON_AUTHORITATIVE_INFORMATION)
+          .json({ message: "Investor not found!" });
+      }
+    }
   } catch (error) {
     res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }
@@ -139,6 +273,62 @@ export const PayoutDatable = async (req, res) => {
       {
         $unwind: {
           path: "$payoutSchedule",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      { $match: query.length > 0 ? { $and: query } : {} },
+    ];
+    const countData = await finance.aggregate([
+      ...findQuery,
+      {
+        $count: "count",
+      },
+    ]);
+
+    const data = await finance.aggregate([
+      ...findQuery,
+      {
+        $sort: reqData.sort || { name: 1 },
+      },
+
+      { $skip: start },
+      { $limit: limit },
+    ]);
+
+    return res.status(StatusCodes.OK).json({
+      message: "Data fetched successfully",
+      data: data,
+      count: countData.length > 0 ? countData[0].count : 0,
+    });
+  } catch (error) {
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
+  }
+};
+
+export const ReedemDatable = async (req, res) => {
+  try {
+    const reqData = req.body;
+    const page = reqData.page;
+    const limit = reqData.limit;
+    const start = page * limit - limit;
+    const query = [
+      { "payoutReedem.isPaid": false },
+      {
+        "payoutReedem.reedemDate": {
+          $gte: new Date(req.body.startDate),
+          $lte: new Date(req.body.endDate),
+        },
+      },
+    ];
+
+    if (reqData.name) {
+      query.push(BuildRegexQuery("name", reqData.name));
+    }
+
+    const findQuery = [
+      {
+        $unwind: {
+          path: "$payoutReedem",
           preserveNullAndEmptyArrays: true,
         },
       },

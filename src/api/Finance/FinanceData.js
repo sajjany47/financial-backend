@@ -24,7 +24,7 @@ export const GeneratePayout = (data) => {
       payoutAmount: payoutAmount.toFixed(2),
       _id: new mongoose.Types.ObjectId(),
       isPaid: false,
-      TransactionNumber: null,
+      transactionNumber: null,
       paidBy: null,
       paidOn: null,
     });
