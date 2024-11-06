@@ -82,12 +82,11 @@ export const financePayNow = async (req, res) => {
   try {
     const validData = await payNowSchema.validate(req.body);
     if (validData) {
-      await finance.updateOne(
-        {
-          "payoutSchedule._id": new mongoose.Types.ObjectId(validData.payoutId),
-        },
-        {
-          $set: {
+      const findInvestor = await finance.findOne({ _id: validData._id });
+      if (findInvestor) {
+        let reqData = {};
+        if (validData.type === "payout") {
+          reqData = {
             "payoutSchedule.$.isPaid": true,
             "payoutSchedule.$.transactionNumber": validData.transactionNumber,
             "payoutSchedule.$.paidBy": new mongoose.Types.ObjectId(
@@ -95,13 +94,60 @@ export const financePayNow = async (req, res) => {
             ),
             "payoutSchedule.$.paidOn": new Date(),
             updatedBy: new mongoose.Types.ObjectId(req.user._id),
-          },
+          };
+
+          const filterPayout = findInvestor.payoutSchedule.filter(
+            (item) => item.isPaid === false
+          );
+          if (filterPayout.length === 0) {
+            reqData.isMaturityCompleted = true;
+          } else {
+            reqData.isMaturityCompleted = false;
+            reqData.isInvestorActive = true;
+          }
         }
-      );
+
+        if (validData.type === "reedem") {
+          reqData = {
+            "payoutReedem.$.isPaid": true,
+            "payoutReedem.$.transactionNumber": validData.transactionNumber,
+            "payoutReedem.$.paidBy": new mongoose.Types.ObjectId(req.user._id),
+            "payoutReedem.$.paidOn": new Date(),
+            updatedBy: new mongoose.Types.ObjectId(req.user._id),
+          };
+
+          if (findInvestor.investmentAmount === 0) {
+            reqData.isInvestorActive = false;
+            reqData.isFullyPaid = true;
+            reqData.transactionNumber = validData.transactionNumber;
+            reqData.paidOn = new Date();
+          }
+        }
+        await finance.updateOne(
+          validData.type === "payout"
+            ? {
+                "payoutSchedule._id": new mongoose.Types.ObjectId(
+                  validData.payoutId
+                ),
+              }
+            : {
+                "payoutReedem._id": new mongoose.Types.ObjectId(
+                  validData.reedemId
+                ),
+              },
+          {
+            $set: reqData,
+          }
+        );
+        return res
+          .status(StatusCodes.OK)
+          .json({ message: "Payment updated successfully" });
+      } else {
+        return res
+          .status(StatusCodes.NOT_FOUND)
+          .json({ message: "Investor not found!" });
+      }
     }
-    return res
-      .status(StatusCodes.OK)
-      .json({ message: "Payment updated successfully" });
   } catch (error) {
     res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }
@@ -146,24 +192,29 @@ export const financeReedemApply = async (req, res) => {
         const filterPayoutSchedule = findInvestor.payoutSchedule.filter(
           (item) => item.isPaid === true
         );
-        const payoutSchedule = GeneratePayout({
-          investmentAmount: validData.remainingInvestAmount,
-          duration: validData.duration,
-          interestRate: validData.interestRate,
-          payoutFrequency:
-            validData.payoutFrequency === PayoutFrequencies.MONTHLY
-              ? 1
-              : validData.payoutFrequency === PayoutFrequencies.QUARTERLY
-              ? 3
-              : validData.payoutFrequency === PayoutFrequencies.SEMI_ANNUALLY
-              ? 6
-              : validData.payoutFrequency === PayoutFrequencies.ANNUALLY
-              ? 12
-              : validData.payoutFrequency === PayoutFrequencies.AT_MATURITY
-              ? Number(validData.duration)
-              : 1,
-          payoutDate: validData.payoutDate,
-        });
+        const payoutSchedule =
+          validData.remainingInvestAmount === "0"
+            ? []
+            : GeneratePayout({
+                investmentAmount: validData.remainingInvestAmount,
+                duration: validData.duration,
+                interestRate: validData.interestRate,
+                payoutFrequency:
+                  validData.payoutFrequency === PayoutFrequencies.MONTHLY
+                    ? 1
+                    : validData.payoutFrequency === PayoutFrequencies.QUARTERLY
+                    ? 3
+                    : validData.payoutFrequency ===
+                      PayoutFrequencies.SEMI_ANNUALLY
+                    ? 6
+                    : validData.payoutFrequency === PayoutFrequencies.ANNUALLY
+                    ? 12
+                    : validData.payoutFrequency ===
+                      PayoutFrequencies.AT_MATURITY
+                    ? Number(validData.duration)
+                    : 1,
+                payoutDate: validData.payoutDate,
+              });
         await finance.updateOne(
           { _id: new mongoose.Types.ObjectId(validData._id) },
           {

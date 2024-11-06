@@ -52,6 +52,10 @@ export const DataManage = (data) => {
     accountName: data.accountName,
     panNumber: data.panNumber,
     aadharNumber: data.aadharNumber,
+    isInvestorActive: true,
+    isFullyPaid: false,
+    transactionNumber: null,
+    paidOn: null,
   };
   if (data.investmentType === InvestmentTypes.BONDS) {
     prepareData.payoutSchedule = GeneratePayout({
