@@ -153,33 +153,6 @@ export const financePayNow = async (req, res) => {
   }
 };
 
-export const financeReedemPayNow = async (req, res) => {
-  try {
-    const validData = await payNowSchema.validate(req.body);
-    if (validData) {
-      await finance.updateOne(
-        {
-          "payoutReedem._id": new mongoose.Types.ObjectId(validData.reedemId),
-        },
-        {
-          $set: {
-            "payoutReedem.$.isPaid": true,
-            "payoutReedem.$.transactionNumber": validData.transactionNumber,
-            "payoutReedem.$.paidBy": new mongoose.Types.ObjectId(req.user._id),
-            "payoutReedem.$.paidOn": new Date(),
-            updatedBy: new mongoose.Types.ObjectId(req.user._id),
-          },
-        }
-      );
-    }
-    return res
-      .status(StatusCodes.OK)
-      .json({ message: "Payment updated successfully" });
-  } catch (error) {
-    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
-  }
-};
-
 export const financeReedemApply = async (req, res) => {
   try {
     const validData = await reedemApplySchema.validate(req.body);

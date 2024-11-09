@@ -5,7 +5,6 @@ import {
   financeGetDetails,
   financePayNow,
   financeReedemApply,
-  financeReedemPayNow,
   financeUpdate,
   InvestorDatatable,
   PayoutDatable,
@@ -18,10 +17,6 @@ FinaceRoutes.route("/create").post(tokenValidation, financeCreate);
 FinaceRoutes.route("/update").post(tokenValidation, financeUpdate);
 FinaceRoutes.route("/:id").get(tokenValidation, financeGetDetails);
 FinaceRoutes.route("/pay-now").post(tokenValidation, financePayNow);
-FinaceRoutes.route("/reedem/pay-now").post(
-  tokenValidation,
-  financeReedemPayNow
-);
 FinaceRoutes.route("/reedem-apply").post(tokenValidation, financeReedemApply);
 FinaceRoutes.route("/investor/datatable").post(
   tokenValidation,
