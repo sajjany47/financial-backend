@@ -123,6 +123,16 @@ export const financePayNow = async (req, res) => {
             reqData.paidOn = new Date();
           }
         }
+
+        if (validData.type === "matured") {
+          reqData = {
+            isInvestorActive: false,
+            isFullyPaid: true,
+            transactionNumber: validData.transactionNumber,
+            paidOn: new Date(),
+            updatedBy: new mongoose.Types.ObjectId(req.user._id),
+          };
+        }
         await finance.updateOne(
           validData.type === "payout"
             ? {
@@ -130,11 +140,13 @@ export const financePayNow = async (req, res) => {
                   validData.payoutId
                 ),
               }
-            : {
+            : validData.type === "reedem"
+            ? {
                 "payoutReedem._id": new mongoose.Types.ObjectId(
                   validData.reedemId
                 ),
-              },
+              }
+            : { _id: new mongoose.Types.ObjectId(validData._id) },
           {
             $set: reqData,
           }
@@ -367,6 +379,50 @@ export const ReedemDatable = async (req, res) => {
 
     const data = await finance.aggregate([
       ...findQuery,
+      {
+        $sort: reqData.sort || { name: 1 },
+      },
+
+      { $skip: start },
+      { $limit: limit },
+    ]);
+
+    return res.status(StatusCodes.OK).json({
+      message: "Data fetched successfully",
+      data: data,
+      count: countData.length > 0 ? countData[0].count : 0,
+    });
+  } catch (error) {
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
+  }
+};
+
+export const MaturedDatatable = async (req, res) => {
+  try {
+    const reqData = req.body;
+    const page = reqData.page;
+    const limit = reqData.limit;
+    const start = page * limit - limit;
+    const query = [
+      { isMaturityCompleted: true },
+      {
+        isFullyPaid: false,
+      },
+    ];
+
+    if (reqData.name) {
+      query.push(BuildRegexQuery("name", reqData.name));
+    }
+
+    const countData = await finance.aggregate([
+      { $match: query.length > 0 ? { $and: query } : {} },
+      {
+        $count: "count",
+      },
+    ]);
+
+    const data = await finance.aggregate([
+      { $match: query.length > 0 ? { $and: query } : {} },
       {
         $sort: reqData.sort || { name: 1 },
       },

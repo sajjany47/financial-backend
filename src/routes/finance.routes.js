@@ -7,6 +7,7 @@ import {
   financeReedemApply,
   financeUpdate,
   InvestorDatatable,
+  MaturedDatatable,
   PayoutDatable,
   ReedemDatable,
 } from "../api/Finance/Finance.controller.js";
@@ -23,6 +24,10 @@ FinaceRoutes.route("/investor/datatable").post(
   InvestorDatatable
 );
 FinaceRoutes.route("/payout/datatable").post(tokenValidation, PayoutDatable);
+FinaceRoutes.route("/matured/datatable").post(
+  tokenValidation,
+  MaturedDatatable
+);
 FinaceRoutes.route("/reedem/datatable").post(tokenValidation, ReedemDatable);
 
 export default FinaceRoutes;
