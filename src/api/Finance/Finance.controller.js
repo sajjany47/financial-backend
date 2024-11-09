@@ -96,7 +96,11 @@ export const financePayNow = async (req, res) => {
             updatedBy: new mongoose.Types.ObjectId(req.user._id),
           };
 
-          const filterPayout = findInvestor.payoutSchedule.filter(
+          const filterCurrentPayout = findInvestor.payoutSchedule.filter(
+            (item) => item._id.toString() !== validData.payoutId
+          );
+
+          const filterPayout = filterCurrentPayout.filter(
             (item) => item.isPaid === false
           );
           if (filterPayout.length === 0) {
