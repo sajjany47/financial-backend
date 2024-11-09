@@ -218,10 +218,23 @@ export const financeReedemApply = async (req, res) => {
             },
             $set: {
               investmentAmount: validData.remainingInvestAmount,
-              duration: validData.duration,
-              interestRate: validData.interestRate,
-              payoutDate: new Date(validData.payoutDate),
-              payoutFrequency: validData.payoutFrequency,
+              duration:
+                Number(validData.remainingInvestAmount) === 0
+                  ? null
+                  : validData.duration,
+              interestRate:
+                Number(validData.remainingInvestAmount) === 0
+                  ? null
+                  : validData.interestRate,
+              payoutFrequency:
+                Number(validData.remainingInvestAmount) === 0
+                  ? null
+                  : validData.payoutFrequency,
+              payoutDate:
+                Number(validData.remainingInvestAmount) === 0
+                  ? null
+                  : new Date(validData.payoutDate),
+
               updatedBy: new mongoose.Types.ObjectId(req.user._id),
               payoutSchedule: [...filterPayoutSchedule, ...payoutSchedule],
             },

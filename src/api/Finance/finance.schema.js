@@ -40,8 +40,24 @@ export const reedemApplySchema = Yup.object({
   remainingInvestAmount: Yup.string().required(
     "Remaining invested amount is required"
   ),
-  duration: Yup.string().required("Duration is required"),
-  interestRate: Yup.string().required("Interest Rate is required"),
-  payoutFrequency: Yup.string().required("Payout frequency is required"),
-  payoutDate: Yup.string().required("Payout date is required"),
+  duration: Yup.string().when("remainingInvestAmount", {
+    is: (values) => Number(values) !== 0,
+    then: () => Yup.string().required("Duration is required"),
+    otherwise: () => Yup.string().notRequired(),
+  }),
+  interestRate: Yup.string().when("remainingInvestAmount", {
+    is: (values) => Number(values) !== 0,
+    then: () => Yup.string().required("Interest Rate is required"),
+    otherwise: () => Yup.string().notRequired(),
+  }),
+  payoutFrequency: Yup.string().when("remainingInvestAmount", {
+    is: (values) => Number(values) !== 0,
+    then: () => Yup.string().required("Payout frequency is required"),
+    otherwise: () => Yup.string().notRequired(),
+  }),
+  payoutDate: Yup.string().when("remainingInvestAmount", {
+    is: (values) => Number(values) !== 0,
+    then: () => Yup.string().required("Payout date is required"),
+    otherwise: () => Yup.string().notRequired(),
+  }),
 });
