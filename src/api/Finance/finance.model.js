@@ -22,6 +22,7 @@ const financeModel = new mongoose.Schema(
     bankBranchName: String,
     ifsc: String,
     accountName: String,
+    planDetails: Array,
     payoutSchedule: Array,
     payoutReedem: Array,
     aadharNumber: String,

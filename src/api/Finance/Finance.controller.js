@@ -9,13 +9,30 @@ import {
   reedemApplySchema,
 } from "./finance.schema.js";
 import { PayoutFrequencies } from "./Finance.Config.js";
+import moment from "moment";
 
 export const financeCreate = async (req, res) => {
   try {
     const validData = await financeSchema.validate(req.body);
     if (validData) {
       const prepareData = DataManage(validData);
-      const data = new finance({ ...prepareData, createdBy: req.user._id });
+      const data = new finance({
+        ...prepareData,
+        createdBy: req.user._id,
+        planDetails: [
+          {
+            _id: new mongoose.Types.ObjectId(),
+            investmentType: prepareData.investmentType,
+            investmentAmount: Number(prepareData.investmentAmount),
+            duration: Number(prepareData.duration),
+            interestRate: Number(prepareData.interestRate),
+            payoutFrequency: prepareData.payoutFrequency,
+            payoutDate: new Date(prepareData.payoutDate),
+            updatedAt: new Date(),
+            updatedBy: new mongoose.Types.ObjectId(req.user._id),
+          },
+        ],
+      });
       await data.save();
 
       return res
@@ -38,7 +55,33 @@ export const financeUpdate = async (req, res) => {
         const filterPayout = findInvestor.payoutSchedule.filter(
           (item) => item.isPaid === true
         );
-        const data = DataManage(validData);
+        let data = DataManage(validData);
+
+        if (
+          Number(data.interestRate) !== Number(findInvestor.interestRate) ||
+          Number(data.duration) !== Number(findInvestor.duration) ||
+          data.payoutFrequency !== findInvestor.payoutFrequency ||
+          moment(data.payoutDate).format("YYYY-MM-DD") !==
+            moment(findInvestor.payoutDate).format("YYYY-MM-DD") ||
+          data.investmentType !== findInvestor.investmentType ||
+          Number(data.investmentAmount) !==
+            Number(findInvestor.investmentAmount)
+        ) {
+          data.planDetails = [
+            ...findInvestor.planDetails,
+            {
+              _id: new mongoose.Types.ObjectId(),
+              investmentType: data.investmentType,
+              investmentAmount: Number(data.investmentAmount),
+              duration: Number(data.duration),
+              interestRate: Number(data.interestRate),
+              payoutFrequency: data.payoutFrequency,
+              payoutDate: new Date(data.payoutDate),
+              updatedAt: new Date(),
+              updatedBy: new mongoose.Types.ObjectId(req.user._id),
+            },
+          ];
+        }
         await finance.updateOne(
           { _id: new mongoose.Types.ObjectId(validData._id) },
           {
