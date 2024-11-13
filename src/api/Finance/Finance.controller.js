@@ -10,6 +10,7 @@ import {
 } from "./finance.schema.js";
 import { PayoutFrequencies } from "./Finance.Config.js";
 import moment from "moment";
+import { DataWithEmployeeName } from "../loan/loan.config.js";
 
 export const financeCreate = async (req, res) => {
   try {
@@ -67,6 +68,7 @@ export const financeUpdate = async (req, res) => {
           Number(data.investmentAmount) !==
             Number(findInvestor.investmentAmount)
         ) {
+          data.isMaturityCompleted = false;
           data.planDetails = [
             ...findInvestor.planDetails,
             {
@@ -109,13 +111,38 @@ export const financeUpdate = async (req, res) => {
 export const financeGetDetails = async (req, res) => {
   try {
     const id = req.params.id;
-    const findData = await finance.findOne({
-      _id: new mongoose.Types.ObjectId(id),
-    });
+    const data = await finance.aggregate([
+      { $match: { _id: new mongoose.Types.ObjectId(id) } },
+    ]);
+    const findData = data[0];
+    const modifyData = {
+      ...findData,
+      createdBy: await DataWithEmployeeName(findData.createdBy),
+      updatedBy: await DataWithEmployeeName(findData.updatedBy),
+      planDetails: await Promise.all(
+        findData.planDetails.map(async (item) => ({
+          ...item,
+          updatedBy: await DataWithEmployeeName(item.updatedBy),
+        }))
+      ),
+      payoutSchedule: await Promise.all(
+        findData.payoutSchedule.map(async (item) => ({
+          ...item,
 
+          paidBy: item.isPaid ? await DataWithEmployeeName(item.paidBy) : null,
+        }))
+      ),
+      payoutReedem: await Promise.all(
+        findData.payoutReedem.map(async (item) => ({
+          ...item,
+          paidBy: item.isPaid ? await DataWithEmployeeName(item.paidBy) : null,
+          createdBy: await DataWithEmployeeName(item.createdBy),
+        }))
+      ),
+    };
     return res
       .status(StatusCodes.OK)
-      .json({ message: "Data fetched successfully", data: findData });
+      .json({ message: "Data fetched successfully", data: modifyData });
   } catch (error) {
     res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }
