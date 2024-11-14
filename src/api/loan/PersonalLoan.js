@@ -168,6 +168,7 @@ export const StatusData = (data) => {
     prepareData.emiSchedule = EMI.emiSchedule;
     prepareData.disbursment = disbursment;
     prepareData.isLoanActive = true;
+    prepareData.status = LoanApplicationStepsEnum.DISBURSED;
   }
 
   return prepareData;
