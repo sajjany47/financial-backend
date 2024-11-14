@@ -340,11 +340,22 @@ export const InvestorDatatable = async (req, res) => {
     if (reqData.name) {
       query.push(BuildRegexQuery("name", reqData.name));
     }
+    if (reqData.mobile) {
+      query.push(BuildRegexQuery("mobile", reqData.mobile));
+    }
+    if (reqData.email) {
+      query.push(BuildRegexQuery("email", reqData.email));
+    }
     if (reqData.investmentType) {
       query.push({ investmentType: reqData.investmentType });
     }
     if (reqData.payoutFrequency) {
       query.push({ payoutFrequency: reqData.payoutFrequency });
+    }
+    if (reqData.hasOwnProperty("isInvestorActive")) {
+      query.push({
+        isInvestorActive: reqData.isInvestorActive,
+      });
     }
 
     const data = await finance.aggregate([
@@ -391,6 +402,15 @@ export const PayoutDatable = async (req, res) => {
 
     if (reqData.name) {
       query.push(BuildRegexQuery("name", reqData.name));
+    }
+    if (reqData.mobile) {
+      query.push(BuildRegexQuery("mobile", reqData.mobile));
+    }
+    if (reqData.investmentType) {
+      query.push({ investmentType: reqData.investmentType });
+    }
+    if (reqData.payoutFrequency) {
+      query.push({ payoutFrequency: reqData.payoutFrequency });
     }
 
     const findQuery = [
@@ -500,6 +520,15 @@ export const MaturedDatatable = async (req, res) => {
 
     if (reqData.name) {
       query.push(BuildRegexQuery("name", reqData.name));
+    }
+    if (reqData.mobile) {
+      query.push(BuildRegexQuery("mobile", reqData.mobile));
+    }
+    if (reqData.investmentType) {
+      query.push({ investmentType: reqData.investmentType });
+    }
+    if (reqData.payoutFrequency) {
+      query.push({ payoutFrequency: reqData.payoutFrequency });
     }
 
     const countData = await finance.aggregate([

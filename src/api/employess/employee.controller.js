@@ -706,7 +706,7 @@ export const dataTable = async (req, res) => {
     if (reqData.username) {
       query.push(BuildRegexQuery("username", reqData.username));
     }
-    if (reqData.isActive) {
+    if (reqData.hasOwnProperty("isActive")) {
       query.push({
         isActive: reqData.isActive,
       });
