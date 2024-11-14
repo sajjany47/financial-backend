@@ -33,6 +33,8 @@ export const financeCreate = async (req, res) => {
             updatedBy: new mongoose.Types.ObjectId(req.user._id),
           },
         ],
+        payoutReedem: [],
+        payoutSchedule: [],
       });
       await data.save();
 
@@ -120,20 +122,19 @@ export const financeGetDetails = async (req, res) => {
       createdBy: await DataWithEmployeeName(findData.createdBy),
       updatedBy: await DataWithEmployeeName(findData.updatedBy),
       planDetails: await Promise.all(
-        findData.planDetails.map(async (item) => ({
+        findData?.planDetails.map(async (item) => ({
           ...item,
           updatedBy: await DataWithEmployeeName(item.updatedBy),
         }))
       ),
       payoutSchedule: await Promise.all(
-        findData.payoutSchedule.map(async (item) => ({
+        findData?.payoutSchedule.map(async (item) => ({
           ...item,
-
           paidBy: item.isPaid ? await DataWithEmployeeName(item.paidBy) : null,
         }))
       ),
       payoutReedem: await Promise.all(
-        findData.payoutReedem.map(async (item) => ({
+        findData?.payoutReedem.map(async (item) => ({
           ...item,
           paidBy: item.isPaid ? await DataWithEmployeeName(item.paidBy) : null,
           createdBy: await DataWithEmployeeName(item.createdBy),
