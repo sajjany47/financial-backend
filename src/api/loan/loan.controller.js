@@ -105,41 +105,11 @@ export const ApplicationUpdate = async (req, res) => {
     let validateData = await validationSchema.validate(req.body);
     if (validateData) {
       if (validateData.status === LoanApplicationStepsEnum.DISBURSED) {
-        const findCharges = await charges.findOne({ isActive: true });
         const findLoanApplication = await Loan.findOne({
           _id: new mongoose.Types.ObjectId(validateData._id),
         });
         validateData = {
           ...validateData,
-          loanCharges: findCharges._id,
-          charges: {
-            foreclosureFees: findCharges?.foreclosureFees
-              ? findCharges?.foreclosureFees
-              : 0,
-            foreclosureFeesGST: findCharges?.foreclosureFeesGST
-              ? findCharges?.foreclosureFeesGST
-              : 0,
-            foreclosureApply: findCharges?.foreclosureApply
-              ? findCharges?.foreclosureApply
-              : 0,
-            overdue: findCharges?.overdue ? findCharges.overdue : 0,
-            processingFees: findCharges?.processingFees
-              ? findCharges?.processingFees
-              : 0,
-            processingFeesGST: findCharges?.processingFeesGST
-              ? findCharges?.processingFeesGST
-              : 0,
-            loginFees: findCharges?.loginFees ? findCharges?.loginFees : 0,
-            loginFeesGST: findCharges?.loginFeesGST
-              ? findCharges.loginFeesGST
-              : 0,
-            otherCharges: findCharges?.otherCharges
-              ? findCharges?.otherCharges
-              : 0,
-            otherChargesGST: findCharges?.otherChargesGST
-              ? findCharges?.otherChargesGST
-              : 0,
-          },
           loanAmount: findLoanApplication.loanAmount,
           loanTenure: findLoanApplication.loanTenure,
         };
@@ -147,13 +117,13 @@ export const ApplicationUpdate = async (req, res) => {
 
       const data =
         type === "lead"
-          ? LeadData(validateData)
+          ? await LeadData(validateData)
           : type === "basic"
-          ? BasicData(validateData)
+          ? await BasicData(validateData)
           : type === "address"
-          ? AddressData(validateData)
+          ? await AddressData(validateData)
           : type === "work"
-          ? WorkData(validateData)
+          ? await WorkData(validateData)
           : type === "document"
           ? {
               applicationStaus: LoanStatusEnum.INCOMPLETED,
@@ -161,15 +131,16 @@ export const ApplicationUpdate = async (req, res) => {
               status: LoanApplicationStepsEnum.INCOMPLETED,
             }
           : type === "account"
-          ? AccountData(validateData)
+          ? await AccountData(validateData)
           : type === "status"
-          ? StatusData({ ...validateData, user: req.user._id })
+          ? await StatusData({ ...validateData, user: req.user._id })
           : "";
 
       const updateData = await Loan.findOneAndUpdate(
         { _id: new mongoose.Types.ObjectId(validateData._id) },
         { $set: { ...data, updatedBy: req.user._id } }
       );
+
       res.status(StatusCodes.OK).json({
         data: updateData,
         message: `${
@@ -388,39 +359,13 @@ export const applicationDelete = async (req, res) => {
 
 export const getEMIDetails = async (req, res) => {
   try {
-    const findCharges = await charges.findOne({ isActive: true });
-
-    const fixedCharges = findCharges;
-
-    const EMI = EMICalculator({
+    const EMI = await EMICalculator({
       loanAmount: Number(req.body.loanAmount),
       interestRate: Number(req.body.interestRate),
       loanTenure: Number(req.body.loanTenure),
-      foreclosureFees: fixedCharges?.foreclosureFees
-        ? fixedCharges?.foreclosureFees
-        : 0,
-      foreclosureFeesGST: fixedCharges?.foreclosureFeesGST
-        ? fixedCharges?.foreclosureFeesGST
-        : 0,
-      foreclosureApply: fixedCharges?.foreclosureApply
-        ? fixedCharges?.foreclosureApply
-        : 0,
-      overdue: fixedCharges?.overdue ? fixedCharges.overdue : 0,
     });
 
-    const disbursment = DisbursmentCalculate({
-      processingFees: fixedCharges?.processingFees
-        ? fixedCharges?.processingFees
-        : 0,
-      processingFeesGST: fixedCharges?.processingFeesGST
-        ? fixedCharges?.processingFeesGST
-        : 0,
-      loginFees: fixedCharges?.loginFees ? fixedCharges?.loginFees : 0,
-      loginFeesGST: fixedCharges?.loginFeesGST ? fixedCharges.loginFeesGST : 0,
-      otherCharges: fixedCharges?.otherCharges ? fixedCharges?.otherCharges : 0,
-      otherChargesGST: fixedCharges?.otherChargesGST
-        ? fixedCharges?.otherChargesGST
-        : 0,
+    const disbursment = await DisbursmentCalculate({
       loanAmount: Number(req.body.loanAmount),
     });
 

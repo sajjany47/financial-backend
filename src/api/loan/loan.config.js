@@ -4,6 +4,7 @@ import { GetFileName, GLocalImage } from "../../utilis/utilis.js";
 import fs from "fs";
 import employee from "../employess/employee.model.js";
 import { City, Country, State } from "../Regional/Regional.model.js";
+import charges from "../charges/charges.model.js";
 
 export const EmployeeTypes = ["salaried", "self_employed", "business"];
 
@@ -81,7 +82,13 @@ export const GenerateApplicationNumber = (loanType) => {
   return `${prefix}${year}${month}${day}${randomNumber}`;
 };
 
-export const EMICalculator = (data) => {
+export const EMICalculator = async (data) => {
+  const query = data?.loanCharges
+    ? {
+        _id: new mongoose.Types.ObjectId(data.loanCharges),
+      }
+    : { isActive: true };
+  const chargesDetails = await charges.findOne(query);
   // console.log(data);
   const P = Number(data.loanAmount);
   const r = Number(data.interestRate) / 100;
@@ -101,9 +108,19 @@ export const EMICalculator = (data) => {
     const emiDate = moment(date).add(index, "months").format("YYYY-MM-DD");
 
     const foreClosureFees =
-      (principle + outstanding) * (Number(data.foreclosureFees) / 100);
+      (principle + outstanding) *
+      (Number(
+        chargesDetails?.foreclosureFees ? chargesDetails?.foreclosureFees : 0
+      ) /
+        100);
     const foreClosureGST =
-      foreClosureFees * (Number(data.foreclosureFeesGST) / 100);
+      foreClosureFees *
+      (Number(
+        chargesDetails?.foreclosureFeesGST
+          ? chargesDetails?.foreclosureFeesGST
+          : 0
+      ) /
+        100);
 
     let foreclosureAmount = (
       principle +
@@ -122,7 +139,12 @@ export const EMICalculator = (data) => {
       isPaid: false,
       remainingOutstanding: outstanding.toFixed(2),
       foreclosureAmount:
-        index > Number(data.foreclosureApply)
+        index >
+        Number(
+          chargesDetails?.foreclosureApply
+            ? chargesDetails?.foreclosureApply
+            : 0
+        )
           ? index === n
             ? EMI.toFixed(2)
             : foreclosureAmount
@@ -133,18 +155,44 @@ export const EMICalculator = (data) => {
   return { emi: EMI.toFixed(2), emiSchedule: emiSchedule };
 };
 
-export const DisbursmentCalculate = (data) => {
+export const DisbursmentCalculate = async (data) => {
+  const query = data?.loanCharges
+    ? {
+        _id: new mongoose.Types.ObjectId(data.loanCharges),
+      }
+    : { isActive: true };
+  const chargesDetails = await charges.findOne(query);
   const processingFees =
-    Number(data.loanAmount) * (Number(data.processingFees) / 100);
+    Number(data.loanAmount) *
+    (Number(
+      chargesDetails?.processingFees ? chargesDetails?.processingFees : 0
+    ) /
+      100);
 
   const processingFeesGST =
-    processingFees * (Number(data.processingFeesGST) / 100);
+    processingFees *
+    (Number(
+      chargesDetails?.processingFeesGST ? chargesDetails?.processingFeesGST : 0
+    ) /
+      100);
 
-  const loginFees = Number(data.loginFees);
-  const loginFeesGST = loginFees * (Number(data.loginFeesGST) / 100);
+  const loginFees = Number(
+    chargesDetails?.loginFees ? chargesDetails?.loginFees : 0
+  );
+  const loginFeesGST =
+    loginFees *
+    (Number(chargesDetails?.loginFeesGST ? chargesDetails?.loginFeesGST : 0) /
+      100);
 
-  const otherCharges = Number(data.otherCharges);
-  const otherChargesGST = otherCharges * (Number(data.otherChargesGST) / 100);
+  const otherCharges = Number(
+    chargesDetails?.otherCharges ? chargesDetails?.otherCharges : 0
+  );
+  const otherChargesGST =
+    otherCharges *
+    (Number(
+      chargesDetails?.otherChargesGST ? chargesDetails?.otherChargesGST : 0
+    ) /
+      100);
 
   const totalDeductions =
     processingFees +
