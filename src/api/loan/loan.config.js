@@ -1,7 +1,10 @@
 import moment from "moment";
 import mongoose from "mongoose";
-import path from "path";
-import { fileURLToPath } from "url";
+import { GetFileName, GLocalImage } from "../../utilis/utilis.js";
+import fs from "fs";
+import employee from "../employess/employee.model.js";
+import { City, Country, State } from "../Regional/Regional.model.js";
+import charges from "../charges/charges.model.js";
 
 export const EmployeeTypes = ["salaried", "self_employed", "business"];
 
@@ -79,7 +82,13 @@ export const GenerateApplicationNumber = (loanType) => {
   return `${prefix}${year}${month}${day}${randomNumber}`;
 };
 
-export const EMICalculator = (data) => {
+export const EMICalculator = async (data) => {
+  const query = data?.loanCharges
+    ? {
+        _id: new mongoose.Types.ObjectId(data.loanCharges),
+      }
+    : { isActive: true };
+  const chargesDetails = await charges.findOne(query);
   // console.log(data);
   const P = Number(data.loanAmount);
   const r = Number(data.interestRate) / 100;
@@ -98,42 +107,92 @@ export const EMICalculator = (data) => {
     const date = data?.startDate ? data.startDate : new Date();
     const emiDate = moment(date).add(index, "months").format("YYYY-MM-DD");
 
-    const foreClosureFees = outstanding * (Number(data.foreclosureFees) / 100);
+    const foreClosureFees =
+      (principle + outstanding) *
+      (Number(
+        chargesDetails?.foreclosureFees ? chargesDetails?.foreclosureFees : 0
+      ) /
+        100);
     const foreClosureGST =
-      foreClosureFees * (Number(data.foreclosureFeesGST) / 100);
+      foreClosureFees *
+      (Number(
+        chargesDetails?.foreclosureFeesGST
+          ? chargesDetails?.foreclosureFeesGST
+          : 0
+      ) /
+        100);
+
+    let foreclosureAmount = (
+      principle +
+      outstanding +
+      interest +
+      foreClosureFees +
+      foreClosureGST
+    ).toFixed(2);
 
     emiSchedule.push({
       _id: new mongoose.Types.ObjectId(),
-      emiDate: emiDate,
+      emiDate: new Date(emiDate),
       emiAmount: EMI.toFixed(2),
       interestPaid: interest.toFixed(2),
       principalPaid: principle.toFixed(2),
       isPaid: false,
       remainingOutstanding: outstanding.toFixed(2),
-      foreclosureAmount: (
-        outstanding +
-        interest +
-        foreClosureFees +
-        foreClosureGST
-      ).toFixed(2),
+      foreclosureAmount:
+        index >
+        Number(
+          chargesDetails?.foreclosureApply
+            ? chargesDetails?.foreclosureApply
+            : 0
+        )
+          ? index === n
+            ? EMI.toFixed(2)
+            : foreclosureAmount
+          : "Not applicable",
     });
   }
 
   return { emi: EMI.toFixed(2), emiSchedule: emiSchedule };
 };
 
-export const DisbursmentCalculate = (data) => {
+export const DisbursmentCalculate = async (data) => {
+  const query = data?.loanCharges
+    ? {
+        _id: new mongoose.Types.ObjectId(data.loanCharges),
+      }
+    : { isActive: true };
+  const chargesDetails = await charges.findOne(query);
   const processingFees =
-    Number(data.loanAmount) * (Number(data.processingFees) / 100);
+    Number(data.loanAmount) *
+    (Number(
+      chargesDetails?.processingFees ? chargesDetails?.processingFees : 0
+    ) /
+      100);
 
   const processingFeesGST =
-    processingFees * (Number(data.processingFeesGST) / 100);
+    processingFees *
+    (Number(
+      chargesDetails?.processingFeesGST ? chargesDetails?.processingFeesGST : 0
+    ) /
+      100);
 
-  const loginFees = Number(data.loginFees);
-  const loginFeesGST = loginFees * (Number(data.loginFeesGST) / 100);
+  const loginFees = Number(
+    chargesDetails?.loginFees ? chargesDetails?.loginFees : 0
+  );
+  const loginFeesGST =
+    loginFees *
+    (Number(chargesDetails?.loginFeesGST ? chargesDetails?.loginFeesGST : 0) /
+      100);
 
-  const otherCharges = Number(data.otherCharges);
-  const otherChargesGST = otherCharges * (Number(data.otherChargesGST) / 100);
+  const otherCharges = Number(
+    chargesDetails?.otherCharges ? chargesDetails?.otherCharges : 0
+  );
+  const otherChargesGST =
+    otherCharges *
+    (Number(
+      chargesDetails?.otherChargesGST ? chargesDetails?.otherChargesGST : 0
+    ) /
+      100);
 
   const totalDeductions =
     processingFees +
@@ -157,25 +216,68 @@ export const DisbursmentCalculate = (data) => {
   };
 };
 
-export const LocalImageUpload = (fileName) => {
-  const __filename = fileURLToPath(import.meta.url);
-  const __dirname = path.dirname(__filename);
-  const uploadPath = path.join(__dirname, process.env.IMAGE_PATH, fileName);
-  return uploadPath;
+export const LoanImageUpload = async (imageName, uploadFile) => {
+  if (imageName) {
+    const deletePath = GLocalImage(imageName, process.env.LOAN_PATH);
+    await fs.promises.unlink(deletePath);
+  }
+  const file = uploadFile;
+  const fileName = GetFileName(uploadFile);
+  const uploadPath = GLocalImage(fileName, process.env.LOAN_PATH);
+
+  await file.mv(uploadPath);
+
+  return fileName;
 };
 
-export const DeleteLocalImageUpload = (fileName) => {
-  const __filename = fileURLToPath(import.meta.url);
-  const __dirname = path.dirname(__filename);
-  const deletePath = path.join(__dirname, process.env.IMAGE_PATH, fileName);
-  return deletePath;
+export const AcccessPositionWise = (user) => {
+  let query = [];
+  if (user.country !== null) {
+    query.push({ country: Number(user.country) });
+  }
+  if (user.state !== null) {
+    query.push({ state: Number(user.state) });
+  }
+  if (user.city !== null) {
+    query.push({ city: Number(user.city) });
+  }
+  if (user.branch !== null) {
+    query.push({ branch: new mongoose.Types.ObjectId(user.branch) });
+  }
+
+  return query;
 };
-// IMAGE_PATH=../../../../Upload/loan_document
-export const GetLocalImage = (fileName) => {
-  const __filename = fileURLToPath(import.meta.url);
-  const __dirname = path.dirname(__filename);
-  const uploadPath = path.join(__dirname, process.env.IMAGE_PATH, fileName);
-  return uploadPath;
+
+export const DataWithEmployeeName = async (id) => {
+  const employeeArray = await employee.find({});
+  const findEmployee = employeeArray.find(
+    (item) => item._id.toString() === id.toString()
+  );
+  const data = { name: findEmployee.name, username: findEmployee.username };
+
+  return data;
+};
+
+export const CountryName = async (id) => {
+  const countryData = await Country.findOne({ id: Number(id) });
+
+  return countryData.name;
+};
+
+export const StateName = async (id) => {
+  const stateData = await State.findOne({ id: Number(id) });
+
+  return stateData.name;
+};
+export const CityName = async (id) => {
+  const cityData = await City.findOne({ id: Number(id) });
+
+  return cityData.name;
+};
+
+export const FormatType = (str) => {
+  // Replace underscores with spaces and capitalize each word
+  return str.replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
 };
 
 // const myPincode = 700053;

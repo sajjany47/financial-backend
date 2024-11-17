@@ -1,3 +1,6 @@
+import { GetFileName, GLocalImage } from "../../utilis/utilis.js";
+import fs from "fs";
+
 export const Position = {
   ADMIN: "admin",
   BM: "branch-manager",
@@ -21,4 +24,47 @@ export const Status = {
 export const fresherOrExperience = {
   FRESHER: "fresher",
   EXPERIENCE: "experience",
+};
+
+export const EmployeeDocumentImageUpload = async (
+  actionType,
+  findArray,
+  productId,
+  imageKey,
+  uploadFile
+) => {
+  if (actionType !== "add") {
+    const findEducationImage = findArray.find(
+      (item) => item.id.toString() === productId
+    );
+    if (findEducationImage[imageKey]) {
+      const deletePath = GLocalImage(
+        findEducationImage[imageKey],
+        process.env.EMPLOYEE_PATH
+      );
+
+      await fs.promises.unlink(deletePath);
+    }
+  }
+  const file = uploadFile;
+  const fileName = GetFileName(uploadFile);
+  const uploadPath = GLocalImage(fileName, process.env.EMPLOYEE_PATH);
+
+  await file.mv(uploadPath);
+
+  return fileName;
+};
+
+export const EmployeeImageUpload = async (imageName, uploadFile) => {
+  if (imageName) {
+    const deletePath = GLocalImage(imageName, process.env.EMPLOYEE_PATH);
+    await fs.promises.unlink(deletePath);
+  }
+  const file = uploadFile;
+  const fileName = GetFileName(uploadFile);
+  const uploadPath = GLocalImage(fileName, process.env.EMPLOYEE_PATH);
+
+  await file.mv(uploadPath);
+
+  return fileName;
 };

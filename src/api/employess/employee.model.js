@@ -1,3 +1,4 @@
+import { ResidenceTypes } from "../loan/loan.config.js";
 import { Position, Status, fresherOrExperience } from "./EmployeeConfig.js";
 
 import mongoose from "mongoose";
@@ -24,19 +25,48 @@ const employeeSchema = new mongoose.Schema(
         Position.FM,
       ],
     },
-    branch: mongoose.Schema.Types.ObjectId,
+    branch: {
+      type: mongoose.Schema.Types.ObjectId,
+      default: null,
+    },
     mobile: { type: String, trim: true },
     email: { type: String, trim: true, lowercase: true },
     dob: Date,
-    address: { type: String },
-    state: Number,
-    country: Number,
-    city: Number,
-    pincode: { type: String, trim: true },
+    state: {
+      type: Number,
+      default: null,
+    },
+    country: {
+      type: Number,
+      default: null,
+    },
+    city: {
+      type: Number,
+      default: null,
+    },
     password: String,
     sessionId: String,
     isPasswordReset: Boolean,
     userImage: String,
+    permanentHouseOrBuildingNumber: String,
+    permanentStreet: String,
+    permanentLandmark: String,
+    permanentPincode: String,
+    permanentState: Number,
+    permanentCountry: Number,
+    permanentCity: Number,
+    residenceHouseOrBuildingNumber: String,
+    residenceStreet: String,
+    residenceLandmark: String,
+    residencePincode: String,
+    residenceState: Number,
+    residenceCountry: Number,
+    residenceCity: Number,
+    residenceType: {
+      type: String,
+      enum: ResidenceTypes,
+    },
+    addressSame: Boolean,
     education: [
       {
         boardName: { type: String },

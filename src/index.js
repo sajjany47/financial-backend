@@ -11,6 +11,7 @@ import DocumentRoutes from "./routes/dcoument.routes.js";
 import path from "path";
 import { fileURLToPath } from "url";
 import ChargesRoutes from "./routes/charges.routes.js";
+import FinaceRoutes from "./routes/finance.routes.js";
 
 function main() {
   const port = process.env.port;
@@ -22,13 +23,13 @@ function main() {
   const app = express();
   app.use(
     fileUpload({
-      useTempFiles: true,
+      useTempFiles: false,
     })
   );
   const server = createServer(app);
   app.use(express.json());
   // Serve static files (like images) from the './src/uploads' directory
-  app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+  app.use("/uploads", express.static(path.join(__dirname, "../../Upload/")));
 
   app.use(express.urlencoded({ limit: "30 mb", extended: true }));
   mongoose
@@ -55,5 +56,6 @@ function main() {
   app.use("/loan", LoanRoutes);
   app.use("/document", DocumentRoutes);
   app.use("/charges", ChargesRoutes);
+  app.use("/finance", FinaceRoutes);
 }
 main();

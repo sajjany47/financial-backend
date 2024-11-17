@@ -11,13 +11,12 @@ import {
 import Loan from "./loan.model.js";
 import mongoose from "mongoose";
 import {
-  DeleteLocalImageUpload,
   DisbursmentCalculate,
   EMICalculator,
   GenerateApplicationNumber,
   LoanApplicationStepsEnum,
+  LoanImageUpload,
   LoanStatusEnum,
-  LocalImageUpload,
 } from "./loan.config.js";
 import loanType from "../document/loanType.model.js";
 import {
@@ -28,7 +27,11 @@ import {
   StatusData,
   WorkData,
 } from "./PersonalLoan.js";
-import { BuildRegexQuery, GetFileName } from "../../utilis/utilis.js";
+import {
+  BuildRegexQuery,
+  GetFileName,
+  GLocalImage,
+} from "../../utilis/utilis.js";
 import { Position } from "../employess/EmployeeConfig.js";
 import fs from "fs";
 import charges from "../charges/charges.model.js";
@@ -102,22 +105,11 @@ export const ApplicationUpdate = async (req, res) => {
     let validateData = await validationSchema.validate(req.body);
     if (validateData) {
       if (validateData.status === LoanApplicationStepsEnum.DISBURSED) {
-        const findCharges = await charges.findOne({ isActive: true });
         const findLoanApplication = await Loan.findOne({
           _id: new mongoose.Types.ObjectId(validateData._id),
         });
         validateData = {
           ...validateData,
-          charges: findCharges
-            ? findCharges
-            : {
-                processingFees: 0,
-                processingFeesGST: 0,
-                loginFees: 0,
-                loginFeesGST: 0,
-                otherCharges: 0,
-                otherChargesGST: 0,
-              },
           loanAmount: findLoanApplication.loanAmount,
           loanTenure: findLoanApplication.loanTenure,
         };
@@ -125,13 +117,13 @@ export const ApplicationUpdate = async (req, res) => {
 
       const data =
         type === "lead"
-          ? LeadData(validateData)
+          ? await LeadData(validateData)
           : type === "basic"
-          ? BasicData(validateData)
+          ? await BasicData(validateData)
           : type === "address"
-          ? AddressData(validateData)
+          ? await AddressData(validateData)
           : type === "work"
-          ? WorkData(validateData)
+          ? await WorkData(validateData)
           : type === "document"
           ? {
               applicationStaus: LoanStatusEnum.INCOMPLETED,
@@ -139,15 +131,16 @@ export const ApplicationUpdate = async (req, res) => {
               status: LoanApplicationStepsEnum.INCOMPLETED,
             }
           : type === "account"
-          ? AccountData(validateData)
+          ? await AccountData(validateData)
           : type === "status"
-          ? StatusData({ ...validateData, user: req.user._id })
+          ? await StatusData({ ...validateData, user: req.user._id })
           : "";
 
       const updateData = await Loan.findOneAndUpdate(
         { _id: new mongoose.Types.ObjectId(validateData._id) },
         { $set: { ...data, updatedBy: req.user._id } }
       );
+
       res.status(StatusCodes.OK).json({
         data: updateData,
         message: `${
@@ -208,7 +201,7 @@ export const getLoanDetail = async (req, res, next) => {
         if (item[entityKey] && item[entityKey].documentImage) {
           item[
             entityKey
-          ].documentUrl = `${baseUrl}/uploads/${item[entityKey].documentImage}`;
+          ].documentUrl = `${baseUrl}/uploads/loan_document/${item[entityKey].documentImage}`;
         }
         return item;
       });
@@ -237,8 +230,11 @@ export const documentDelete = async (req, res, next) => {
       }
     );
     if (deleteDocument) {
-      const uploadPath = DeleteLocalImageUpload(req.body.doumentImage);
-      await fs.promises.unlink(uploadPath + req.body.doumentImage);
+      const uploadPath = GLocalImage(
+        req.body.doumentImage,
+        process.env.LOAN_PATH
+      );
+      await fs.promises.unlink(uploadPath);
     }
 
     res
@@ -258,12 +254,8 @@ export const documentUpload = async (req, res, next) => {
     };
 
     if (req.files) {
-      const file = req.files.documentImage;
-      const fileName = GetFileName(file);
-      const uploadPath = LocalImageUpload(fileName);
-
-      await file.mv(uploadPath + fileName);
-      data = { ...data, documentImage: fileName };
+      const a = await LoanImageUpload("", req.files.documentImage);
+      data = { ...data, documentImage: a };
     }
     await Loan.updateOne(
       { _id: new mongoose.Types.ObjectId(reqData._id) },
@@ -301,23 +293,17 @@ export const documentUpdate = async (req, res, next) => {
         // "document._id": new mongoose.Types.ObjectId(reqData.documentId),
       });
 
-      if (findDocument) {
-        const findDocumentImage = findDocument.document.find(
-          (item) => item._id.toString() === reqData.documentId
-        );
-        const documentImagePath =
-          findDocumentImage[reqData.entity].documentImage;
-        const uploadPath = DeleteLocalImageUpload(documentImagePath);
-        await fs.promises.unlink(uploadPath + documentImagePath);
-      }
+      // if (findDocument) {
+      const findDocumentImage = findDocument.document.find(
+        (item) => item._id.toString() === reqData.documentId
+      );
+      const documentImagePath = findDocumentImage[reqData.entity].documentImage;
 
-      const file = req.files.documentImage;
-
-      const fileName = GetFileName(file);
-      const uploadPath = LocalImageUpload(fileName);
-
-      await file.mv(uploadPath + fileName);
-      data = { ...data, documentImage: fileName };
+      const a = await LoanImageUpload(
+        documentImagePath,
+        req.files.documentImage
+      );
+      data = { ...data, documentImage: a };
     }
 
     const a = await Loan.updateOne(
@@ -351,12 +337,11 @@ export const applicationDelete = async (req, res) => {
         for (let index = 0; index < findApplication?.document.length; index++) {
           const element = findApplication?.document[index];
           const deleteKey = Object.keys(element)[1];
-          const uploadPath = DeleteLocalImageUpload(
-            element[deleteKey].documentImage
+          const uploadPath = GLocalImage(
+            element[deleteKey].documentImage,
+            process.env.LOAN_PATH
           );
-          await fs.promises.unlink(
-            uploadPath + element[deleteKey].documentImage
-          );
+          await fs.promises.unlink(uploadPath);
         }
       }
       const deleteApplication = await Loan.findOneAndDelete({
@@ -374,36 +359,13 @@ export const applicationDelete = async (req, res) => {
 
 export const getEMIDetails = async (req, res) => {
   try {
-    const findCharges = await charges.findOne({ isActive: true });
-
-    const fixedCharges = findCharges
-      ? findCharges
-      : {
-          processingFees: 0,
-          processingFeesGST: 0,
-          loginFees: 0,
-          loginFeesGST: 0,
-          otherCharges: 0,
-          otherChargesGST: 0,
-          foreclosureFees: 0,
-          foreclosureFeesGST: 0,
-        };
-
-    const EMI = EMICalculator({
+    const EMI = await EMICalculator({
       loanAmount: Number(req.body.loanAmount),
       interestRate: Number(req.body.interestRate),
       loanTenure: Number(req.body.loanTenure),
-      foreclosureFees: fixedCharges.foreclosureFees,
-      foreclosureFeesGST: fixedCharges.foreclosureFeesGST,
     });
 
-    const disbursment = DisbursmentCalculate({
-      processingFees: fixedCharges.processingFees,
-      processingFeesGST: fixedCharges.processingFeesGST,
-      loginFees: fixedCharges.loginFees,
-      loginFeesGST: fixedCharges.loginFeesGST,
-      otherCharges: fixedCharges.otherCharges,
-      otherChargesGST: fixedCharges.otherChargesGST,
+    const disbursment = await DisbursmentCalculate({
       loanAmount: Number(req.body.loanAmount),
     });
 

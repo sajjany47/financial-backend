@@ -84,9 +84,19 @@ export const updateBranch = async (req, res) => {
 export const branchList = async (req, res) => {
   try {
     const reqData = req.query;
+    const query = {};
+    if (reqData.hasOwnProperty("country")) {
+      query.country = Number(reqData.country);
+    }
+    if (reqData.hasOwnProperty("state")) {
+      query.state = Number(reqData.state);
+    }
+    if (reqData.hasOwnProperty("city")) {
+      query.city = Number(reqData.city);
+    }
 
     const data = await branch.aggregate([
-      { $match: Object.keys(reqData).length > 0 ? reqData : {} },
+      { $match: Object.keys(query).length > 0 ? query : {} },
     ]);
 
     res

@@ -90,7 +90,7 @@ export const WorkData = (data) => {
   return prepareData;
 };
 
-export const AccountData = (data) => {
+export const AccountData = async (data) => {
   const prepareData = {
     accountNumber: data.accountNumber,
     bankName: data.bankName,
@@ -105,7 +105,7 @@ export const AccountData = (data) => {
   return prepareData;
 };
 
-export const StatusData = (data) => {
+export const StatusData = async (data) => {
   let prepareData = {
     applicationStaus:
       data.status === LoanApplicationStepsEnum.LOAN_APPROVED
@@ -136,34 +136,29 @@ export const StatusData = (data) => {
   }
   if (data.status === LoanApplicationStepsEnum.LOAN_APPROVED) {
     prepareData.loanVerifiedBy = data.user;
-    prepareData.interestRate = data.interestRate;
+    prepareData.interestRate = Number(data.interestRate);
   }
 
   if (data.status === LoanApplicationStepsEnum.DISBURSED) {
-    const EMI = EMICalculator({
+    const EMI = await EMICalculator({
       loanAmount: Number(data.loanAmount),
       interestRate: Number(data.interestRate),
       loanTenure: Number(data.loanTenure),
-      foreclosureFees: data.charges.foreclosureFees,
-      foreclosureFeesGST: data.charges.foreclosureFeesGST,
       startDate: data.emiDate,
     });
 
-    const disbursment = DisbursmentCalculate({
-      processingFees: data.charges.processingFees,
-      processingFeesGST: data.charges.processingFeesGST,
-      loginFees: data.charges.loginFees,
-      loginFeesGST: data.charges.loginFeesGST,
-      otherCharges: data.charges.otherCharges,
-      otherChargesGST: data.charges.otherChargesGST,
+    const disbursment = await DisbursmentCalculate({
       loanAmount: Number(data.loanAmount),
     });
+    (prepareData.loanCharges = new mongoose.Types.ObjectId(data.loanCharges)),
+      (prepareData.interestRate = data.interestRate);
     prepareData.transactionNumber = data.transactionNumber;
     prepareData.disbursedBy = data.user;
     prepareData.EMIMonthly = EMI.emi;
     prepareData.emiSchedule = EMI.emiSchedule;
     prepareData.disbursment = disbursment;
     prepareData.isLoanActive = true;
+    prepareData.status = LoanApplicationStepsEnum.DISBURSED;
   }
 
   return prepareData;

@@ -53,11 +53,6 @@ const loanModel = new mongoose.Schema(
     workCity: Number,
 
     document: Array,
-    // IDProof: Object,
-    // addressProof: Object,
-    // incomeProof: Object,
-    // bankStatement: Object,
-    // employmentProof: Object,
 
     accountNumber: String,
     bankName: String,
@@ -69,6 +64,9 @@ const loanModel = new mongoose.Schema(
     transactionNumber: String,
     EMIMonthly: Number,
     emiSchedule: Array,
+    agentRemark: Array,
+    loanCharges: mongoose.Schema.Types.ObjectId,
+    assignAgent: mongoose.Schema.Types.ObjectId,
     disbursment: Object,
     interestRate: Number,
     status: {

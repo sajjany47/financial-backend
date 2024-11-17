@@ -5,13 +5,20 @@ import {
   documentsSchema20,
   educationOrCompanyDetailSchema30,
 } from "./employee.schema.js";
-import { Status } from "./EmployeeConfig.js";
+import {
+  EmployeeDocumentImageUpload,
+  EmployeeImageUpload,
+  Position,
+  Status,
+} from "./EmployeeConfig.js";
 import {
   BuildRegexQuery,
   generateAccessToken,
   generateEmployeeId,
   generatePassword,
   generateRefreshToken,
+  GetFileName,
+  GLocalImage,
   ImageUpload,
   MailSend,
 } from "../../utilis/utilis.js";
@@ -20,6 +27,19 @@ import { welcome } from "../../template/wlecome.js";
 import mongoose from "mongoose";
 import { nanoid } from "nanoid";
 import employee from "./employee.model.js";
+import { PersonalLoanAddressSchema } from "../loan/loan.schema.js";
+import {
+  EmployeeAccountData,
+  EmployeeAddressData,
+  EmployeeBasicData,
+  EmployeeDocumentData,
+} from "./EmployeeData.js";
+import {
+  CityName,
+  CountryName,
+  DataWithEmployeeName,
+  StateName,
+} from "../loan/loan.config.js";
 
 export const adminSignUpSchemaFirst = async (req, res) => {
   try {
@@ -41,17 +61,11 @@ export const adminSignUpSchemaFirst = async (req, res) => {
           email: validatedUser.email,
           dob: validatedUser.dob,
           position: validatedUser.position,
-          address: validatedUser.address,
-          state: Number(validatedUser.state),
-          country: Number(validatedUser.country),
-          city: Number(validatedUser.city),
-          pincode: validatedUser.pincode,
-          branch: new mongoose.Types.ObjectId(validatedUser.branch),
+
           fresherOrExperience: validatedUser.fresherOrExperience,
           password: await bcrypt.hash(password, 10),
           employeeId: employeeId,
-          isProfileVerified: Status.PENDING,
-          profileRatio: 30,
+          profileRatio: 20,
           approvedBy: req.user._id,
           isActive: true,
           createdBy: req.user._id,
@@ -60,10 +74,45 @@ export const adminSignUpSchemaFirst = async (req, res) => {
           pageIndex: 0,
         };
 
+        if (
+          validatedUser.position === Position.ADMIN ||
+          validatedUser.position === Position.SM ||
+          validatedUser.position === Position.CM
+        ) {
+          if (validatedUser.position === Position.ADMIN) {
+            userData.country = null;
+            userData.state = null;
+            userData.city = null;
+            userData.branch = null;
+          }
+          if (validatedUser.position === Position.SM) {
+            userData.country = validatedUser.country;
+            userData.state = validatedUser.state;
+            userData.city = null;
+            userData.branch = null;
+          }
+          if (validatedUser.position === Position.CM) {
+            userData.country = validatedUser.country;
+            userData.state = validatedUser.state;
+            userData.city = validatedUser.city;
+            userData.branch = null;
+          }
+        } else {
+          userData.country = validatedUser.country;
+          userData.state = validatedUser.state;
+          userData.city = validatedUser.city;
+          userData.branch = validatedUser.branch;
+        }
+
         if (req.files) {
           const file = req.files.userImage;
-          const imageUrl = await ImageUpload("user", file);
-          userData.userImage = imageUrl;
+          const fileName = GetFileName(req.files.userImage);
+          const uploadPath = GLocalImage(fileName, process.env.EMPLOYEE_PATH);
+
+          await file.mv(uploadPath);
+          // const file = req.files.userImage;
+          // const imageUrl = await ImageUpload("user", file);
+          userData.userImage = fileName;
         }
 
         const createUser = new employee(userData);
@@ -99,7 +148,7 @@ export const updateEducationAndCompanyDetails = async (req, res) => {
   try {
     const validData = req.body;
 
-    const reqData =
+    let reqData =
       req.body.dataType === "education"
         ? {
             boardName: validData.boardName,
@@ -118,30 +167,64 @@ export const updateEducationAndCompanyDetails = async (req, res) => {
             salarySlip: validData.salarySlip,
           };
     if (req.files) {
-      if (req.files.resultImage) {
-        const file = req.files.resultImage;
-        const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
-        reqData.resultImage = imageUrl;
-      }
-      if (req.files.experienceLetter) {
-        const file = req.files.experienceLetter;
-        const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
-        reqData.experienceLetter = imageUrl;
-      }
-      if (req.files.relievingLetter) {
-        const file = req.files.relievingLetter;
-        const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
-        reqData.relievingLetter = imageUrl;
-      }
-      if (req.files.appointmentLetter) {
-        const file = req.files.appointmentLetter;
-        const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
-        reqData.appointmentLetter = imageUrl;
-      }
-      if (req.files.salarySlip) {
-        const file = req.files.salarySlip;
-        const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
-        reqData.salarySlip = imageUrl;
+      const findUser = await employee.findOne({
+        _id: new mongoose.Types.ObjectId(validData.id),
+      });
+      if (req.body.dataType === "education") {
+        if (req.files.resultImage) {
+          const a = await EmployeeDocumentImageUpload(
+            validData.actionType,
+            validData.actionType !== "add" ? findUser?.education : [],
+            validData.productId,
+            validData.actionType !== "add" ? "resultImage" : "",
+            req.files.resultImage
+          );
+
+          reqData.resultImage = a;
+        }
+      } else {
+        if (req.files.experienceLetter) {
+          const a = await EmployeeDocumentImageUpload(
+            validData.actionType,
+            validData.actionType !== "add" ? findUser?.workDetail : [],
+            validData.productId,
+            validData.actionType !== "add" ? "experienceLetter" : "",
+            req.files.experienceLetter
+          );
+
+          reqData.experienceLetter = a;
+        }
+        if (req.files.relievingLetter) {
+          const a = await EmployeeDocumentImageUpload(
+            validData.actionType,
+            validData.actionType !== "add" ? findUser?.workDetail : [],
+            validData.productId,
+            validData.actionType !== "add" ? "relievingLetter" : "",
+            req.files.relievingLetter
+          );
+          reqData.relievingLetter = a;
+        }
+        if (req.files.appointmentLetter) {
+          const a = await EmployeeDocumentImageUpload(
+            validData.actionType,
+            validData.actionType !== "add" ? findUser?.workDetail : [],
+            validData.productId,
+            validData.actionType !== "add" ? "appointmentLetter" : "",
+            req.files.appointmentLetter
+          );
+
+          reqData.appointmentLetter = a;
+        }
+        if (req.files.salarySlip) {
+          const a = await EmployeeDocumentImageUpload(
+            validData.actionType,
+            validData.actionType !== "add" ? findUser?.workDetail : [],
+            validData.productId,
+            validData.actionType !== "add" ? "salarySlip" : "",
+            req.files.salarySlip
+          );
+          reqData.salarySlip = a;
+        }
       }
     }
 
@@ -171,21 +254,21 @@ export const updateEducationAndCompanyDetails = async (req, res) => {
       const updateQuery =
         req.body.dataType === "education"
           ? {
-              "education.$.boardName": validData.boardName,
-              "education.$.passingYear": validData.passingYear,
-              "education.$.marksPercentage": validData.marksPercentage,
-              "education.$.resultImage": validData.resultImage,
+              "education.$.boardName": reqData.boardName,
+              "education.$.passingYear": reqData.passingYear,
+              "education.$.marksPercentage": reqData.marksPercentage,
+              "education.$.resultImage": reqData.resultImage,
               updatedBy: req.user._id,
             }
           : {
-              "workDetail.$.companyName": validData.companyName,
-              "workDetail.$.position": validData.position,
-              "workDetail.$.startingYear": validData.startingYear,
-              "workDetail.$.endingYear": validData.endingYear,
-              "workDetail.$.experienceLetter": validData.experienceLetter,
-              "workDetail.$.relievingLetter": validData.relievingLetter,
-              "workDetail.$.appointmentLetter": validData.appointmentLetter,
-              "workDetail.$.salarySlip": validData.salarySlip,
+              "workDetail.$.companyName": reqData.companyName,
+              "workDetail.$.position": reqData.position,
+              "workDetail.$.startingYear": reqData.startingYear,
+              "workDetail.$.endingYear": reqData.endingYear,
+              "workDetail.$.experienceLetter": reqData.experienceLetter,
+              "workDetail.$.relievingLetter": reqData.relievingLetter,
+              "workDetail.$.appointmentLetter": reqData.appointmentLetter,
+              "workDetail.$.salarySlip": reqData.salarySlip,
               updatedBy: req.user._id,
             };
       await employee.updateOne(findQuery, { $set: updateQuery });
@@ -202,14 +285,66 @@ export const updateEducationAndCompanyDetails = async (req, res) => {
 export const getDetails = async (req, res) => {
   try {
     const id = req.params.id;
-    const findData = await employee.findOne(
-      { _id: new mongoose.Types.ObjectId(id) },
-      { password: 0 }
-    );
+    const data = await employee.aggregate([
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(id),
+        },
+      },
+      {
+        $project: {
+          password: 0,
+        },
+      },
+    ]);
+
+    const baseUrl = req.protocol + "://" + req.get("host");
+    const findData = data[0];
+    const finalData = {
+      ...findData,
+      education:
+        findData.education.length > 0
+          ? findData?.education?.map((item) => ({
+              ...item,
+              resultImageUrl: `${baseUrl}/uploads/employee/${item.resultImage}`,
+            }))
+          : [],
+      workDetail:
+        findData.workDetail.length > 0
+          ? findData?.workDetail?.map((item) => ({
+              ...item,
+              experienceLetterUrl: `${baseUrl}/uploads/employee/${item.experienceLetter}`,
+              relievingLetterUrl: `${baseUrl}/uploads/employee/${item.relievingLetter}`,
+              appointmentLetterUrl: `${baseUrl}/uploads/employee/${item.appointmentLetter}`,
+              salarySlipUrl: `${baseUrl}/uploads/employee/${item.salarySlip}`,
+            }))
+          : [],
+      userImageUrl: findData.userImage
+        ? `${baseUrl}/uploads/employee/${findData.userImage}`
+        : null,
+      aadharImageUrl: findData.aadharImage
+        ? `${baseUrl}/uploads/employee/${findData.aadharImage}`
+        : null,
+      panImageUrl: findData.panImage
+        ? `${baseUrl}/uploads/employee/${findData.panImage}`
+        : null,
+      passportImageUrl: findData.passportImage
+        ? `${baseUrl}/uploads/employee/${findData.passportImage}`
+        : null,
+      voterImageUrl: findData.voterImage
+        ? `${baseUrl}/uploads/employee/${findData.voterImage}`
+        : null,
+      uanImageUrl: findData.uanImage
+        ? `${baseUrl}/uploads/employee/${findData.uanImage}`
+        : null,
+      passbookImageUrl: findData.passbookImage
+        ? `${baseUrl}/uploads/employee/${findData.passbookImage}`
+        : null,
+    };
 
     return res
       .status(StatusCodes.OK)
-      .json({ message: "Data fetched successfully", data: findData });
+      .json({ message: "Data fetched successfully", data: finalData });
   } catch (error) {
     res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }
@@ -226,89 +361,89 @@ export const detailsUpdateUser = async (req, res) => {
         ? documentsSchema20
         : req.body.dataType === "account"
         ? accountDetailSchema20
+        : req.body.dataType === "address"
+        ? PersonalLoanAddressSchema
         : "";
     // console.log(req.body);
     const validatedUser = await selectValodation.validate(req.body);
 
     const reqData =
       validatedUser.dataType === "basic"
-        ? {
-            name: validatedUser.name,
-            username: validatedUser.username,
-            mobile: validatedUser.mobile,
-            email: validatedUser.email,
-            dob: validatedUser.dob,
-            position: validatedUser.position,
-            address: validatedUser.address,
-            state: Number(validatedUser.state),
-            country: Number(validatedUser.country),
-            city: Number(validatedUser.city),
-            pincode: validatedUser.pincode,
-            branch: new mongoose.Types.ObjectId(validatedUser.branch),
-            fresherOrExperience: validatedUser.fresherOrExperience,
-            pageIndex: 0,
-          }
+        ? EmployeeBasicData(validatedUser)
+        : validatedUser.dataType === "address"
+        ? EmployeeAddressData(validatedUser)
         : validatedUser.dataType === "educationAndWork"
         ? {
             education: validatedUser.education,
 
             workDetail: validatedUser.workDetail,
-            pageIndex: 1,
-          }
-        : validatedUser.dataType === "document"
-        ? {
-            aadharNumber: validatedUser.aadharNumber,
-            voterNumber: validatedUser.voterNumber,
-            panNumber: validatedUser.panNumber,
-            passportNumber: validatedUser.passportNumber,
             pageIndex: 2,
           }
+        : validatedUser.dataType === "document"
+        ? EmployeeDocumentData(validatedUser)
         : validatedUser.dataType === "account"
-        ? {
-            bankName: validatedUser.bankName,
-            accountNumber: validatedUser.accountNumber,
-            bankBranchName: validatedUser.bankBranchName,
-            ifsc: validatedUser.ifsc,
-            uan: validatedUser.uan,
-            pageIndex: 0,
-          }
+        ? EmployeeAccountData(validatedUser)
         : null;
     if (req.files) {
+      const findUser = await employee.findOne({
+        _id: new mongoose.Types.ObjectId(validatedUser.id),
+      });
       if (req.files.userImage) {
-        const file = req.files.userImage;
-        const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
-        reqData.userImage = imageUrl;
+        const a = await EmployeeImageUpload(
+          findUser.userImage,
+          req.files.userImage
+        );
+
+        reqData.userImage = a;
       }
       if (req.files.passportImage) {
-        const file = req.files.passportImage;
-        const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
-        reqData.passportImage = imageUrl;
+        const a = await EmployeeImageUpload(
+          findUser.passportImage,
+          req.files.passportImage
+        );
+
+        reqData.passportImage = a;
       }
       if (req.files.voterImage) {
-        const file = req.files.voterImage;
-        const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
-        reqData.voterImage = imageUrl;
+        const a = await EmployeeImageUpload(
+          findUser.voterImage,
+          req.files.voterImage
+        );
+
+        reqData.voterImage = a;
       }
       if (req.files.panImage) {
-        const file = req.files.panImage;
-        const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
-        reqData.panImage = imageUrl;
+        const a = await EmployeeImageUpload(
+          findUser.panImage,
+          req.files.panImage
+        );
+
+        reqData.panImage = a;
       }
       if (req.files.aadharImage) {
-        const file = req.files.aadharImage;
-        const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
-        reqData.aadharImage = imageUrl;
+        const a = await EmployeeImageUpload(
+          findUser.aadharImage,
+          req.files.aadharImage
+        );
+
+        reqData.aadharImage = a;
       }
 
       if (req.files.passbookImage) {
-        const file = req.files.passbookImage;
-        const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
-        reqData.passbookImage = imageUrl;
+        const a = await EmployeeImageUpload(
+          findUser.passbookImage,
+          req.files.passbookImage
+        );
+
+        reqData.passbookImage = a;
       }
       if (req.files.uanImage) {
-        const file = req.files.uanImage;
-        const imageUrl = await ImageUpload(`user/${req.body.id}`, file);
-        reqData.uanImage = imageUrl;
+        const a = await EmployeeImageUpload(
+          findUser.uanImage,
+          req.files.uanImage
+        );
+
+        reqData.uanImage = a;
       }
     }
 
@@ -346,6 +481,7 @@ export const login = async (req, res) => {
           validUser.password
         );
         if (verifyPassword) {
+          const baseUrl = req.protocol + "://" + req.get("host");
           const sessionID = nanoid();
           const data = {
             _id: validUser._id,
@@ -358,6 +494,7 @@ export const login = async (req, res) => {
             state: validUser.state,
             isPasswordReset: validUser.isPasswordReset,
             sessionId: sessionID,
+            userImage: `${baseUrl}/uploads/employee/${validUser.userImage}`,
           };
           const accessToken = generateAccessToken(data);
           const refreshToken = generateRefreshToken(data);
@@ -403,24 +540,43 @@ export const resetPassword = async (req, res) => {
   try {
     const reqData = req.body;
 
-    const updatedPassword = await employee.updateOne(
-      { _id: new mongoose.Types.ObjectId(reqData.id) },
-
-      {
-        $set: {
-          password: await bcrypt.hash(reqData.password, 10),
-          isPasswordReset: true,
-        },
+    const findUser = await employee.findOne({
+      _id: new mongoose.Types.ObjectId(reqData.id),
+    });
+    if (findUser) {
+      let password = "";
+      if (reqData.type === "user") {
+        const verifyPassword = await bcrypt.compare(
+          reqData.oldPassword,
+          findUser.password
+        );
+        if (verifyPassword) {
+          password = await bcrypt.hash(reqData.password, 10);
+        } else {
+          return res
+            .status(StatusCodes.UNAUTHORIZED)
+            .json({ message: "Invalid old password" });
+        }
+      } else {
+        password = await bcrypt.hash(reqData.password, 10);
       }
-    );
-    if (updatedPassword) {
+      await employee.updateOne(
+        { _id: new mongoose.Types.ObjectId(reqData.id) },
+
+        {
+          $set: {
+            password: password,
+            isPasswordReset: true,
+          },
+        }
+      );
       return res
         .status(StatusCodes.OK)
         .json({ message: "Password updated successfully" });
     } else {
       return res
-        .status(StatusCodes.BAD_REQUEST)
-        .json({ message: "Invalid user or Password" });
+        .status(StatusCodes.NOT_FOUND)
+        .json({ message: "User not found!" });
     }
   } catch (error) {
     res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
@@ -461,6 +617,72 @@ export const ifsc = async (req, res) => {
   }
 };
 
+export const EmployeeView = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const findEmployee = await employee.aggregate([
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(id),
+        },
+      },
+      {
+        $lookup: {
+          from: "branches",
+          localField: "branch",
+          foreignField: "_id",
+          as: "branch",
+        },
+      },
+      {
+        $unwind: {
+          path: "$branch",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $project: {
+          isPasswordReset: 0,
+          password: 0,
+        },
+      },
+    ]);
+    const data = findEmployee[0];
+    const modifyData = {
+      ...data,
+      createdBy: await DataWithEmployeeName(data.createdBy),
+      country: data.country ? await CountryName(data.country) : null,
+      state: data.state ? await StateName(data.state) : null,
+      city: data.city ? await CityName(data.city) : null,
+      permanentCountry: data.permanentCountry
+        ? await CountryName(data.permanentCountry)
+        : null,
+      permanentState: data.permanentState
+        ? await StateName(data.permanentState)
+        : null,
+      permanentCity: data.permanentCity
+        ? await CityName(data.permanentCity)
+        : null,
+
+      residenceCountry: data.residenceCountry
+        ? await CountryName(data.residenceCountry)
+        : null,
+      residenceState: data.residenceState
+        ? await StateName(data.residenceState)
+        : null,
+      residenceCity: data.residenceCity
+        ? await CityName(data.residenceCity)
+        : null,
+    };
+
+    return res
+      .status(StatusCodes.OK)
+      .json({ message: "Data fetched successfully", data: modifyData });
+  } catch (error) {
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
+  }
+};
+
 export const dataTable = async (req, res) => {
   try {
     const reqData = req.body;
@@ -484,7 +706,7 @@ export const dataTable = async (req, res) => {
     if (reqData.username) {
       query.push(BuildRegexQuery("username", reqData.username));
     }
-    if (reqData.isActive) {
+    if (reqData.hasOwnProperty("isActive")) {
       query.push({
         isActive: reqData.isActive,
       });
