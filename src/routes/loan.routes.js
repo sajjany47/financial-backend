@@ -8,6 +8,7 @@ import {
   documentDelete,
   documentUpdate,
   documentUpload,
+  downloadExcelFile,
   getEMIDetails,
   getLoanDetail,
 } from "../api/loan/loan.controller.js";
@@ -53,5 +54,6 @@ LoanRoutes.route("/manage/payment").post(tokenValidation, PaymentDetails);
 LoanRoutes.route("/manage/paid-list").post(tokenValidation, PaidLoanList);
 LoanRoutes.route("/application-view/:id").get(tokenValidation, ApplicationView);
 LoanRoutes.route("/datatable").post(tokenValidation, datatable);
+LoanRoutes.route("/download-excel").get(tokenValidation, downloadExcelFile);
 
 export default LoanRoutes;

@@ -34,7 +34,7 @@ import {
 } from "../../utilis/utilis.js";
 import { Position } from "../employess/EmployeeConfig.js";
 import fs from "fs";
-import charges from "../charges/charges.model.js";
+import ExcelJS from "exceljs";
 
 export const ApplicationCreate = async (req, res) => {
   try {
@@ -501,6 +501,35 @@ export const datatable = async (req, res, next) => {
       count: totalCount,
     });
   } catch (error) {
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
+  }
+};
+
+export const downloadExcelFile = async (req, res, next) => {
+  try {
+    console.log("object");
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Lead");
+    const headerRow = [
+      "NAME",
+      "MOBILE",
+      "EMAIL",
+      "LOAN TYPE",
+      "LOAN AMOUNT",
+      "TENURE",
+      "MONTHLY INCOME",
+      "BRANCH CODE",
+    ];
+    worksheet.addRow(headerRow);
+    // workbook.xlsx.writeFile("my-file.xlsx");
+    // res.setHeader(
+    //   "Content-Type",
+    //   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    // );
+    res.setHeader("Content-Disposition", "attachment; filename=" + "lead.xlsx");
+    workbook.xlsx.write(res).then(() => res.end());
+  } catch (error) {
+    console.log("f");
     res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }
 };
