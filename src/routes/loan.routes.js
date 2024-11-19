@@ -8,7 +8,6 @@ import {
   documentDelete,
   documentUpdate,
   documentUpload,
-  downloadExcelFile,
   getEMIDetails,
   getLoanDetail,
   LeadBulkUpload,
@@ -55,7 +54,6 @@ LoanRoutes.route("/manage/payment").post(tokenValidation, PaymentDetails);
 LoanRoutes.route("/manage/paid-list").post(tokenValidation, PaidLoanList);
 LoanRoutes.route("/application-view/:id").get(tokenValidation, ApplicationView);
 LoanRoutes.route("/datatable").post(tokenValidation, datatable);
-LoanRoutes.route("/download-excel").get(tokenValidation, downloadExcelFile);
 LoanRoutes.route("/lead/bulk-upload").post(tokenValidation, LeadBulkUpload);
 
 export default LoanRoutes;
