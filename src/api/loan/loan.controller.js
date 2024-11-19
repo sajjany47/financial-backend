@@ -35,6 +35,7 @@ import {
 import { Position } from "../employess/EmployeeConfig.js";
 import fs from "fs";
 import ExcelJS from "exceljs";
+import branch from "../branch/branch.model.js";
 
 export const ApplicationCreate = async (req, res) => {
   try {
@@ -500,6 +501,55 @@ export const datatable = async (req, res, next) => {
       data: data,
       count: totalCount,
     });
+  } catch (error) {
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
+  }
+};
+
+export const LeadBulkUpload = async (req, res, next) => {
+  try {
+    const reqData = req.body.data;
+    const branchList = await branch.find({ isActive: true });
+
+    const errorData = reqData.filter(
+      (item1) => !branchList.some((item2) => item1.branch === item2.code)
+    );
+
+    if (errorData.length === 0) {
+      const prepareData = [];
+      for (let index = 0; index < reqData.length; index++) {
+        const element = reqData[index];
+        const findLoanDetails = await loanType.findOne({
+          _id: new mongoose.Types.ObjectId(element.loanType._id),
+        });
+        for (let i = 0; i < branchList.length; i++) {
+          const branch = branchList[i];
+          if (element.branch === branch.code) {
+            const leadModifyData = LeadData({
+              ...element,
+              loanType: element.loanType._id,
+              branch: branch._id,
+            });
+
+            prepareData.push({
+              ...leadModifyData,
+              loanAllotAgent: req.user._id,
+              applicationNumber: `L-${GenerateApplicationNumber(
+                findLoanDetails.entity
+              )}`,
+              createdBy: req.user._id,
+            });
+          }
+        }
+      }
+
+      await Loan.insertMany(prepareData);
+      return res.status(200).json({ message: "Data inserted successfully" });
+    } else {
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ message: "Branch not found", data: errorData });
+    }
   } catch (error) {
     res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }
