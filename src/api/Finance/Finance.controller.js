@@ -25,6 +25,7 @@ export const financeCreate = async (req, res) => {
       const data = new finance({
         ...prepareData,
         createdBy: req.user._id,
+        initialCapital: Number(prepareData.investmentAmount),
         planDetails: [
           {
             _id: new mongoose.Types.ObjectId(),
@@ -76,6 +77,7 @@ export const financeUpdate = async (req, res) => {
             Number(findInvestor.investmentAmount)
         ) {
           data.isMaturityCompleted = false;
+
           data.planDetails = [
             ...findInvestor.planDetails,
             {
@@ -90,6 +92,7 @@ export const financeUpdate = async (req, res) => {
               updatedBy: new mongoose.Types.ObjectId(req.user._id),
             },
           ];
+          data.initialCapital = Number(data.investmentAmount);
         }
         await finance.updateOne(
           { _id: new mongoose.Types.ObjectId(validData._id) },

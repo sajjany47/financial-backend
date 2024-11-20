@@ -7,6 +7,7 @@ const financeModel = new mongoose.Schema(
     email: String,
     dob: Date,
     investmentType: String,
+    initialCapital: Number,
     investmentAmount: Number,
     duration: Number,
     interestRate: Number,
