@@ -92,6 +92,7 @@ export const financeUpdate = async (req, res) => {
               updatedBy: new mongoose.Types.ObjectId(req.user._id),
             },
           ];
+          data.createdAt = new Date();
           data.initialCapital = Number(data.investmentAmount);
         }
         await finance.updateOne(

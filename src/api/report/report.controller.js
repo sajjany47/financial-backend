@@ -20,6 +20,17 @@ export const financialReport = async (req, res) => {
       { $count: "total" },
     ]);
 
+    const totalInvestment = await finance.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalInvestment: {
+            $sum: "$initialCapital",
+          },
+        },
+      },
+    ]);
+
     res.status(StatusCodes.OK).json({
       message: "Data fetched successfully",
       data: {
@@ -27,6 +38,9 @@ export const financialReport = async (req, res) => {
           totalInvestor: totalInvestor[0].total,
           newInvestor: newInvestor[0].total,
           totalActiveInvestor: totalActiveInvestor[0].total,
+        },
+        investment: {
+          totalInvestment: totalInvestment[0].totalInvestment,
         },
       },
     });
