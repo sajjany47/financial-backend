@@ -1,3 +1,4 @@
+import { StatusCodes } from "http-status-codes";
 import finance from "../Finance/finance.model";
 
 export const financialReport = async (req, res) => {
@@ -18,6 +19,17 @@ export const financialReport = async (req, res) => {
       { $match: { isInvestorActive: true } },
       { $count: "total" },
     ]);
+
+    res.status(StatusCodes.OK).json({
+      message: "Data fetched successfully",
+      data: {
+        investor: {
+          totalInvestor: totalInvestor[0].total,
+          newInvestor: newInvestor[0].total,
+          totalActiveInvestor: totalActiveInvestor[0].total,
+        },
+      },
+    });
   } catch (error) {
     res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }
