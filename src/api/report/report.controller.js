@@ -31,6 +31,51 @@ export const financialReport = async (req, res) => {
       },
     ]);
 
+    const newInvestment = await finance.aggregate([
+      {
+        $match: {
+          createdAt: {
+            $gte: new Date(req.body.startDate),
+            $lte: new Date(req.body.endDate),
+          },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          newInvestment: {
+            $sum: "$initialCapital",
+          },
+        },
+      },
+    ]);
+
+    const reedemAmount = await finance.aggregate([
+      {
+        $unwind: {
+          path: "$payoutReedem",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $match: {
+          "payoutReedem.isPaid": true,
+          "payoutReedem.createdOn": {
+            $gte: new Date(req.body.startDate),
+            $lte: new Date(req.body.endDate),
+          },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          reedemAmount: {
+            $sum: "$payoutReedem.reedemAmount",
+          },
+        },
+      },
+    ]);
+
     res.status(StatusCodes.OK).json({
       message: "Data fetched successfully",
       data: {
@@ -41,6 +86,8 @@ export const financialReport = async (req, res) => {
         },
         investment: {
           totalInvestment: totalInvestment[0].totalInvestment,
+          newInvestment: newInvestment[0].newInvestment,
+          reedemAmount: reedemAmount[0].reedemAmount,
         },
       },
     });

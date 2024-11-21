@@ -289,9 +289,9 @@ export const financeReedemApply = async (req, res) => {
             $push: {
               payoutReedem: {
                 _id: new mongoose.Types.ObjectId(),
-                reedemAmount: validData.reedemAmount,
+                reedemAmount: Number(validData.reedemAmount),
                 reedemDate: new Date(validData.reedemDate),
-                remainingInvestAmount: validData.remainingInvestAmount,
+                remainingInvestAmount: Number(validData.remainingInvestAmount),
                 isPaid: false,
                 paidOn: null,
                 transactionNumber: null,
