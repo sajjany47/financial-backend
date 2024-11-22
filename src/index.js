@@ -12,6 +12,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import ChargesRoutes from "./routes/charges.routes.js";
 import FinaceRoutes from "./routes/finance.routes.js";
+import ReportRoutes from "./routes/report.routes.js";
 
 function main() {
   const port = process.env.port;
@@ -28,6 +29,16 @@ function main() {
   );
   const server = createServer(app);
   app.use(express.json());
+  app.use((err, req, res, next) => {
+    if (err instanceof SyntaxError) {
+      return res.status(400).json({
+        error: "Invalid JSON",
+        message:
+          "The provided JSON is not correctly formatted. Please check your JSON syntax.",
+      });
+    }
+    next(err);
+  });
   // Serve static files (like images) from the './src/uploads' directory
   app.use("/uploads", express.static(path.join(__dirname, "../../Upload/")));
 
@@ -57,5 +68,6 @@ function main() {
   app.use("/document", DocumentRoutes);
   app.use("/charges", ChargesRoutes);
   app.use("/finance", FinaceRoutes);
+  app.use("/report", ReportRoutes);
 }
 main();
