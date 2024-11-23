@@ -1,5 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import finance from "../Finance/finance.model.js";
+import Loan from "../loan/loan.model.js";
 
 export const financialReport = async (req, res) => {
   try {
@@ -193,7 +194,46 @@ export const loanPerformance = async (req, res) => {
     const startDate = new Date(req.body.startDate);
     const endDate = new Date(req.body.endDate);
 
-    const result = await finance.aggregate([
+    const commonQuery = [
+      {
+        $project: {
+          monthYear: {
+            $concat: [
+              {
+                $dateToString: {
+                  format: "%B",
+                  date: "$createdAt",
+                },
+              },
+              ",",
+              { $toString: { $year: "$createdAt" } },
+            ],
+          },
+          loan: "$_id",
+        },
+      },
+      {
+        $group: {
+          _id: "$monthYear",
+          totalLoan: {
+            $addToSet: "$loan",
+          },
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          total: { $size: "$totalLoan" },
+        },
+      },
+      {
+        $sort: {
+          _id: 1,
+        },
+      },
+    ];
+
+    const result = await Loan.aggregate([
       { $match: { createdAt: { $gte: startDate, $lte: endDate } } },
       {
         $facet: {
@@ -322,6 +362,22 @@ export const loanPerformance = async (req, res) => {
             },
             { $count: "total" },
           ],
+          monthWiseLoan: [
+            {
+              $match: {
+                applicationStaus: "disbursed",
+              },
+            },
+            ...commonQuery,
+          ],
+          monthWiseLead: [
+            {
+              $match: {
+                applicationStaus: "lead",
+              },
+            },
+            ...commonQuery,
+          ],
         },
       },
     ]);
@@ -345,8 +401,8 @@ export const loanPerformance = async (req, res) => {
           defaultEmi: data.defaultEmi[0]?.total || 0,
         },
 
-        monthWiseInvestor: data.monthWiseInvestor || [],
-        monthWiseReedem: data.monthWiseReedem || [],
+        monthWiseLoan: data.monthWiseLoan || [],
+        monthWiseLead: data.monthWiseLead || [],
       },
     });
   } catch (error) {
