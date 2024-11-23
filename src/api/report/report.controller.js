@@ -187,3 +187,169 @@ export const financialReport = async (req, res) => {
     res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }
 };
+
+export const loanPerformance = async (req, res) => {
+  try {
+    const startDate = new Date(req.body.startDate);
+    const endDate = new Date(req.body.endDate);
+
+    const result = await finance.aggregate([
+      { $match: { createdAt: { $gte: startDate, $lte: endDate } } },
+      {
+        $facet: {
+          lead: [
+            {
+              $match: {
+                applicationStaus: "lead",
+              },
+            },
+            { $count: "total" },
+          ],
+          approvedLoan: [
+            {
+              $match: {
+                applicationStaus: "disbursed",
+              },
+            },
+            { $count: "total" },
+          ],
+          incompletedLoan: [
+            {
+              $match: {
+                applicationStaus: "incompleted",
+              },
+            },
+            { $count: "total" },
+          ],
+          rejectLoan: [
+            {
+              $match: {
+                applicationStaus: "rejected",
+              },
+            },
+            { $count: "total" },
+          ],
+
+          totalEmi: [
+            {
+              $match: {
+                applicationStaus: "disbursed",
+              },
+            },
+            {
+              $unwind: {
+                path: "$emiSchedule",
+                preserveNullAndEmptyArrays: true,
+              },
+            },
+            {
+              $match: {
+                "emiSchedule.emiDate": {
+                  $gte: startDate,
+                  $lte: endDate,
+                },
+              },
+            },
+            { $count: "total" },
+          ],
+          paidEmi: [
+            {
+              $match: {
+                applicationStaus: "disbursed",
+              },
+            },
+            {
+              $unwind: {
+                path: "$emiSchedule",
+                preserveNullAndEmptyArrays: true,
+              },
+            },
+            {
+              $match: {
+                "emiSchedule.emiDate": {
+                  $gte: startDate,
+                  $lte: endDate,
+                },
+                "emiSchedule.isPaid": true,
+              },
+            },
+            { $count: "total" },
+          ],
+          unpaidEmi: [
+            {
+              $match: {
+                applicationStaus: "disbursed",
+              },
+            },
+            {
+              $unwind: {
+                path: "$emiSchedule",
+                preserveNullAndEmptyArrays: true,
+              },
+            },
+            {
+              $match: {
+                "emiSchedule.emiDate": {
+                  $gte: startDate,
+                  $lte: endDate,
+                },
+                "emiSchedule.isPaid": false,
+              },
+            },
+            { $count: "total" },
+          ],
+          defaultEmi: [
+            {
+              $match: {
+                applicationStaus: "disbursed",
+              },
+            },
+            {
+              $unwind: {
+                path: "$emiSchedule",
+                preserveNullAndEmptyArrays: true,
+              },
+            },
+            {
+              $match: {
+                "emiSchedule.emiDate": {
+                  $gte: startDate,
+                  $lte: endDate,
+                },
+                "emiSchedule.isPaid": false,
+                "emiSchedule.emiDate": { $lt: new Date() },
+              },
+            },
+            { $count: "total" },
+          ],
+        },
+      },
+    ]);
+
+    const data = result[0];
+
+    res.status(StatusCodes.OK).json({
+      message: "Data fetched successfully",
+      data: {
+        loan: {
+          lead: data.lead[0]?.total || 0,
+          approvedLoan: data.approvedLoan[0]?.total || 0,
+          incompletedLoan: data.incompletedLoan[0]?.total || 0,
+          rejectLoan: data.rejectLoan[0]?.total || 0,
+        },
+
+        emi: {
+          totalEmi: data.totalEmi[0]?.total || 0,
+          paidEmi: data.paidEmi[0]?.total || 0,
+          unpaidEmi: data.unpaidEmi[0]?.total || 0,
+          defaultEmi: data.defaultEmi[0]?.total || 0,
+        },
+
+        monthWiseInvestor: data.monthWiseInvestor || [],
+        monthWiseReedem: data.monthWiseReedem || [],
+      },
+    });
+  } catch (error) {
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
+  }
+};
