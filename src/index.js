@@ -28,7 +28,7 @@ function main() {
     })
   );
   const server = createServer(app);
-  app.use(express.json());
+  app.use(express.json({ limit: "100mb" }));
   app.use((err, req, res, next) => {
     if (err instanceof SyntaxError) {
       return res.status(400).json({
@@ -37,12 +37,13 @@ function main() {
           "The provided JSON is not correctly formatted. Please check your JSON syntax.",
       });
     }
+
     next(err);
   });
   // Serve static files (like images) from the './src/uploads' directory
   app.use("/uploads", express.static(path.join(__dirname, "../../Upload/")));
 
-  app.use(express.urlencoded({ limit: "30 mb", extended: true }));
+  app.use(express.urlencoded({ limit: "100mb", extended: true }));
   mongoose
     .connect(mongodb_url)
     .then(() => {
