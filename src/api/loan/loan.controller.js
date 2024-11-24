@@ -63,6 +63,8 @@ export const ApplicationCreate = async (req, res) => {
             : `${GenerateApplicationNumber(findLoanDetails.entity)}`,
 
         createdBy: req.user._id,
+        loanAllotAgent:
+          validateData.applicationType === "basic" ? req.user._id : null,
       });
 
       const applicationSave = await LeadCreate.save();
@@ -528,7 +530,6 @@ export const LeadBulkUpload = async (req, res, next) => {
 
             prepareData.push({
               ...leadModifyData,
-              loanAllotAgent: req.user._id,
               applicationNumber: `L-${GenerateApplicationNumber(
                 findLoanDetails.entity
               )}`,
@@ -545,6 +546,44 @@ export const LeadBulkUpload = async (req, res, next) => {
         .status(StatusCodes.NOT_FOUND)
         .json({ message: "Branch not found", data: errorData });
     }
+  } catch (error) {
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
+  }
+};
+
+export const LeadAssignAgent = async (req, res, next) => {
+  try {
+    const reqData = req.body;
+    if (reqData.type === "single") {
+      await Loan.updateOne(
+        { _id: new mongoose.Types.ObjectId(reqData.leadId[0].id) },
+        {
+          $set: {
+            leadAssignAgent: new mongoose.Types.ObjectId(reqData.agentId.id),
+          },
+        }
+      );
+    } else {
+      for (let index = 0; index < reqData.leadId.length; index++) {
+        const lead = reqData.leadId[index];
+
+        if (lead.branchId.toString() === reqData.agentId.branchId.toString()) {
+          await Loan.updateOne(
+            { _id: new mongoose.Types.ObjectId(lead.id) },
+            {
+              $set: {
+                leadAssignAgent: new mongoose.Types.ObjectId(
+                  reqData.agentId.id
+                ),
+              },
+            }
+          );
+        }
+      }
+    }
+    return res
+      .status(StatusCodes.OK)
+      .json({ message: "Lead assign sucessfully" });
   } catch (error) {
     res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }

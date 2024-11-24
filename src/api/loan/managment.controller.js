@@ -186,7 +186,7 @@ export const AgentList = async (req, res) => {
     const position = req.user;
 
     const list = await employee.aggregate([
-      { $match: { branch: new mongoose.Types.ObjectId(id) } },
+      { $match: { branch: new mongoose.Types.ObjectId(id), isActive: true } },
       {
         $lookup: {
           from: "branches",
@@ -208,6 +208,7 @@ export const AgentList = async (req, res) => {
             : { $ne: "" },
           "branchDetails.state": position.state ? position.state : { $ne: "" },
           "branchDetails.city": position.city ? position.city : { $ne: "" },
+          "branchDetails.isActive": true,
         },
       },
     ]);

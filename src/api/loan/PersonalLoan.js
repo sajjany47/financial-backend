@@ -121,10 +121,6 @@ export const StatusData = async (data) => {
     remark: data.remark,
   };
 
-  if (data.loanAllotAgent) {
-    prepareData.loanAllotAgent = data.user;
-  }
-
   if (data.status === LoanApplicationStepsEnum.DOCUMENT_ADDRESS_VERIFICATION) {
     prepareData.addressVerifiedBy = data.user;
   }

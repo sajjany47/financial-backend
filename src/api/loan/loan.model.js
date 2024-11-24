@@ -18,6 +18,7 @@ const loanModel = new mongoose.Schema(
     fatherName: String,
     motherName: String,
     branch: mongoose.Schema.Types.ObjectId,
+    leadAssignAgent: mongoose.Schema.Types.ObjectId,
 
     permanentHouseOrBuildingNumber: String,
     permanentStreet: String,
