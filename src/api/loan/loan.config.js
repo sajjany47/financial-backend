@@ -253,7 +253,11 @@ export const DataWithEmployeeName = async (id) => {
   const findEmployee = employeeArray.find(
     (item) => item._id.toString() === id.toString()
   );
-  const data = { name: findEmployee.name, username: findEmployee.username };
+  const data = {
+    _id: findEmployee._id,
+    name: findEmployee.name,
+    username: findEmployee.username,
+  };
 
   return data;
 };

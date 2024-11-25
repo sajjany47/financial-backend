@@ -11,6 +11,7 @@ import {
 import Loan from "./loan.model.js";
 import mongoose from "mongoose";
 import {
+  DataWithEmployeeName,
   DisbursmentCalculate,
   EMICalculator,
   GenerateApplicationNumber,
@@ -409,6 +410,11 @@ export const datatable = async (req, res, next) => {
     if (reqData?.branch) {
       query.push({ branch: new mongoose.Types.ObjectId(reqData.branch) });
     }
+    if (reqData?.leadAssignAgent) {
+      query.push({
+        leadAssignAgent: new mongoose.Types.ObjectId(reqData.leadAssignAgent),
+      });
+    }
 
     if (postion === Position.SM) {
       positionWise.push({ "branchDetails.country": req.user.country });
@@ -495,7 +501,14 @@ export const datatable = async (req, res, next) => {
 
     return res.status(StatusCodes.OK).json({
       message: "Data fetched successfully",
-      data: data,
+      data: await Promise.all(
+        data.map(async (item) => ({
+          ...item,
+          leadAssignAgent: item.leadAssignAgent
+            ? await DataWithEmployeeName(item.leadAssignAgent)
+            : "",
+        }))
+      ),
       count: totalCount,
     });
   } catch (error) {
