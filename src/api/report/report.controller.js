@@ -169,17 +169,17 @@ export const financialReport = async (req, res) => {
       message: "Data fetched successfully",
       data: {
         investor: {
-          totalInvestor: data.totalInvestor[0]?.total || 0,
-          newInvestor: data.newInvestor[0]?.total || 0,
-          totalActiveInvestor: data.totalActiveInvestor[0]?.total || 0,
+          totalInvestor: data.totalInvestor[0]?.total || "",
+          newInvestor: data.newInvestor[0]?.total || "",
+          totalActiveInvestor: data.totalActiveInvestor[0]?.total || "",
         },
 
         investment: {
-          totalInvestment: data.totalInvestment[0]?.totalInvestment || 0,
-          newInvestment: data.newInvestment[0]?.newInvestment || 0,
-          reedemAmount: data.reedemAmount[0]?.reedemAmount || 0,
+          totalInvestment: data.totalInvestment[0]?.totalInvestment || "",
+          newInvestment: data.newInvestment[0]?.newInvestment || "",
+          reedemAmount: data.reedemAmount[0]?.reedemAmount || "",
           remainingInvestAmount:
-            data.remainingInvestAmount[0]?.remainingInvestAmount || 0,
+            data.remainingInvestAmount[0]?.remainingInvestAmount || "",
         },
 
         monthWiseInvestor: data.monthWiseInvestor
@@ -413,17 +413,17 @@ export const loanPerformance = async (req, res) => {
       message: "Data fetched successfully",
       data: {
         loan: {
-          lead: data.lead[0]?.total || 0,
-          approvedLoan: data.approvedLoan[0]?.total || 0,
-          incompletedLoan: data.incompletedLoan[0]?.total || 0,
-          rejectLoan: data.rejectLoan[0]?.total || 0,
+          lead: data.lead[0]?.total || "",
+          approvedLoan: data.approvedLoan[0]?.total || "",
+          incompletedLoan: data.incompletedLoan[0]?.total || "",
+          rejectLoan: data.rejectLoan[0]?.total || "",
         },
 
         emi: {
-          totalEmi: data.totalEmi[0]?.total || 0,
-          paidEmi: data.paidEmi[0]?.total || 0,
-          unpaidEmi: data.unpaidEmi[0]?.total || 0,
-          defaultEmi: data.defaultEmi[0]?.total || 0,
+          totalEmi: data.totalEmi[0]?.total || "",
+          paidEmi: data.paidEmi[0]?.total || "",
+          unpaidEmi: data.unpaidEmi[0]?.total || "",
+          defaultEmi: data.defaultEmi[0]?.total || "",
         },
 
         monthWiseLoan: data.monthWiseLoan
@@ -431,7 +431,7 @@ export const loanPerformance = async (req, res) => {
               (item) => ({
                 ...item,
                 _id: moment(item._id, "MMMM,YYYY").format("MMMM"),
-                total: item.total ? item.total : 0,
+                total: item.total ? item.total : "",
               })
             )
           : [],
@@ -440,7 +440,7 @@ export const loanPerformance = async (req, res) => {
               (item) => ({
                 ...item,
                 _id: moment(item._id, "MMMM,YYYY").format("MMMM"),
-                total: item.total ? item.total : 0,
+                total: item.total ? item.total : "",
               })
             )
           : [],
