@@ -1,6 +1,8 @@
 import { StatusCodes } from "http-status-codes";
 import finance from "../Finance/finance.model.js";
 import Loan from "../loan/loan.model.js";
+import { MonthNameAdd } from "./report.config.js";
+import moment from "moment";
 
 export const financialReport = async (req, res) => {
   try {
@@ -180,8 +182,31 @@ export const financialReport = async (req, res) => {
             data.remainingInvestAmount[0]?.remainingInvestAmount || 0,
         },
 
-        monthWiseInvestor: data.monthWiseInvestor || [],
-        monthWiseReedem: data.monthWiseReedem || [],
+        monthWiseInvestor: data.monthWiseInvestor
+          ? await MonthNameAdd(startDate, endDate, data.monthWiseInvestor).map(
+              (item) => ({
+                ...item,
+                _id: moment(item._id, "MMMM,YYYY").format("MMMM"),
+                totalInvestAmount: item.totalInvestAmount
+                  ? item.totalInvestAmount
+                  : "",
+                totalInvestorCount: item.totalInvestorCount
+                  ? item.totalInvestorCount
+                  : "",
+              })
+            )
+          : [],
+        monthWiseReedem: data.monthWiseReedem
+          ? await MonthNameAdd(startDate, endDate, data.monthWiseReedem).map(
+              (item) => ({
+                ...item,
+                _id: moment(item._id, "MMMM,YYYY").format("MMMM"),
+                totalReedemAmount: item.totalReedemAmount
+                  ? item.totalReedemAmount
+                  : "",
+              })
+            )
+          : [],
       },
     });
   } catch (error) {
@@ -401,8 +426,24 @@ export const loanPerformance = async (req, res) => {
           defaultEmi: data.defaultEmi[0]?.total || 0,
         },
 
-        monthWiseLoan: data.monthWiseLoan || [],
-        monthWiseLead: data.monthWiseLead || [],
+        monthWiseLoan: data.monthWiseLoan
+          ? await MonthNameAdd(startDate, endDate, data.monthWiseLoan).map(
+              (item) => ({
+                ...item,
+                _id: moment(item._id, "MMMM,YYYY").format("MMMM"),
+                total: item.total ? item.total : 0,
+              })
+            )
+          : [],
+        monthWiseLead: data.monthWiseLead
+          ? await MonthNameAdd(startDate, endDate, data.monthWiseLead).map(
+              (item) => ({
+                ...item,
+                _id: moment(item._id, "MMMM,YYYY").format("MMMM"),
+                total: item.total ? item.total : 0,
+              })
+            )
+          : [],
       },
     });
   } catch (error) {
