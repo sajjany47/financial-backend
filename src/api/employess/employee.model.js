@@ -116,8 +116,8 @@ const employeeSchema = new mongoose.Schema(
     profileRatio: String,
     approvedBy: String,
     isActive: Boolean,
-    createdBy: String,
-    updatedBy: String,
+    createdBy: mongoose.Schema.Types.ObjectId,
+    updatedBy: mongoose.Schema.Types.ObjectId,
     pageIndex: Number,
   },
   {

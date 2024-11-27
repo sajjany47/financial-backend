@@ -3,6 +3,7 @@ import { createBranchSchema } from "./branch.schema.js";
 import branch from "./branch.model.js";
 import mongoose from "mongoose";
 import { BuildRegexQuery } from "../../utilis/utilis.js";
+import { GenerateBranchCode } from "./branch.config.js";
 
 export const createBranch = async (req, res) => {
   try {
@@ -22,12 +23,17 @@ export const createBranch = async (req, res) => {
           phone: validateData.phone,
           address: validateData.address,
           pincode: validateData.pincode,
-          code: validateData.code,
+          code: await GenerateBranchCode(
+            validateData.countryName,
+            validateData.stateName,
+            validateData.cityName,
+            validateData.pincode
+          ),
           countryName: validateData.countryName,
           stateName: validateData.stateName,
           cityName: validateData.cityName,
           isActive: true,
-          createdBy: req.user.username,
+          createdBy: req.user._id,
           updatedBy: null,
         });
 
@@ -63,7 +69,7 @@ export const updateBranch = async (req, res) => {
           countryName: validateData.countryName,
           stateName: validateData.stateName,
           cityName: validateData.cityName,
-          updatedBy: req.user.username,
+          updatedBy: req.user._id,
         };
 
         const branchUpdate = await branch.updateOne(
@@ -109,6 +115,107 @@ export const branchList = async (req, res) => {
 
 export const dataTable = async (req, res) => {
   try {
+    const a = await Promise.all(
+      [
+        {
+          name: "Kolkata Branch",
+          country: 101,
+          state: 4853,
+          city: 142001,
+          countryName: "India",
+          stateName: "West Bengal",
+          cityName: "Kolkata",
+          email: "kolkata.branch@example.com",
+          phone: "+91-9876543210",
+          address: "123 Park Street, Kolkata, West Bengal",
+          pincode: "700016",
+          code: "I-WB-K-016",
+          isActive: true,
+          createdBy: "admin",
+          updatedBy: "admin",
+        },
+        {
+          name: "Patna Branch",
+          country: 101,
+          state: 4037,
+          city: 133386,
+          countryName: "India",
+          stateName: "Bihar",
+          cityName: "Patna",
+          email: "patna.branch@example.com",
+          phone: "+91-9876543211",
+          address: "456 Gandhi Maidan, Patna, Bihar",
+          pincode: "800001",
+          code: "I-B-P-001",
+          isActive: true,
+          createdBy: "admin",
+          updatedBy: "admin",
+        },
+        {
+          name: "Lucknow Branch",
+          country: 101,
+          state: 4022,
+          city: 132782,
+          countryName: "India",
+          stateName: "Uttar Pradesh",
+          cityName: "Lucknow",
+          email: "lucknow.branch@example.com",
+          phone: "+91-9876543212",
+          address: "789 Hazratganj, Lucknow, Uttar Pradesh",
+          pincode: "226001",
+          code: "I-UP-L-001",
+          isActive: true,
+          createdBy: "admin",
+          updatedBy: "admin",
+        },
+        {
+          name: "New Delhi Branch",
+          country: 101,
+          state: 4021,
+          city: 133210,
+          countryName: "India",
+          stateName: "Delhi",
+          cityName: "New Delhi",
+          email: "newdelhi.branch@example.com",
+          phone: "+91-9876543213",
+          address: "12 Connaught Place, New Delhi, Delhi",
+          pincode: "110001",
+          code: "I-D-N-001",
+          isActive: true,
+          createdBy: "admin",
+          updatedBy: "admin",
+        },
+        {
+          name: "Gandhinagar Branch",
+          country: 101,
+          state: 4030,
+          city: 131900,
+          countryName: "India",
+          stateName: "Gujarat",
+          cityName: "Gandhinagar",
+          email: "gandhinagar.branch@example.com",
+          phone: "+91-9876543214",
+          address: "Plot No 10, Sector 11, Gandhinagar, Gujarat",
+          pincode: "382010",
+          code: "I-G-G-010",
+          isActive: true,
+          createdBy: "admin",
+          updatedBy: "admin",
+        },
+      ].map(async (item) => ({
+        ...item,
+        code: await GenerateBranchCode(
+          item.countryName,
+          item.stateName,
+          item.cityName,
+          item.pincode
+        ),
+        createdBy: req.user._id,
+        updatedBy: req.user._id,
+      }))
+    );
+
+    // await branch.insertMany(a);
     const reqData = req.body;
     const page = reqData.page;
     const limit = reqData.limit;
@@ -154,7 +261,8 @@ export const dataTable = async (req, res) => {
 
     return res.status(StatusCodes.OK).json({
       message: "Data fetched successfully",
-      data: data[0].data,
+      // data: data[0].data,
+      data: a,
       count: data[0].count[0] ? data[0].count[0].total : 0,
     });
   } catch (error) {
