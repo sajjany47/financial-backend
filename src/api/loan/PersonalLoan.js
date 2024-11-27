@@ -37,6 +37,7 @@ export const BasicData = (data) => {
     activeIndex: 0,
     applicationStaus: LoanStatusEnum.INCOMPLETED,
     status: LoanApplicationStepsEnum.INCOMPLETED,
+    loanAllotAgent: new mongoose.Types.ObjectId(data.operationBy),
   };
 
   return prepareData;

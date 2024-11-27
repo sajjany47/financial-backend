@@ -738,7 +738,12 @@ export const dataTable = async (req, res) => {
       },
       { $match: query.length > 0 ? { $and: query } : {} },
     ];
-    const countData = await employee.countDocuments([...findQuery]);
+    const countData = await employee.aggregate([
+      ...findQuery,
+      {
+        $count: "count",
+      },
+    ]);
     const data = await employee.aggregate([
       ...findQuery,
       {
@@ -752,7 +757,7 @@ export const dataTable = async (req, res) => {
     return res.status(StatusCodes.OK).json({
       message: "Data fetched successfully",
       data: data,
-      count: countData,
+      count: countData.length > 0 ? countData[0].count : 0,
     });
   } catch (error) {
     res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });

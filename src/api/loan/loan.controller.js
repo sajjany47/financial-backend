@@ -57,15 +57,13 @@ export const ApplicationCreate = async (req, res) => {
           : "";
       const LeadCreate = new Loan({
         ...data,
-        loanAllotAgent: req.user._id,
+        leadAssignAgent: req.user._id,
         applicationNumber:
           validateData.applicationType === "lead"
             ? `L-${GenerateApplicationNumber(findLoanDetails.entity)}`
             : `${GenerateApplicationNumber(findLoanDetails.entity)}`,
 
         createdBy: req.user._id,
-        loanAllotAgent:
-          validateData.applicationType === "basic" ? req.user._id : null,
       });
 
       const applicationSave = await LeadCreate.save();
@@ -118,7 +116,7 @@ export const ApplicationUpdate = async (req, res) => {
         type === "lead"
           ? await LeadData(validateData)
           : type === "basic"
-          ? await BasicData(validateData)
+          ? await BasicData({ ...validateData, operationBy: req.user._id })
           : type === "address"
           ? await AddressData(validateData)
           : type === "work"
@@ -509,6 +507,7 @@ export const datatable = async (req, res, next) => {
             : "",
         }))
       ),
+
       count: totalCount,
     });
   } catch (error) {
