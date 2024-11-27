@@ -23,6 +23,7 @@ const employeeSchema = new mongoose.Schema(
         Position.LD,
         Position.VD,
         Position.FM,
+        Position.CM,
       ],
     },
     branch: {
