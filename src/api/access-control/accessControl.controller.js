@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
-import { childMenuSchema, primaryMenuSchema } from "./accessControl.schema";
-import accessControl from "./accessControl.model";
+import { childMenuSchema, primaryMenuSchema } from "./accessControl.schema.js";
+import accessControl from "./accessControl.model.js";
 import mongoose from "mongoose";
 
 export const PrimaryMenuCreate = async (req, res) => {
