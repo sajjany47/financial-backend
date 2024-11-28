@@ -1,0 +1,11 @@
+import * as Yup from "yup";
+
+export const primaryMenuSchema = Yup.object().shape({
+  name: Yup.string().required("Name is required"),
+});
+
+export const childMenuSchema = Yup.object().shape({
+  name: Yup.string().required("Name is required"),
+  primaryMenu: Yup.string().required("Primary Menu is required"),
+  path: Yup.string().required("Path is required"),
+});
