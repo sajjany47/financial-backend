@@ -13,6 +13,7 @@ import { fileURLToPath } from "url";
 import ChargesRoutes from "./routes/charges.routes.js";
 import FinaceRoutes from "./routes/finance.routes.js";
 import ReportRoutes from "./routes/report.routes.js";
+import AccessRoutes from "./routes/access.routes.js";
 
 function main() {
   const port = process.env.port;
@@ -70,5 +71,6 @@ function main() {
   app.use("/charges", ChargesRoutes);
   app.use("/finance", FinaceRoutes);
   app.use("/report", ReportRoutes);
+  app.use("/access", AccessRoutes);
 }
 main();

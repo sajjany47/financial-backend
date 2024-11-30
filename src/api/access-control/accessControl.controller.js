@@ -2,6 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import { childMenuSchema, primaryMenuSchema } from "./accessControl.schema.js";
 import accessControl from "./accessControl.model.js";
 import mongoose from "mongoose";
+import { DataWithEmployeeName } from "../loan/loan.config.js";
 
 export const PrimaryMenuCreate = async (req, res) => {
   try {
@@ -94,22 +95,32 @@ export const ChildMenuCreate = async (req, res) => {
           .status(StatusCodes.NOT_FOUND)
           .json({ message: "Primary menu not found!" });
       } else {
-        let data = {
-          _id: new mongoose.Types.ObjectId(),
-          name: validateData.name,
-          path: validateData.path,
-          isActive: validateData.isActive ? validateData.isActive : true,
-          createdBy: new mongoose.Types.ObjectId(req.user._id),
-        };
-
-        await accessControl.updateOne(
-          { _id: new mongoose.Types.ObjectId(validateData._id) },
-          { $push: { childMenu: data }, $set: { updatedBy: req.user._id } }
+        const filterData = checkData.childMenu.filter(
+          (item) =>
+            item.name === validateData.name || item.path === validateData.path
         );
+        if (filterData.length > 0) {
+          return res
+            .status(StatusCodes.CONFLICT)
+            .json({ message: "Child menu already present" });
+        } else {
+          let data = {
+            _id: new mongoose.Types.ObjectId(),
+            name: validateData.name,
+            path: validateData.path,
+            isActive: validateData.isActive ? validateData.isActive : true,
+            createdBy: new mongoose.Types.ObjectId(req.user._id),
+          };
 
-        return res.status(StatusCodes.OK).json({
-          message: "Menu updated successfully",
-        });
+          await accessControl.updateOne(
+            { _id: new mongoose.Types.ObjectId(validateData.primaryMenu) },
+            { $push: { childMenu: data }, $set: { updatedBy: req.user._id } }
+          );
+
+          return res.status(StatusCodes.OK).json({
+            message: "Menu updated successfully",
+          });
+        }
       }
     }
   } catch (error) {
@@ -119,6 +130,7 @@ export const ChildMenuCreate = async (req, res) => {
 
 export const ChildMenuUpdate = async (req, res) => {
   try {
+    let error = false;
     const validateData = await childMenuSchema.validate(req.body);
     if (validateData) {
       const checkData = await accessControl.findOne({
@@ -130,7 +142,6 @@ export const ChildMenuUpdate = async (req, res) => {
           .json({ message: "Primary menu not found!" });
       } else {
         const reqData = {
-          _id: new mongoose.Types.ObjectId(),
           name: validateData.name,
           path: validateData.path,
           isActive: validateData.isActive ? validateData.isActive : true,
@@ -140,22 +151,101 @@ export const ChildMenuUpdate = async (req, res) => {
         const modifyData = checkData.childMenu.map((item) => {
           let data = item;
           if (item._id.toString() === validateData._id.toString()) {
-            data = reqData;
+            if (item.name !== validateData.name) {
+              const checkFilterName = checkData.childMenu.filter(
+                (elm) => elm.name === item.name || elm.path === item.path
+              );
+              if (checkFilterName.length > 0) {
+                error = true;
+              } else {
+                error = false;
+                data = {
+                  ...reqData,
+                  _id: new mongoose.Types.ObjectId(validateData._id),
+                };
+              }
+            }
+            error = false;
+            data = {
+              ...reqData,
+              _id: new mongoose.Types.ObjectId(validateData._id),
+            };
           }
 
           return data;
         });
 
-        await accessControl.updateOne(
-          { _id: new mongoose.Types.ObjectId(validateData._id) },
-          { $set: { childMenu: modifyData, updatedBy: req.user._id } }
-        );
+        if (error) {
+          return res
+            .status(StatusCodes.CONFLICT)
+            .json({ message: "Child Menu name or path already present" });
+        } else {
+          await accessControl.updateOne(
+            { _id: new mongoose.Types.ObjectId(validateData._id) },
+            { $set: { childMenu: modifyData, updatedBy: req.user._id } }
+          );
 
-        return res.status(StatusCodes.OK).json({
-          message: "Menu updated successfully",
-        });
+          return res.status(StatusCodes.OK).json({
+            message: "Menu updated successfully",
+          });
+        }
       }
     }
+  } catch (error) {
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
+  }
+};
+
+export const MenuList = async (req, res) => {
+  try {
+    const result = await accessControl.aggregate([{ $match: {} }]);
+    const modifyData = await Promise.all(
+      result.map(async (item) => ({
+        ...item,
+        createdBy: await DataWithEmployeeName(item.createdBy),
+        updatedBy: item.updatedBy
+          ? await DataWithEmployeeName(item.updatedBy)
+          : null,
+      }))
+    );
+    res
+      .status(StatusCodes.OK)
+      .json({ message: "Data fetched successfully", data: modifyData });
+  } catch (error) {
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
+  }
+};
+
+export const ChildMenuList = async (req, res) => {
+  try {
+    const result = await accessControl.aggregate([
+      {
+        $unwind: {
+          path: "$childMenu",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+    ]);
+    const modifyData = await Promise.all(
+      result.map(async (item) => ({
+        ...item,
+        childMenu: {
+          ...item?.childMenu,
+          createdBy: item?.childMenu.createdBy
+            ? await DataWithEmployeeName(item.childMenu.createdBy)
+            : "",
+        },
+        createdBy: item.createdBy
+          ? await DataWithEmployeeName(item.createdBy)
+          : "",
+        updatedBy: item.updatedBy
+          ? await DataWithEmployeeName(item.updatedBy)
+          : null,
+      }))
+    );
+    res
+      .status(StatusCodes.OK)
+      .json({ message: "Data fetched successfully", data: result });
   } catch (error) {
     res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }
