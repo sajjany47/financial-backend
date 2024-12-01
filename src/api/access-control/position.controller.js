@@ -18,6 +18,7 @@ export const PositionCreate = async (req, res) => {
         let data = new position({
           _id: new mongoose.Types.ObjectId(),
           name: validateData.name,
+          isActive: true,
           createdBy: new mongoose.Types.ObjectId(req.user._id),
           menu: validateData.menu.map(
             (item) => new mongoose.Types.ObjectId(item)
@@ -89,7 +90,17 @@ export const PositionUpdate = async (req, res) => {
 
 export const PositionList = async (req, res) => {
   try {
-    const result = await position.find({});
+    const result = await position.aggregate([
+      { $match: {} },
+      {
+        $lookup: {
+          from: "access_controls",
+          localField: "menu",
+          foreignField: "childMenu._id",
+          as: "menuDetails",
+        },
+      },
+    ]);
     res
       .status(StatusCodes.OK)
       .json({ message: "Data fetched successfully", data: result });

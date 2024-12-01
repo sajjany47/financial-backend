@@ -130,7 +130,6 @@ export const ChildMenuCreate = async (req, res) => {
 
 export const ChildMenuUpdate = async (req, res) => {
   try {
-    let error = false;
     const validateData = await childMenuSchema.validate(req.body);
     if (validateData) {
       const checkData = await accessControl.findOne({
@@ -142,53 +141,50 @@ export const ChildMenuUpdate = async (req, res) => {
           .json({ message: "Primary menu not found!" });
       } else {
         const reqData = {
+          _id: new mongoose.Types.ObjectId(validateData._id),
           name: validateData.name,
           path: validateData.path,
           isActive: validateData.isActive ? validateData.isActive : true,
           updatedBy: new mongoose.Types.ObjectId(req.user._id),
         };
+        let data = checkData.childMenu;
 
-        const modifyData = checkData.childMenu.map((item) => {
-          let data = item;
-          if (item._id.toString() === validateData._id.toString()) {
-            if (item.name !== validateData.name) {
-              const checkFilterName = checkData.childMenu.filter(
-                (elm) => elm.name === item.name || elm.path === item.path
-              );
-              if (checkFilterName.length > 0) {
-                error = true;
-              } else {
-                error = false;
-                data = {
-                  ...reqData,
-                  _id: new mongoose.Types.ObjectId(validateData._id),
-                };
-              }
+        const findChildMenu = data.findIndex(
+          (item) => item._id.toString() === validateData._id.toString()
+        );
+        if (findChildMenu !== -1) {
+          if (data[findChildMenu].name !== validateData.name) {
+            const checkValidName = await accessControl.findOne({
+              "childMenu.name": validateData.name,
+            });
+            if (checkValidName) {
+              return res
+                .status(StatusCodes.CONFLICT)
+                .json({ message: "Child menu name already present" });
             }
-            error = false;
-            data = {
-              ...reqData,
-              _id: new mongoose.Types.ObjectId(validateData._id),
-            };
           }
 
-          return data;
-        });
-
-        if (error) {
-          return res
-            .status(StatusCodes.CONFLICT)
-            .json({ message: "Child Menu name or path already present" });
-        } else {
-          await accessControl.updateOne(
-            { _id: new mongoose.Types.ObjectId(validateData._id) },
-            { $set: { childMenu: modifyData, updatedBy: req.user._id } }
-          );
-
-          return res.status(StatusCodes.OK).json({
-            message: "Menu updated successfully",
-          });
+          if (data[findChildMenu].path !== validateData.path) {
+            const checkValidPath = await accessControl.findOne({
+              "childMenu.path": validateData.path,
+            });
+            if (checkValidPath) {
+              return res
+                .status(StatusCodes.CONFLICT)
+                .json({ message: "Child menu path already present" });
+            }
+          }
+          data[findChildMenu] = reqData;
         }
+
+        await accessControl.updateOne(
+          { _id: new mongoose.Types.ObjectId(validateData.primaryMenu) },
+          { $set: { childMenu: data, updatedBy: req.user._id } }
+        );
+
+        return res.status(StatusCodes.OK).json({
+          message: "Menu updated successfully",
+        });
       }
     }
   } catch (error) {
