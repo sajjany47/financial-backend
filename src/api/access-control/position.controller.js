@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import { PositionSchema } from "./accessControl.schema.js";
+import { ConvertToSlug, PositionSchema } from "./accessControl.schema.js";
 import position from "./position.model.js";
 import mongoose from "mongoose";
 
@@ -19,6 +19,7 @@ export const PositionCreate = async (req, res) => {
           _id: new mongoose.Types.ObjectId(),
           name: validateData.name,
           isActive: true,
+          key: ConvertToSlug(validateData.name),
           createdBy: new mongoose.Types.ObjectId(req.user._id),
           menu: validateData.menu.map(
             (item) => new mongoose.Types.ObjectId(item)
@@ -68,6 +69,7 @@ export const PositionUpdate = async (req, res) => {
               .json({ message: "Position already present" });
           } else {
             reqData.name = validateData.name;
+            reqData.key = ConvertToSlug(validateData.name);
           }
         } else {
           reqData.name = validateData.name;

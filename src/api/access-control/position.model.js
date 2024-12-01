@@ -5,6 +5,7 @@ const positionModel = new mongoose.Schema(
     name: String,
     isActive: Boolean,
     menu: Array,
+    key: String,
     createdBy: mongoose.Schema.Types.ObjectId,
     updatedBy: mongoose.Schema.Types.ObjectId,
   },

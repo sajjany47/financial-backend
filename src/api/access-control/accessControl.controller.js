@@ -218,7 +218,6 @@ export const ChildMenuList = async (req, res) => {
       {
         $unwind: {
           path: "$childMenu",
-          preserveNullAndEmptyArrays: true,
         },
       },
     ]);
@@ -241,7 +240,7 @@ export const ChildMenuList = async (req, res) => {
     );
     res
       .status(StatusCodes.OK)
-      .json({ message: "Data fetched successfully", data: result });
+      .json({ message: "Data fetched successfully", data: modifyData });
   } catch (error) {
     res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }

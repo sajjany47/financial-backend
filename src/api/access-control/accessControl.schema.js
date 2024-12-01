@@ -16,3 +16,7 @@ export const PositionSchema = Yup.object().shape({
     .required("Menu is required")
     .min(1, "Minimum one menu is required"),
 });
+
+export const ConvertToSlug = (str) => {
+  return str.toLowerCase().replace(/\s+/g, "-");
+};
