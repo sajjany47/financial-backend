@@ -39,6 +39,7 @@ import {
   DataWithEmployeeName,
   StateName,
 } from "../loan/loan.config.js";
+import position from "../access-control/position.model.js";
 
 export const adminSignUpSchemaFirst = async (req, res) => {
   try {
@@ -480,6 +481,20 @@ export const login = async (req, res) => {
           validUser.password
         );
         if (verifyPassword) {
+          const positionDetails = await position.aggregate([
+            { $match: { key: validUser.position } },
+            {
+              $lookup: {
+                from: "access_controls",
+                localField: "menu",
+                foreignField: "childMenu._id",
+                as: "menuDetails",
+              },
+            },
+            {
+              $sort: { name: -1 },
+            },
+          ]);
           const baseUrl = req.protocol + "://" + req.get("host");
           const sessionID = nanoid();
           const data = {
@@ -510,7 +525,11 @@ export const login = async (req, res) => {
             .json({
               message: "Data fetched successfully",
               data: {
-                data: data,
+                data: {
+                  ...data,
+                  menu: positionDetails[0].menuDetails,
+                  positionName: positionDetails[0].name,
+                },
                 accessToken: accessToken,
                 refreshToken: refreshToken,
               },
@@ -689,6 +708,29 @@ export const dataTable = async (req, res) => {
     const limit = reqData.limit;
     const start = page * limit - limit;
 
+    const positionWise = [];
+    const postion = req.user.position;
+
+    if (postion === Position.SM) {
+      positionWise.push({ "branchDetails.country": req.user.country });
+      positionWise.push({ "branchDetails.state": req.user.state });
+    }
+    if (postion === Position.CM) {
+      positionWise.push({ "branchDetails.country": req.user.country });
+      positionWise.push({ "branchDetails.state": req.user.state });
+      positionWise.push({ "branchDetails.city": req.user.city });
+    }
+
+    if (
+      postion === Position.BM ||
+      postion === Position.LM ||
+      postion === Position.LD ||
+      postion === Position.VD
+    ) {
+      positionWise.push({
+        branch: new mongoose.Types.ObjectId(req.user.branch),
+      });
+    }
     const query = [];
     if (reqData.name) {
       query.push(BuildRegexQuery("name", reqData.name));
@@ -711,6 +753,9 @@ export const dataTable = async (req, res) => {
       });
     }
     const findQuery = [
+      {
+        $match: positionWise.length > 0 ? { $and: positionWise } : {},
+      },
       {
         $lookup: {
           from: "branches",
