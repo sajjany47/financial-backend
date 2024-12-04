@@ -220,6 +220,9 @@ export const ChildMenuList = async (req, res) => {
           path: "$childMenu",
         },
       },
+      {
+        $sort: { "childMenu.name": 1 },
+      },
     ]);
     const modifyData = await Promise.all(
       result.map(async (item) => ({

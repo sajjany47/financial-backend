@@ -93,16 +93,91 @@ export const PositionUpdate = async (req, res) => {
 export const PositionList = async (req, res) => {
   try {
     const result = await position.aggregate([
-      { $match: {} },
+      {
+        $unwind: {
+          path: "$menu",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
       {
         $lookup: {
           from: "access_controls",
-          localField: "menu",
-          foreignField: "childMenu._id",
+          let: { menuId: "$menu" },
+          pipeline: [
+            { $unwind: "$childMenu" },
+            {
+              $match: {
+                $expr: {
+                  $eq: ["$childMenu._id", "$$menuId"],
+                },
+              },
+            },
+            {
+              $project: {
+                childMenu: 1,
+                name: 1,
+                icon: 1,
+                path: 1,
+                isActive: 1,
+              },
+            },
+          ],
           as: "menuDetails",
         },
       },
+      {
+        $unwind: {
+          path: "$menuDetails",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $group: {
+          _id: { positionId: "$_id", menuId: "$menuDetails._id" },
+          name: { $first: "$name" },
+          positionName: { $first: "$name" },
+          isActive: { $first: "$isActive" },
+          key: { $first: "$key" },
+          createdBy: { $first: "$createdBy" },
+          createdAt: { $first: "$createdAt" },
+          updatedAt: { $first: "$updatedAt" },
+          menu: { $push: "$menuDetails.childMenu" },
+          menu: {
+            $first: {
+              _id: "$menuDetails._id",
+              name: "$menuDetails.name",
+              icon: "$menuDetails.icon",
+              isActive: "$menuDetails.isActive",
+              childMenu: [],
+            },
+          },
+          childMenus: { $push: "$menuDetails.childMenu" },
+        },
+      },
+      {
+        $addFields: {
+          "menu.childMenu": "$childMenus",
+        },
+      },
+      {
+        $group: {
+          _id: "$_id.positionId",
+          name: { $first: "$positionName" },
+          isActive: { $first: "$isActive" },
+          key: { $first: "$key" },
+          createdBy: { $first: "$createdBy" },
+          createdAt: { $first: "$createdAt" },
+          updatedAt: { $first: "$updatedAt" },
+          menu: { $push: "$menu" },
+        },
+      },
+      {
+        $sort: {
+          name: 1,
+        },
+      },
     ]);
+
     res
       .status(StatusCodes.OK)
       .json({ message: "Data fetched successfully", data: result });
