@@ -491,9 +491,6 @@ export const login = async (req, res) => {
                 as: "menuDetails",
               },
             },
-            {
-              $sort: { name: -1 },
-            },
           ]);
           const baseUrl = req.protocol + "://" + req.get("host");
           const sessionID = nanoid();
@@ -508,7 +505,9 @@ export const login = async (req, res) => {
             state: validUser.state,
             isPasswordReset: validUser.isPasswordReset,
             sessionId: sessionID,
-            userImage: `${baseUrl}/uploads/employee/${validUser.userImage}`,
+            userImage: validUser.userImage
+              ? `${baseUrl}/uploads/employee/${validUser.userImage}`
+              : null,
           };
           const accessToken = generateAccessToken(data);
           const refreshToken = generateRefreshToken(data);
@@ -527,7 +526,11 @@ export const login = async (req, res) => {
               data: {
                 data: {
                   ...data,
-                  menu: positionDetails[0].menuDetails,
+                  menu: positionDetails[0].menuDetails.sort((a, b) => {
+                    if (a.name < b.name) return -1;
+                    if (a.name > b.name) return 1;
+                    return 0;
+                  }),
                   positionName: positionDetails[0].name,
                 },
                 accessToken: accessToken,
