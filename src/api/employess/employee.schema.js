@@ -16,6 +16,7 @@ export const adminSignUpSchema30 = Yup.object().shape({
     .max(new Date(Date.now() - 567648000000), "You must be at least 18 years"),
   position: Yup.string()
     .oneOf([
+      Position.SUPER_ADMIN,
       Position.ADMIN,
       Position.AM,
       Position.CD,

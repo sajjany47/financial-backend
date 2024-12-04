@@ -2,6 +2,7 @@ import { GetFileName, GLocalImage } from "../../utilis/utilis.js";
 import fs from "fs";
 
 export const Position = {
+  SUPER_ADMIN: "super-admin",
   ADMIN: "admin",
   BM: "branch-manager",
   SM: "state-manager",
