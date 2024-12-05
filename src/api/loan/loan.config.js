@@ -284,6 +284,16 @@ export const FormatType = (str) => {
   return str.replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
 };
 
+export const LoanDivide = async (postion, branch) => {
+  const employeeList = await employee
+    .find({
+      isActive: true,
+      position: postion,
+      branch: new mongoose.Types.ObjectId(branch),
+    })
+    .sort({ assignedLoansCount: 1 });
+};
+
 // const myPincode = 700053;
 // const pincodes = [700026, 700045, 700007, 700012, 700057, 700001];
 

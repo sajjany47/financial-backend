@@ -45,6 +45,7 @@ const employeeSchema = new mongoose.Schema(
       type: Number,
       default: null,
     },
+    assignedLoansCount: { type: Number, default: 0 },
     password: String,
     sessionId: String,
     isPasswordReset: Boolean,
