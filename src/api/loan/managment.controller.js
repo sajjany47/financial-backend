@@ -805,7 +805,7 @@ export const ApplicationView = async (req, res) => {
       for (let index = 0; index < modifyDocument.length; index++) {
         const item = modifyDocument[index];
 
-        if (element._id.toString() === item.documentType) {
+        if (element._id ? element._id.toString() : "" === item.documentType) {
           documentNameList.push({
             ...item,
             documentType: element.documentName,

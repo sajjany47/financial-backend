@@ -250,8 +250,8 @@ export const AcccessPositionWise = (user) => {
 
 export const DataWithEmployeeName = async (id) => {
   const employeeArray = await employee.find({});
-  const findEmployee = employeeArray.find(
-    (item) => item._id.toString() === id.toString()
+  const findEmployee = employeeArray.find((item) =>
+    item._id ? item._id.toString() : "" === id.toString()
   );
   const data = {
     _id: findEmployee._id,
