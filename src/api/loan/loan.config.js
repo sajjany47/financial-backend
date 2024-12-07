@@ -5,6 +5,7 @@ import fs from "fs";
 import employee from "../employess/employee.model.js";
 import { City, Country, State } from "../Regional/Regional.model.js";
 import charges from "../charges/charges.model.js";
+import { Position } from "../employess/EmployeeConfig.js";
 
 export const EmployeeTypes = ["salaried", "self_employed", "business"];
 
@@ -292,6 +293,13 @@ export const LoanDivide = async (postion, branch) => {
       branch: new mongoose.Types.ObjectId(branch),
     })
     .sort({ assignedLoansCount: 1 });
+  if (employeeList) {
+    await employee.updateOne(
+      { _id: new mongoose.Types.ObjectId(employeeList[0]._id) },
+      { $set: { assignedLoansCount: employeeList[0].assignedLoansCount + 1 } }
+    );
+    return employeeList[0]._id;
+  }
 };
 
 // const myPincode = 700053;

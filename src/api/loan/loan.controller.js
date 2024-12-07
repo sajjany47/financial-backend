@@ -16,6 +16,7 @@ import {
   EMICalculator,
   GenerateApplicationNumber,
   LoanApplicationStepsEnum,
+  LoanDivide,
   LoanImageUpload,
   LoanStatusEnum,
 } from "./loan.config.js";
@@ -68,6 +69,25 @@ export const ApplicationCreate = async (req, res) => {
 
       const applicationSave = await LeadCreate.save();
 
+      if (applicationSave) {
+        if (req.user.position !== Position.LD) {
+          const selectEmployee = await LoanDivide(
+            Position.LD,
+            validateData.branch
+          );
+          if (selectEmployee) {
+            await loanType.updateOne(
+              { _id: new mongoose.Types.ObjectId(applicationSave._id) },
+              {
+                $set: {
+                  assignAgent: new mongoose.Types.ObjectId(selectEmployee),
+                },
+              }
+            );
+          }
+        }
+      }
+
       res.status(StatusCodes.OK).json({
         data: applicationSave,
         message: `${
@@ -101,10 +121,10 @@ export const ApplicationUpdate = async (req, res) => {
         : "";
     let validateData = await validationSchema.validate(req.body);
     if (validateData) {
+      const findLoanApplication = await Loan.findOne({
+        _id: new mongoose.Types.ObjectId(validateData._id),
+      });
       if (validateData.status === LoanApplicationStepsEnum.DISBURSED) {
-        const findLoanApplication = await Loan.findOne({
-          _id: new mongoose.Types.ObjectId(validateData._id),
-        });
         validateData = {
           ...validateData,
           loanAmount: findLoanApplication.loanAmount,
@@ -128,7 +148,10 @@ export const ApplicationUpdate = async (req, res) => {
               status: LoanApplicationStepsEnum.INCOMPLETED,
             }
           : type === "account"
-          ? await AccountData(validateData)
+          ? await AccountData({
+              ...validateData,
+              branch: findLoanApplication.branch,
+            })
           : type === "status"
           ? await StatusData({ ...validateData, user: req.user._id })
           : "";
@@ -137,7 +160,49 @@ export const ApplicationUpdate = async (req, res) => {
         { _id: new mongoose.Types.ObjectId(validateData._id) },
         { $set: { ...data, updatedBy: req.user._id } }
       );
+      if (updateData && (type === "status" || type === "account")) {
+        let assignAgent = "";
+        if (type === "account") {
+          const selectEmployee = await LoanDivide(
+            Position.VD,
+            findLoanApplication.branch
+          );
+          if (selectEmployee) {
+            assignAgent = selectEmployee;
+          }
+        }
+        if (type === "status") {
+          if (data.status === LoanApplicationStepsEnum.DOCUMENT_VERIFICATION) {
+            const selectEmployee = await LoanDivide(
+              Position.BM,
+              findLoanApplication.branch
+            );
+            if (selectEmployee) {
+              assignAgent = selectEmployee;
+            }
+          }
+          if (data.status === LoanApplicationStepsEnum.LOAN_APPROVED) {
+            const selectEmployee = await LoanDivide(
+              Position.FM,
+              findLoanApplication.branch
+            );
+            if (selectEmployee) {
+              assignAgent = selectEmployee;
+            }
+          }
+        }
 
+        if (assignAgent !== "") {
+          await loanType.updateOne(
+            { _id: new mongoose.Types.ObjectId(validateData._id) },
+            {
+              $set: {
+                assignAgent: new mongoose.Types.ObjectId(assignAgent),
+              },
+            }
+          );
+        }
+      }
       res.status(StatusCodes.OK).json({
         data: updateData,
         message: `${
