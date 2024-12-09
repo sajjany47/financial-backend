@@ -536,6 +536,20 @@ export const datatable = async (req, res, next) => {
       {
         $match: positionWise.length > 0 ? { $and: positionWise } : {},
       },
+      {
+        $lookup: {
+          from: "employees",
+          localField: "assignAgent",
+          foreignField: "_id",
+          as: "assignAgent",
+        },
+      },
+      {
+        $unwind: {
+          path: "$assignAgent",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
     ];
 
     const countData = await Loan.aggregate([
@@ -555,14 +569,15 @@ export const datatable = async (req, res, next) => {
 
     return res.status(StatusCodes.OK).json({
       message: "Data fetched successfully",
-      data: await Promise.all(
-        data.map(async (item) => ({
-          ...item,
-          leadAssignAgent: item.leadAssignAgent
-            ? await DataWithEmployeeName(item.leadAssignAgent)
-            : "",
-        }))
-      ),
+      // data: await Promise.all(
+      //   data.map(async (item) => ({
+      //     ...item,
+      //     assignAgent: item.assignAgent
+      //       ? await DataWithEmployeeName(item.assignAgent)
+      //       : "",
+      //   }))
+      // ),
+      data: data,
 
       count: totalCount,
     });
@@ -574,6 +589,7 @@ export const datatable = async (req, res, next) => {
 export const LeadBulkUpload = async (req, res, next) => {
   try {
     const reqData = req.body.data;
+
     const branchList = await branch.find({ isActive: true });
 
     const errorData = reqData.filter(
@@ -599,6 +615,10 @@ export const LeadBulkUpload = async (req, res, next) => {
             prepareData.push({
               _id: new mongoose.Types.ObjectId(),
               ...leadModifyData,
+              loanAmount: leadModifyData.loanAmount
+                ? Number(leadModifyData.loanAmount)
+                : 28000,
+              loanTenure: Number(leadModifyData.loanTenure),
               applicationNumber: `L-${GenerateApplicationNumber(
                 findLoanDetails.entity
               )}`,
@@ -615,7 +635,7 @@ export const LeadBulkUpload = async (req, res, next) => {
           const element = prepareData[index];
           const selectEmployee = await LoanDivide(Position.LD, element.branch);
           if (selectEmployee) {
-            await loanType.updateOne(
+            await Loan.updateOne(
               { _id: new mongoose.Types.ObjectId(element._id) },
               {
                 $set: {
