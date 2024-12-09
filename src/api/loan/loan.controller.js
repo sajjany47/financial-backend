@@ -33,6 +33,7 @@ import { BuildRegexQuery, GLocalImage } from "../../utilis/utilis.js";
 import { Position } from "../employess/EmployeeConfig.js";
 import fs from "fs";
 import branch from "../branch/branch.model.js";
+import employee from "../employess/employee.model.js";
 
 export const ApplicationCreate = async (req, res) => {
   try {
@@ -453,7 +454,7 @@ export const datatable = async (req, res, next) => {
     const page = Number(reqData.page);
     const limit = Number(reqData.limit);
     const start = page * limit - limit;
-    const query = [];
+    const query = [{ applicationStaus: reqData.applicationStaus }];
     const positionWise = [];
     const postion = req.user.position;
     if (reqData?.name) {
@@ -473,12 +474,12 @@ export const datatable = async (req, res, next) => {
     if (reqData?.branch) {
       query.push({ branch: new mongoose.Types.ObjectId(reqData.branch) });
     }
-    if (reqData?.leadAssignAgent) {
+
+    if (postion === Position.LD) {
       query.push({
-        leadAssignAgent: new mongoose.Types.ObjectId(reqData.leadAssignAgent),
+        assignAgent: new mongoose.Types.ObjectId(req.user._id),
       });
     }
-
     if (postion === Position.SM) {
       positionWise.push({ "branchDetails.country": req.user.country });
       positionWise.push({ "branchDetails.state": req.user.state });
@@ -500,19 +501,9 @@ export const datatable = async (req, res, next) => {
       });
     }
 
-    const queryHandel =
-      query.length > 0
-        ? {
-            applicationStaus: reqData.applicationStaus,
-            $and: query,
-          }
-        : {
-            applicationStaus: reqData.applicationStaus,
-          };
-
     const findQuery = [
       {
-        $match: queryHandel,
+        $match: { $and: query },
       },
       {
         $lookup: {
@@ -606,6 +597,7 @@ export const LeadBulkUpload = async (req, res, next) => {
             });
 
             prepareData.push({
+              _id: new mongoose.Types.ObjectId(),
               ...leadModifyData,
               applicationNumber: `L-${GenerateApplicationNumber(
                 findLoanDetails.entity
@@ -616,7 +608,24 @@ export const LeadBulkUpload = async (req, res, next) => {
         }
       }
 
-      await Loan.insertMany(prepareData);
+      const updateLead = await Loan.insertMany(prepareData);
+
+      if (updateLead) {
+        for (let index = 0; index < prepareData.length; index++) {
+          const element = prepareData[index];
+          const selectEmployee = await LoanDivide(Position.LD, element.branch);
+          if (selectEmployee) {
+            await loanType.updateOne(
+              { _id: new mongoose.Types.ObjectId(element._id) },
+              {
+                $set: {
+                  assignAgent: new mongoose.Types.ObjectId(selectEmployee),
+                },
+              }
+            );
+          }
+        }
+      }
       return res.status(200).json({ message: "Data inserted successfully" });
     } else {
       return res
@@ -632,14 +641,30 @@ export const LeadAssignAgent = async (req, res, next) => {
   try {
     const reqData = req.body;
     if (reqData.type === "single") {
-      await Loan.updateOne(
+      const updateLead = await Loan.updateOne(
         { _id: new mongoose.Types.ObjectId(reqData.leadId[0].id) },
         {
           $set: {
-            leadAssignAgent: new mongoose.Types.ObjectId(reqData.agentId.id),
+            assignAgent: new mongoose.Types.ObjectId(reqData.agentId.id),
           },
         }
       );
+
+      if (updateLead) {
+        const findEmployee = await employee.findOne({
+          _id: new mongoose.Types.ObjectId(reqData.agentId.id),
+        });
+        if (findEmployee) {
+          await employee.updateOne(
+            { _id: new mongoose.Types.ObjectId(reqData.agentId.id) },
+            {
+              $set: {
+                assignedLoansCount: findEmployee.assignedLoansCount + 1,
+              },
+            }
+          );
+        }
+      }
     } else {
       for (let index = 0; index < reqData.leadId.length; index++) {
         const lead = reqData.leadId[index];
@@ -649,9 +674,7 @@ export const LeadAssignAgent = async (req, res, next) => {
             { _id: new mongoose.Types.ObjectId(lead.id) },
             {
               $set: {
-                leadAssignAgent: new mongoose.Types.ObjectId(
-                  reqData.agentId.id
-                ),
+                assignAgent: new mongoose.Types.ObjectId(reqData.agentId.id),
               },
             }
           );
