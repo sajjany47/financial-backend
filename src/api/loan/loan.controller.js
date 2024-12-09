@@ -172,6 +172,7 @@ export const ApplicationUpdate = async (req, res) => {
             assignAgent = selectEmployee;
           }
         }
+
         if (type === "status") {
           if (data.status === LoanApplicationStepsEnum.DOCUMENT_VERIFICATION) {
             const selectEmployee = await LoanDivide(

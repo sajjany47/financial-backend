@@ -797,22 +797,17 @@ export const ApplicationView = async (req, res) => {
         documentNumber: doc.documentNumber,
       };
     });
-
     const documentFullList = await document.find({});
-    const documentNameList = [];
-    for (let index = 0; index < documentFullList.length; index++) {
-      const element = documentFullList[index];
-      for (let index = 0; index < modifyDocument.length; index++) {
-        const item = modifyDocument[index];
+    const documentNameList = modifyDocument.map((item) => {
+      const matchedDocument = documentFullList.find(
+        (element) => item.documentType === element._id.toString()
+      );
 
-        if (element._id ? element._id.toString() : "" === item.documentType) {
-          documentNameList.push({
-            ...item,
-            documentType: element.documentName,
-          });
-        }
+      if (matchedDocument) {
+        return { ...item, documentType: matchedDocument.documentName };
       }
-    }
+      return item;
+    });
 
     const prepareData = {
       ...a,
@@ -831,7 +826,7 @@ export const ApplicationView = async (req, res) => {
       officeOrBussinessVerifiedBy: a?.officeOrBussinessVerifiedBy
         ? await DataWithEmployeeName(a.officeOrBussinessVerifiedBy)
         : null,
-      documentVerifiedBy: (await a?.documentVerifiedBy)
+      documentVerifiedBy: a?.documentVerifiedBy
         ? DataWithEmployeeName(a.documentVerifiedBy)
         : null,
       document: documentNameList,
