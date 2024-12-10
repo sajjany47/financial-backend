@@ -808,7 +808,7 @@ export const ApplicationView = async (req, res) => {
       }
       return item;
     });
-
+    console.log(a.documentVerifiedBy);
     const prepareData = {
       ...a,
       createdBy: await DataWithEmployeeName(a.createdBy),
@@ -827,7 +827,7 @@ export const ApplicationView = async (req, res) => {
         ? await DataWithEmployeeName(a.officeOrBussinessVerifiedBy)
         : null,
       documentVerifiedBy: a?.documentVerifiedBy
-        ? DataWithEmployeeName(a.documentVerifiedBy)
+        ? await DataWithEmployeeName(a.documentVerifiedBy)
         : null,
       document: documentNameList,
       permanentCountry: a.permanentCountry

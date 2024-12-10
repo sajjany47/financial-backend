@@ -250,17 +250,16 @@ export const AcccessPositionWise = (user) => {
 };
 
 export const DataWithEmployeeName = async (id) => {
-  const employeeArray = await employee.find({});
-  const findEmployee = employeeArray.find((item) =>
-    item._id ? item._id.toString() : "" === id.toString()
-  );
-  const data = {
-    _id: findEmployee._id,
-    name: findEmployee.name,
-    username: findEmployee.username,
-  };
-
-  return data;
+  const findEmployee = await employee.findOne({
+    _id: new mongoose.Types.ObjectId(id),
+  });
+  if (findEmployee) {
+    return {
+      _id: findEmployee._id,
+      name: findEmployee.name,
+      username: findEmployee.username,
+    };
+  }
 };
 
 export const CountryName = async (id) => {
