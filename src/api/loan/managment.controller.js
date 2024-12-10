@@ -391,6 +391,7 @@ export const PaymentDetails = async (req, res) => {
           emiSchedule: 1,
           loanId: "$_id",
           _id: 0,
+          loanCharges: 1,
           applicationNumber: "$applicationNumber",
           loanAmount: "$loanAmount",
           mobile: "$mobile",
@@ -454,7 +455,7 @@ export const PaymentDetails = async (req, res) => {
       {
         $lookup: {
           from: "charges",
-          localField: "charges",
+          localField: "loanCharges",
           foreignField: "_id",
           as: "charges",
         },

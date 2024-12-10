@@ -11,6 +11,7 @@ const financeModel = new mongoose.Schema(
     investmentAmount: Number,
     duration: Number,
     interestRate: Number,
+    branch: mongoose.Schema.Types.ObjectId,
     payoutFrequency: String,
     payoutDate: Date,
     accountNumber: String,
