@@ -13,6 +13,7 @@ import {
 } from "./loan.config.js";
 import documentType from "../document/documentType.model.js";
 import document from "../document/document.model.js";
+import { Position } from "../employess/EmployeeConfig.js";
 
 export const LoanManagList = async (req, res) => {
   try {
