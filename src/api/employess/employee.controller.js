@@ -668,6 +668,7 @@ export const EmployeeView = async (req, res) => {
         },
       },
     ]);
+    const baseUrl = req.protocol + "://" + req.get("host");
     const data = findEmployee[0];
     const modifyData = {
       ...data,
@@ -693,6 +694,44 @@ export const EmployeeView = async (req, res) => {
         : null,
       residenceCity: data.residenceCity
         ? await CityName(data.residenceCity)
+        : null,
+      education:
+        data.education.length > 0
+          ? data?.education?.map((item) => ({
+              ...item,
+              resultImageUrl: `${baseUrl}/uploads/employee/${item.resultImage}`,
+            }))
+          : [],
+      workDetail:
+        data.workDetail.length > 0
+          ? data?.workDetail?.map((item) => ({
+              ...item,
+              experienceLetterUrl: `${baseUrl}/uploads/employee/${item.experienceLetter}`,
+              relievingLetterUrl: `${baseUrl}/uploads/employee/${item.relievingLetter}`,
+              appointmentLetterUrl: `${baseUrl}/uploads/employee/${item.appointmentLetter}`,
+              salarySlipUrl: `${baseUrl}/uploads/employee/${item.salarySlip}`,
+            }))
+          : [],
+      userImageUrl: data.userImage
+        ? `${baseUrl}/uploads/employee/${data.userImage}`
+        : null,
+      aadharImageUrl: data.aadharImage
+        ? `${baseUrl}/uploads/employee/${data.aadharImage}`
+        : null,
+      panImageUrl: data.panImage
+        ? `${baseUrl}/uploads/employee/${data.panImage}`
+        : null,
+      passportImageUrl: data.passportImage
+        ? `${baseUrl}/uploads/employee/${data.passportImage}`
+        : null,
+      voterImageUrl: data.voterImage
+        ? `${baseUrl}/uploads/employee/${data.voterImage}`
+        : null,
+      uanImageUrl: data.uanImage
+        ? `${baseUrl}/uploads/employee/${data.uanImage}`
+        : null,
+      passbookImageUrl: data.passbookImage
+        ? `${baseUrl}/uploads/employee/${data.passbookImage}`
         : null,
     };
 
